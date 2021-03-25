@@ -1,0 +1,20 @@
+server:
+  port: 9090
+hapi:
+  fhir:
+    version: R4
+    server:
+      path: /*
+    rest:
+      server-name: schedule-api
+      server-version: 1.0.0
+      implementation-description: Prototype transactional API for scheduling data
+      default-response-encoding: json
+      e-tag-support: enabled
+      default-pretty-print: true
+    validation:
+      enabled: true
+      request-only: true
+logging:
+  level:
+    ca.uhn.fhir.jaxrs: debug

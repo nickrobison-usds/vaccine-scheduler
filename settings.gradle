@@ -1,1 +1,5 @@
-rootProject.name = 'schedule-api'
+rootProject.name = 'scheduler'
+
+include 'api-application'
+include 'publisher-application'
+
