@@ -4,11 +4,11 @@ hapi:
   fhir:
     version: R4
     server:
-      path: /*
+      path: /fhir/*
     rest:
-      server-name: schedule-api
+      server-name: schedule-publisher
       server-version: 1.0.0
-      implementation-description: Prototype transactional API for scheduling data
+      implementation-description: Prototype bulk publish API for vaccine schedules
       default-response-encoding: json
       e-tag-support: enabled
       default-pretty-print: true
