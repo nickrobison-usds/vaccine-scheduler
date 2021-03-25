@@ -1,0 +1,17 @@
+version: "3.5"
+
+services:
+  db:
+    image: library/postgres:13-alpine
+    ports:
+      - "${VS_DB_PORT:-5432}:${VS_DB_PORT:-5432}"
+
+  publisher:
+    build:
+      context: .
+      dockerfile: publisher-application/Dockerfile
+    image: vs-publisher
+    command: bootRun
+    ports:
+      # map SR_API_PORT on localhost to the API server in the container
+      - "${VS_PUBLISHER_PORT:-9090}:9090"
