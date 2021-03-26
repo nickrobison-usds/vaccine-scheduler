@@ -73,3 +73,55 @@ databaseChangeLog:
                   name: location_hash
                   remarks: SHA1 hash value of entity, to track changes
                   type: *string
+        - createTable:
+            tableName: location_identifiers
+            remarks: Identifier table for Vaccine locations
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *updated_at_column
+              - column:
+                  name: entity_id
+                  type: *idtype
+                  remarks: ID of associated location
+                  constraints:
+                    foreignKeyName: fk__identifier__location
+                    references: locations
+              - column:
+                  name: system
+                  remarks: Identifier system
+                  type: *string
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  remarks: Identifier value
+                  type: *string
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: location_telecoms
+            remarks: Contact table for Vaccine locations
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *updated_at_column
+              - column:
+                  name: entity_id
+                  type: *idtype
+                  remarks: ID of associated location
+                  constraints:
+                    foreignKeyName: fk__telecom__location
+                    references: locations
+              - column:
+                  name: system
+                  remarks: Contact system
+                  type: int4
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  remarks: Contact value
+                  type: *string
+                  constraints:
+                    nullable: false
