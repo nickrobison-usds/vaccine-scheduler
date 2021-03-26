@@ -3,6 +3,8 @@ package cov.usds.vaccineshedule.publisher.providers;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import cov.usds.vaccineshedule.publisher.respositories.LocationRepository;
+import cov.usds.vaccineshedule.publisher.respositories.ScheduleRepository;
+import cov.usds.vaccineshedule.publisher.respositories.SlotRepository;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,12 +28,14 @@ import java.util.stream.Collectors;
 public class DataProvider {
     private final IParser parser;
 
-    private ConcurrentMap<String, Supplier<List<? extends BaseResource>>> repos = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Supplier<List<? extends BaseResource>>> repos = new ConcurrentHashMap<>();
 
-    public DataProvider(FhirContext ctx, LocationRepository repo) {
+    public DataProvider(FhirContext ctx, LocationRepository lRepo, ScheduleRepository sRepo, SlotRepository slRepo) {
         this.parser = ctx.newJsonParser();
 
-        repos.put("test-location", repo::getAll);
+        repos.put("test-location", lRepo::getAll);
+        repos.put("test-schedule", sRepo::getAll);
+        repos.put("test-slot", slRepo::getAll);
     }
 
     @GetMapping(value = "/{id}.ndjson", produces = "application/ndjson")
