@@ -1,0 +1,9 @@
+apply plugin: 'java-library'
+
+
+dependencies {
+    api "ca.uhn.hapi.fhir:hapi-fhir-base:${hapiVersion}"
+    api "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:${hapiVersion}"
+    api "ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${hapiVersion}"
+}
+
