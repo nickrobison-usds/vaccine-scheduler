@@ -30,6 +30,7 @@ public class ScheduledTaskService {
 
     public Map<String, ScheduledFuture<?>> scheduleFetch(ScheduleSourceConfig config) {
         Map<String, ScheduledFuture<?>> futures = new HashMap<>();
+        // Ideally, we should have refresh schedules per source, but that's not necessary for an MVP.
         TimeZone tz = config.getScheduleTimezone();
         for (String cron : config.getRefreshSchedule()) {
             logger.info("Scheduling data refresh to run on cron schedule '{}' in time zone {}", cron, tz.getID());

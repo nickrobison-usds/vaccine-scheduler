@@ -7,10 +7,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableConfigurationProperties({
@@ -23,14 +21,18 @@ public class ScheduleApiApplication {
         SpringApplication.run(ScheduleApiApplication.class, args);
     }
 
+    /**
+     * If enabled, schedule the data refresh operations for the upstream sources.
+     * Note: If running in a cluster, only a single node should be responsible for managing the chron jobs, otherwise, we'll get duplicate executions
+     * The backend queue takes care of parallelizing the work amongst all nodes, but the actual job submission should be sequential
+     *
+     * @param config    - {@link ScheduleSourceConfig} for configuring
+     * @param scheduler - {@link ScheduledTaskService} for scheduling
+     * @return - {@link CommandLineRunner} for running
+     */
     @Bean
     @ConditionalOnProperty("vs.schedule-source.schedule-enabled")
     public CommandLineRunner scheduleSourceFetch(ScheduleSourceConfig config, ScheduledTaskService scheduler) {
         return args -> scheduler.scheduleFetch(config);
-    }
-
-    @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        return builder.build();
     }
 }
