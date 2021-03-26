@@ -1,0 +1,75 @@
+x-ref-data:
+  type-defs:
+    - &idtype uuid
+    - &string text
+  column-defs:
+    - column: &pk_column
+        name: internal_id
+        type: *idtype
+        remarks: The internal database identifier for this entity.
+        constraints:
+          primaryKey: true
+          nullable: false
+    - column: &created_at_column
+        name: created_at
+        type: TIMESTAMP WITH TIME ZONE
+        remarks: The creation timestamp for this entity.
+        constraints:
+          nullable: false
+    - column: &updated_at_column
+        name: updated_at
+        type: TIMESTAMP WITH TIME ZONE
+        remarks: The timestamp for the most recent update of this entity.
+        constraints:
+          nullable: false
+databaseChangeLog:
+  - changeSet:
+      id: add-base-tables
+      author: nicholas.a.robison@omb.eop.gov
+      comment: Add the base data types (location, slot, schedule)
+      changes:
+        - createTable:
+            tableName: locations
+            remarks: Vaccine locations
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *updated_at_column
+              - column:
+                  name: name
+                  remarks: Name of location
+                  type: *string
+                  constraints:
+                    nullable: false
+              - column:
+                  name: street
+                  remarks: The street portion of the locationlocation address.
+                  type: "text[]"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: city
+                  remarks: The city of the facility address.
+                  type: *string
+                  constraints:
+                    nullable: false
+              - column:
+                  name: district
+                  remarks: The district (e.g. county, parish) of the location address, if applicable.
+                  type: *string
+              - column:
+                  name: state
+                  remarks: The state or province of the location address.
+                  type: *string
+                  constraints:
+                    nullable: false
+              - column:
+                  name: postal_code
+                  remarks: The zip/postal code of the location address.
+                  type: *string
+                  constraints:
+                    nullable: false
+              - column:
+                  name: location_hash
+                  remarks: SHA1 hash value of entity, to track changes
+                  type: *string

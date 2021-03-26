@@ -3,7 +3,11 @@ package gov.usds.vaccineschedule.api.services;
 import ca.uhn.fhir.context.FhirContext;
 import cov.usds.vaccineschedule.common.models.PublishResponse;
 import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
+import gov.usds.vaccineschedule.api.db.models.LocationEntity;
+import gov.usds.vaccineschedule.api.repositories.LocationRepository;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -28,13 +32,15 @@ public class SourceFetchService {
     private final ScheduleSourceConfig config;
     private final NDJSONToFHIR converter;
     private final Sinks.Many<String> processor;
+    private final LocationRepository locationRepo;
 
     private Disposable disposable;
 
-    public SourceFetchService(FhirContext context, ScheduleSourceConfig config) {
+    public SourceFetchService(FhirContext context, ScheduleSourceConfig config, LocationRepository locationRepository) {
         this.config = config;
         this.converter = new NDJSONToFHIR(context.newJsonParser());
         this.processor = Sinks.many().unicast().onBackpressureBuffer();
+        this.locationRepo = locationRepository;
     }
 
     @Bean
@@ -68,8 +74,20 @@ public class SourceFetchService {
                         (throwable, o) -> { // If we throw an exception
                             logger.error("Cannot process resource: {}", o, throwable);
                         })
-                .subscribe(resource -> logger.info("Received resource: {}", resource), (error) -> {
+                .subscribe(resource -> {
+                    logger.info("Received resource: {}", resource);
+                    this.processResource(resource);
+                }, (error) -> {
                     throw new RuntimeException(error);
                 });
+    }
+
+    private void processResource(IBaseResource resource) {
+        if (resource instanceof Location) {
+            final LocationEntity entity = LocationEntity.fromFHIR((Location) resource);
+            locationRepo.save(entity);
+        } else {
+            logger.error("Cannot handle resource of type: {}", resource);
+        }
     }
 }

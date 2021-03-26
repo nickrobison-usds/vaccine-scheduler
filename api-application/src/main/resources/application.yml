@@ -27,6 +27,18 @@ management.endpoints.web:
   exposure:
     include: health, info, refresh
 spring:
+  datasource:
+    username: vaccine_schedule
+    password: this_is_not_safe
+    url: jdbc:postgresql://localhost:${VS_DB_PORT:5432}/vs
+  jpa:
+    database: POSTGRESQL
+    hibernate.ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: public
+  liquibase:
+    default-schema: ${spring.jpa.properties.hibernate.default_schema}
   rabbitmq:
     host: localhost
     port: 5672

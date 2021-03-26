@@ -5,6 +5,10 @@ services:
     image: library/postgres:13-alpine
     ports:
       - "${VS_DB_PORT:-5432}:${VS_DB_PORT:-5432}"
+    environment:
+      - POSTGRES_DB=vs
+      - POSTGRES_USER=vaccine_schedule
+      - POSTGRES_PASSWORD=this_is_not_safe
   rabbitmq:
     image: rabbitmq:3.8.9-management-alpine
     hostname: rabbitmq
