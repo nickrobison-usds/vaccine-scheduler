@@ -1,0 +1,7 @@
+vs:
+  schedule-source:
+    schedule-enabled: false
+    upload-schedule: "0 0 11 * * *" # Daily at 11:00 AM Eastern Time
+    upload-timezone: America/New_York
+    sources:
+      - "http://localhost:9090/"

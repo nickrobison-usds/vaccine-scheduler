@@ -37,14 +37,6 @@ spring:
       function:
         definition: supplyStream;receiveStream
       bindings:
-        #        send-out-0:
-        #          destination: ints
-        #        receive-in-0:
-        #          destination: total
-        #        accumulate-in-0:
-        #          destination: ints
-        #        accumulate-out-0:
-        #          destination: total
         supplyStream-out-0:
           destination: refresh
         receiveStream-in-0:
