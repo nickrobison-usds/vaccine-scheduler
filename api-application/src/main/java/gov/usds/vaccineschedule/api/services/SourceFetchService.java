@@ -9,6 +9,7 @@ import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Schedule;
+import org.hl7.fhir.r4.model.Slot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -37,12 +38,14 @@ public class SourceFetchService {
     private final Sinks.Many<String> processor;
     private final LocationRepository locationRepo;
     private final ScheduleService sService;
+    private final SlotService slService;
 
     private Disposable disposable;
 
-    public SourceFetchService(FhirContext context, ScheduleSourceConfig config, LocationRepository locationRepository, ScheduleService sService) {
+    public SourceFetchService(FhirContext context, ScheduleSourceConfig config, LocationRepository locationRepository, ScheduleService sService, SlotService slService) {
         this.config = config;
         this.converter = new NDJSONToFHIR(context.newJsonParser());
+        this.slService = slService;
         this.processor = Sinks.many().unicast().onBackpressureBuffer();
         this.locationRepo = locationRepository;
         this.sService = sService;
@@ -99,6 +102,8 @@ public class SourceFetchService {
             locationRepo.save(entity);
         } else if (resource instanceof Schedule) {
             this.sService.addSchedule((Schedule) resource);
+        } else if (resource instanceof Slot) {
+            this.slService.addSlot((Slot) resource);
         } else {
             logger.error("Cannot handle resource of type: {}", resource);
         }

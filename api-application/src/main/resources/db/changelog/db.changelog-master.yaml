@@ -2,6 +2,7 @@ x-ref-data:
   type-defs:
     - &idtype uuid
     - &string text
+    - &timestamp TIMESTAMP WITH TIME ZONE
   column-defs:
     - column: &pk_column
         name: internal_id
@@ -12,13 +13,13 @@ x-ref-data:
           nullable: false
     - column: &created_at_column
         name: created_at
-        type: TIMESTAMP WITH TIME ZONE
+        type: *timestamp
         remarks: The creation timestamp for this entity.
         constraints:
           nullable: false
     - column: &updated_at_column
         name: updated_at
-        type: TIMESTAMP WITH TIME ZONE
+        type: *timestamp
         remarks: The timestamp for the most recent update of this entity.
         constraints:
           nullable: false
@@ -153,6 +154,64 @@ databaseChangeLog:
                   constraints:
                     foreignKeyName: fk__identifier__schedule
                     references: schedules
+              - column:
+                  name: system
+                  remarks: Identifier system
+                  type: *string
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  remarks: Identifier value
+                  type: *string
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: slots
+            remarks: Vaccine slots
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *updated_at_column
+              - column:
+                  name: schedule_id
+                  type: *idtype
+                  remarks: ID of associated schedule
+                  constraints:
+                    foreignKeyName: fk__slot_schedule
+                    references: schedules
+              - column:
+                  name: start_time
+                  type: *timestamp
+                  remarks: Start of schedule slot
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_time
+                  type: *timestamp
+                  remarks: End of schedule slot
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  remarks: Slot status
+                  type: int4
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: slot_identifiers
+            remarks: Identifier table for Vaccine slots
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *updated_at_column
+              - column:
+                  name: entity_id
+                  type: *idtype
+                  remarks: ID of associated slot
+                  constraints:
+                    foreignKeyName: fk__identifier__slot
+                    references: slots
               - column:
                   name: system
                   remarks: Identifier system

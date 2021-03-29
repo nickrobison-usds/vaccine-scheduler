@@ -34,7 +34,7 @@ public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
     private Collection<ScheduleIdentifier> identifiers;
 
     public ScheduleEntity() {
-        // Not used
+        // Hibernate required
     }
 
     public LocationEntity getLocation() {
@@ -74,7 +74,7 @@ public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
 
         final List<ScheduleIdentifier> identifiers = resource.getIdentifier().stream().map(ScheduleIdentifier::fromFHIR).peek(i -> i.setEntity(entity)).collect(Collectors.toList());
         // If we have an existing ID, stash it for later search
-        final ScheduleIdentifier origId = new ScheduleIdentifier(ORIGINAL_ID_SYSTEM, "Schedule/" + resource.getId());
+        final ScheduleIdentifier origId = new ScheduleIdentifier(ORIGINAL_ID_SYSTEM, resource.getId());
         origId.setEntity(entity);
         identifiers.add(origId);
 

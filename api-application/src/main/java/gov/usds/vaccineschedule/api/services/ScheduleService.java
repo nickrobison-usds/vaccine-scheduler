@@ -1,24 +1,20 @@
 package gov.usds.vaccineschedule.api.services;
 
 import gov.usds.vaccineschedule.api.db.models.LocationEntity;
-import gov.usds.vaccineschedule.api.db.models.LocationEntity_;
-import gov.usds.vaccineschedule.api.db.models.LocationIdentifier;
-import gov.usds.vaccineschedule.api.db.models.LocationIdentifier_;
 import gov.usds.vaccineschedule.api.db.models.ScheduleEntity;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
 import org.hl7.fhir.r4.model.Schedule;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.CollectionJoin;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
+import static gov.usds.vaccineschedule.api.repositories.LocationRepository.hasIdentifier;
 
 
 /**
@@ -43,7 +39,7 @@ public class ScheduleService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = false)
+    @Transactional
     public ScheduleEntity addSchedule(Schedule resource) {
 
         // Figure out which location we need to search for
@@ -59,13 +55,5 @@ public class ScheduleService {
 
     }
 
-    private static Specification<LocationEntity> hasIdentifier(String system, String value) {
-        return (root, cq, cb) -> {
-            final CollectionJoin<LocationEntity, LocationIdentifier> idJoin = root.join(LocationEntity_.identifiers);
 
-            return cb.and(
-                    cb.equal(idJoin.get(LocationIdentifier_.system), system),
-                    cb.equal(idJoin.get(LocationIdentifier_.value), value));
-        };
-    }
 }
