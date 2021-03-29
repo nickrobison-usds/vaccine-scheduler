@@ -15,6 +15,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
+
 /**
  * Created by nickrobison on 3/26/21
  */
@@ -108,6 +110,12 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
                 .map(LocationTelecom::fromFHIR)
                 .peek(t -> t.setEntity(entity))
                 .collect(Collectors.toList());
+
+        // We need to move the existing Id to a new identifier field
+        final LocationIdentifier originalId = new LocationIdentifier(ORIGINAL_ID_SYSTEM, resource.getId());
+        originalId.setEntity(entity);
+        identifiers.add(originalId);
+
         entity.setIdentifiers(identifiers);
         entity.setTelecoms(telecoms);
         return entity;

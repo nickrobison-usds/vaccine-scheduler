@@ -125,3 +125,43 @@ databaseChangeLog:
                   type: *string
                   constraints:
                     nullable: false
+        - createTable:
+            tableName: schedules
+            remarks: Vaccine schedules
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *updated_at_column
+              - column:
+                  name: location_id
+                  type: *idtype
+                  remarks: ID of associated location
+                  constraints:
+                    foreignKeyName: fk__schedule_location
+                    references: locations
+        - createTable:
+            tableName: schedule_identifiers
+            remarks: Identifier table for Vaccine schedules
+            columns:
+              - column: *pk_column
+              - column: *created_at_column
+              - column: *updated_at_column
+              - column:
+                  name: entity_id
+                  type: *idtype
+                  remarks: ID of associated location
+                  constraints:
+                    foreignKeyName: fk__identifier__schedule
+                    references: schedules
+              - column:
+                  name: system
+                  remarks: Identifier system
+                  type: *string
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  remarks: Identifier value
+                  type: *string
+                  constraints:
+                    nullable: false

@@ -16,6 +16,7 @@ hapi:
 logging:
   level:
     ca.uhn.fhir.jaxrs: debug
+    gov.usds: debug
 vs:
   schedule-source:
     schedule-enabled: false
@@ -36,6 +37,8 @@ spring:
     hibernate.ddl-auto: validate
     properties:
       hibernate:
+        show_sql: true
+        format_sql: true
         default_schema: public
   liquibase:
     default-schema: ${spring.jpa.properties.hibernate.default_schema}
