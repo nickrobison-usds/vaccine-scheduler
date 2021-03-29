@@ -25,5 +25,18 @@ services:
     image: vs-publisher
     command: bootRun
     ports:
-      # map SR_API_PORT on localhost to the API server in the container
       - "${VS_PUBLISHER_PORT:-9090}:9090"
+  api:
+    build:
+      context: .
+      dockerfile: api-application/Dockerfile
+    image: vs-api
+    command: bootRun
+    depends_on:
+      - db
+      - rabbitmq
+    environment:
+      SPRING_PROFILES_ACTIVE: dockerized
+      SPRING_LIQUIBASE_ENABLED: "true"
+    ports:
+      - "${VS_API_PORT:-8080}:8080"
