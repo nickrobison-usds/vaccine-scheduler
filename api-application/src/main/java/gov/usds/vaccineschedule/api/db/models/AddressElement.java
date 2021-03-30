@@ -79,6 +79,10 @@ public class AddressElement {
         this.district = county;
     }
 
+    public String toNormalizedAddress() {
+        return String.format("%s %s, %s %s", this.street.get(0), this.city, this.state, this.postalCode);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

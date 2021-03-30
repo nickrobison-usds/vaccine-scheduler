@@ -36,6 +36,11 @@ dependencies {
     annotationProcessor 'org.hibernate:hibernate-jpamodelgen'
     runtimeOnly 'org.postgresql:postgresql'
 
+    // Spatial data
+    implementation 'de.grundid.opendatalab:geojson-jackson:1.14'
+    implementation 'org.hibernate:hibernate-spatial'
+
+
     // FHIR
     implementation "ca.uhn.hapi.fhir:hapi-fhir-spring-boot-starter:${hapiVersion}"
     implementation "ca.uhn.hapi.fhir:hapi-fhir-jaxrsserver-base:${hapiVersion}"

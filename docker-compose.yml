@@ -2,13 +2,18 @@ version: "3.5"
 
 services:
   db:
-    image: library/postgres:13-alpine
+    build:
+      context: .
+      dockerfile: db/Dockerfile
+    image: db
     ports:
       - "${VS_DB_PORT:-5432}:${VS_DB_PORT:-5432}"
     environment:
-      - POSTGRES_DB=vs
-      - POSTGRES_USER=vaccine_schedule
       - POSTGRES_PASSWORD=this_is_not_safe
+    volumes:
+      - type: bind
+        source: ./db/setup-postgis.sh
+        target: /docker-entrypoint-initdb.d/20-vs-db-creation.sh
   rabbitmq:
     image: rabbitmq:3.8.9-management-alpine
     hostname: rabbitmq
@@ -40,3 +45,5 @@ services:
       SPRING_LIQUIBASE_ENABLED: "true"
     ports:
       - "${VS_API_PORT:-8080}:8080"
+volumes:
+  vs-dev-db-gisdata:

@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "vs.load-example-data",
+      "type": "java.lang.String",
+      "description": "Load the example data into the database."
+    }
+  ]
+}

@@ -4,6 +4,10 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Location;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -34,6 +38,8 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
 
     @OneToMany(mappedBy = "entity", orphanRemoval = true, cascade = CascadeType.ALL)
     private Collection<LocationTelecom> telecoms;
+
+    private Point coordinates;
 
     public LocationEntity() {
         // Hibernate required
@@ -73,6 +79,14 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
         this.telecoms = telecoms;
     }
 
+    public Point getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(Point coordinates) {
+        this.coordinates = coordinates;
+    }
+
     @Override
     public Location toFHIR() {
         final Location location = new Location();
@@ -88,6 +102,14 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
         // Telecom as well
         final List<ContactPoint> telecoms = this.telecoms.stream().map(LocationTelecom::toFHIR).collect(Collectors.toList());
         location.setTelecom(telecoms);
+
+        // Add the coordinates, if they exist
+        if (this.coordinates != null) {
+            final Location.LocationPositionComponent component = new Location.LocationPositionComponent()
+                    .setLongitude(this.coordinates.getX())
+                    .setLatitude(this.coordinates.getY());
+            location.setPosition(component);
+        }
         return location;
     }
 
@@ -118,6 +140,14 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
 
         entity.setIdentifiers(identifiers);
         entity.setTelecoms(telecoms);
+
+        // If we have a position component, is that as our point
+        final Location.LocationPositionComponent position = resource.getPosition();
+        if (!position.isEmpty()) {
+            final GeometryFactory factory = new GeometryFactory(new PrecisionModel(), 4326);
+            final Point point = factory.createPoint(new Coordinate(position.getLongitude().doubleValue(), position.getLatitude().doubleValue()));
+            entity.setCoordinates(point);
+        }
         return entity;
     }
 }

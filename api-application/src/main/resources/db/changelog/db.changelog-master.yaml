@@ -224,3 +224,29 @@ databaseChangeLog:
                   type: *string
                   constraints:
                     nullable: false
+
+  - changeSet:
+      id: add-location-coordinates
+      author: nicholas.a.robison@omb.eop.gov
+      comment: Add Location coordinates
+      changes:
+        - addColumn:
+            tableName: locations
+            columns:
+              - column:
+                  name: coordinates
+                  type: GEOMETRY(Point, 4326)
+  - changeSet:
+      id: add-location-index
+      author: nicholas.a.robison@omb.eop.gov
+      comment: Add spatial index for locations
+      changes:
+        - sql:
+            sql: |
+              CREATE INDEX spx__locations__coordinates
+              ON ${database.defaultSchemaName}.locations
+              USING GIST (coordinates)
+      rollback:
+        sql: |
+          DROP INDEX ${database.defaultSchemaName}.spx__locations__coordinates
+

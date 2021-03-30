@@ -3,6 +3,7 @@ package gov.usds.vaccineschedule.api.services;
 import gov.usds.vaccineschedule.api.db.models.LocationEntity;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
 import org.hl7.fhir.r4.model.Location;
+import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,9 +21,11 @@ import static gov.usds.vaccineschedule.api.services.ServiceHelpers.fromIterable;
 public class LocationService {
 
     private final LocationRepository repo;
+    private final GeocoderService geocoder;
 
-    public LocationService(LocationRepository repo) {
+    public LocationService(LocationRepository repo, GeocoderService geocoder) {
         this.repo = repo;
+        this.geocoder = geocoder;
     }
 
     @Transactional
@@ -37,6 +40,10 @@ public class LocationService {
         final List<LocationEntity> entities = locations
                 .stream()
                 .map(LocationEntity::fromFHIR)
+                .peek(e -> {
+                    final Point point = this.geocoder.geocodeLocation(e.getAddress()).block();
+                    e.setCoordinates(point);
+                })
                 .collect(Collectors.toList());
 
         return fromIterable(() -> this.repo.saveAll(entities), LocationEntity::toFHIR);
