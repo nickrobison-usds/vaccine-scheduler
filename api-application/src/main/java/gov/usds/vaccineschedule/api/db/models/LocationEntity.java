@@ -15,6 +15,7 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,7 +25,8 @@ import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTE
 /**
  * Created by nickrobison on 3/26/21
  */
-@Entity(name = "locations")
+@Entity
+@Table(name = "locations")
 public class LocationEntity extends BaseEntity implements Flammable<Location>, Identifiable {
 
     @Column(nullable = false)

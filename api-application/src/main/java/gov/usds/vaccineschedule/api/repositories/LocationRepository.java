@@ -4,7 +4,9 @@ import gov.usds.vaccineschedule.api.db.models.LocationEntity;
 import gov.usds.vaccineschedule.api.db.models.LocationEntity_;
 import gov.usds.vaccineschedule.api.db.models.LocationIdentifier;
 import gov.usds.vaccineschedule.api.db.models.LocationIdentifier_;
+import org.locationtech.jts.geom.Point;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +17,11 @@ import java.util.UUID;
 @Repository
 public interface LocationRepository extends CrudRepository<LocationEntity, UUID> {
     List<LocationEntity> findAll(Specification<LocationEntity> searchSpec);
+
+    @Query(
+            "from LocationEntity l where distance(l.coordinates, :location) < 50000"
+    )
+    List<LocationEntity> locationsWithinDistance(Point location);
 
     static Specification<LocationEntity> hasIdentifier(String system, String value) {
         return (root, cq, cb) -> {

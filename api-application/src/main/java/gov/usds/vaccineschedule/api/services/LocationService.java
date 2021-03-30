@@ -49,6 +49,11 @@ public class LocationService {
         return fromIterable(() -> this.repo.saveAll(entities), LocationEntity::toFHIR);
     }
 
+    @Transactional
+    public Collection<Location> findByLocation(Point point) {
+        return fromIterable(() -> this.repo.locationsWithinDistance(point), LocationEntity::toFHIR);
+    }
+
 
     public Collection<Location> getLocations() {
         return fromIterable(this.repo::findAll, LocationEntity::toFHIR);

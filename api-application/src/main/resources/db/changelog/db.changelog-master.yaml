@@ -235,7 +235,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: coordinates
-                  type: GEOMETRY(Point, 4326)
+                  type: GEOGRAPHY(Point, 4326)
   - changeSet:
       id: add-location-index
       author: nicholas.a.robison@omb.eop.gov
