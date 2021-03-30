@@ -60,3 +60,7 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+processResources {
+    from("$rootDir/examples")
+}

@@ -39,6 +39,14 @@ public class SlotService {
     }
 
     @Transactional
+    public Collection<Slot> addSlots(Collection<Slot> resources) {
+        return resources
+                .stream().map(this::addSlot)
+                .map(SlotEntity::toFHIR)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
     public SlotEntity addSlot(Slot resource) {
         final String scheduleRef = resource.getSchedule().getReference();
 

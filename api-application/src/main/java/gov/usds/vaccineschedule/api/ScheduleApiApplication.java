@@ -1,6 +1,7 @@
 package gov.usds.vaccineschedule.api;
 
 import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
+import gov.usds.vaccineschedule.api.services.ExampleDataService;
 import gov.usds.vaccineschedule.api.services.ScheduledTaskService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -34,5 +35,11 @@ public class ScheduleApiApplication {
     @ConditionalOnProperty("vs.schedule-source.schedule-enabled")
     public CommandLineRunner scheduleSourceFetch(ScheduleSourceConfig config, ScheduledTaskService scheduler) {
         return args -> scheduler.scheduleFetch(config);
+    }
+
+    @Bean
+    @ConditionalOnProperty("vs.load-example-data")
+    public CommandLineRunner loadExampleData(ExampleDataService service) {
+        return args -> service.loadTestData();
     }
 }

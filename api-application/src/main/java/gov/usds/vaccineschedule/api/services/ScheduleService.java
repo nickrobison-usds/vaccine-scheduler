@@ -39,6 +39,14 @@ public class ScheduleService {
                 .collect(Collectors.toList());
     }
 
+    public Collection<Schedule> addSchedules(Collection<Schedule> resources) {
+        return resources
+                .stream()
+                .map(this::addSchedule)
+                .map(ScheduleEntity::toFHIR)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public ScheduleEntity addSchedule(Schedule resource) {
 
