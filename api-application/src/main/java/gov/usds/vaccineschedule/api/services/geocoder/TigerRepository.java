@@ -2,6 +2,7 @@ package gov.usds.vaccineschedule.api.services.geocoder;
 
 import gov.usds.vaccineschedule.api.db.models.AddressElement;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -12,6 +13,7 @@ import java.util.List;
  * Created by nickrobison on 3/31/21
  */
 @Repository
+@Lazy
 public class TigerRepository {
 
     private final EntityManager em;

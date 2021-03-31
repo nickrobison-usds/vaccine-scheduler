@@ -2,7 +2,9 @@ package gov.usds.vaccineschedule.api.providers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import gov.usds.vaccineschedule.api.services.ScheduleService;
 import org.hl7.fhir.r4.model.Schedule;
 import org.springframework.stereotype.Component;
@@ -23,8 +25,12 @@ public class ScheduleProvider extends AbstractJaxRsResourceProvider<Schedule> {
     }
 
     @Search
-    public Collection<Schedule> scheduleSearch() {
-        return this.service.getSchedule();
+    public Collection<Schedule> scheduleSearch(@OptionalParam(name = Schedule.SP_ACTOR) ReferenceParam locationRef) {
+        if (locationRef == null) {
+            return this.service.getSchedule();
+        } else {
+            return this.service.getSchedulesForLocation(locationRef.getIdPart());
+        }
     }
 
     @Override

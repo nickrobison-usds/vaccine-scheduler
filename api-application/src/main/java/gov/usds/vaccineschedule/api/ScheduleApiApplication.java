@@ -6,6 +6,7 @@ import gov.usds.vaccineschedule.api.services.ExampleDataService;
 import gov.usds.vaccineschedule.api.services.ScheduledTaskService;
 import gov.usds.vaccineschedule.api.services.geocoder.DBGeocoderService;
 import gov.usds.vaccineschedule.api.services.geocoder.GeocoderService;
+import gov.usds.vaccineschedule.api.services.geocoder.MapBoxGeocoderService;
 import gov.usds.vaccineschedule.api.services.geocoder.TigerRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -49,7 +50,14 @@ public class ScheduleApiApplication {
     }
 
     @Bean
+    @ConditionalOnProperty("vs.geocoder.db")
     public GeocoderService provideGeocoder(TigerRepository repo) {
         return new DBGeocoderService(repo);
+    }
+
+    @Bean
+    @ConditionalOnProperty("vs.geocoder.mapbox-token")
+    public GeocoderService provideMapboxCoder(GeocoderConfig config) {
+        return new MapBoxGeocoderService(config);
     }
 }

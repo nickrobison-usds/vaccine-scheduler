@@ -9,6 +9,8 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -16,6 +18,7 @@ import reactor.core.publisher.Mono;
  * Created by nickrobison on 3/30/21
  */
 public class MapBoxGeocoderService implements GeocoderService {
+    private static final Logger logger = LoggerFactory.getLogger(MapBoxGeocoderService.class);
 
     private final GeocoderConfig config;
 
@@ -45,7 +48,9 @@ public class MapBoxGeocoderService implements GeocoderService {
                     final Coordinate coordinate = new Coordinate(coords.getLongitude(), coords.getLatitude(), coords.getAltitude());
 
                     final GeometryFactory factory = new GeometryFactory(new PrecisionModel(), 4326);
-                    return factory.createPoint(coordinate);
+                    final Point point = factory.createPoint(coordinate);
+                    logger.info("Geocoded {} to {}", address.toNormalizedAddress(), point);
+                    return point;
                 });
     }
 }

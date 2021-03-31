@@ -1,1 +1,8 @@
-vs.load-example-data: true
+vs:
+  load-example-data: true
+  geocoder:
+    db:
+      schema: tiger
+      username: postgres
+      password: this_is_not_safe
+      url: jdbc:postgresql://localhost:${VS_DB_PORT:5432}/geocoder

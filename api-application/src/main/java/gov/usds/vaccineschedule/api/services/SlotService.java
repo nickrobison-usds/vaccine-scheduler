@@ -50,12 +50,12 @@ public class SlotService {
     public SlotEntity addSlot(Slot resource) {
         final String scheduleRef = resource.getSchedule().getReference();
 
-        final List<ScheduleEntity> schedules = scheduleRepository.findAll(ScheduleRepository.hasIdentifier(ORIGINAL_ID_SYSTEM, scheduleRef));
-        if (schedules.isEmpty()) {
+        final List<ScheduleEntity> schedule = StreamSupport.stream(scheduleRepository.findAll(ScheduleRepository.hasIdentifier(ORIGINAL_ID_SYSTEM, scheduleRef)).spliterator(), false).collect(Collectors.toList());
+        if (schedule.isEmpty()) {
             throw new IllegalStateException("Cannot add to missing schedule");
         }
 
-        final SlotEntity entity = SlotEntity.fromFHIR(schedules.get(0), resource);
+        final SlotEntity entity = SlotEntity.fromFHIR(schedule.get(0), resource);
         return repo.save(entity);
     }
 }

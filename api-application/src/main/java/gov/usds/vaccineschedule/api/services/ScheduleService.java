@@ -10,11 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.hasIdentifier;
+import static gov.usds.vaccineschedule.api.repositories.ScheduleRepository.byLocation;
 
 
 /**
@@ -35,6 +37,14 @@ public class ScheduleService {
     public Collection<Schedule> getSchedule() {
         return StreamSupport
                 .stream(this.repo.findAll().spliterator(), false)
+                .map(ScheduleEntity::toFHIR)
+                .collect(Collectors.toList());
+    }
+
+    public Collection<Schedule> getSchedulesForLocation(String reference) {
+        final UUID locationId = UUID.fromString(reference);
+        return StreamSupport
+                .stream(this.repo.findAll(byLocation(locationId)).spliterator(), false)
                 .map(ScheduleEntity::toFHIR)
                 .collect(Collectors.toList());
     }
