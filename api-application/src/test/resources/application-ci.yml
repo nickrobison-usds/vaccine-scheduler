@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    username: postgres
+    password: this_is_not_safe
+    url: jdbc:postgresql://localhost:${VS_DB_PORT:5432}/vs
