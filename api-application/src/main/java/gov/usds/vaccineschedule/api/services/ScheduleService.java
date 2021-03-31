@@ -1,22 +1,25 @@
 package gov.usds.vaccineschedule.api.services;
 
+import ca.uhn.fhir.rest.param.TokenParam;
 import gov.usds.vaccineschedule.api.db.models.LocationEntity;
 import gov.usds.vaccineschedule.api.db.models.ScheduleEntity;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Schedule;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
-import static gov.usds.vaccineschedule.api.repositories.LocationRepository.hasIdentifier;
 import static gov.usds.vaccineschedule.api.repositories.ScheduleRepository.byLocation;
+import static gov.usds.vaccineschedule.api.repositories.ScheduleRepository.hasIdentifier;
 
 
 /**
@@ -34,11 +37,23 @@ public class ScheduleService {
         this.lRepo = lRepo;
     }
 
-    public Collection<Schedule> getSchedule() {
+    public Collection<Schedule> getAllSchedules() {
         return StreamSupport
                 .stream(this.repo.findAll().spliterator(), false)
                 .map(ScheduleEntity::toFHIR)
                 .collect(Collectors.toList());
+    }
+
+    public Optional<Schedule> getSchedule(IIdType id) {
+        return this.repo.findById(UUID.fromString(id.getIdPart())).map(ScheduleEntity::toFHIR);
+    }
+
+    public Collection<Schedule> getScheduleWithIdentifier(TokenParam param) {
+        return StreamSupport.stream(this.repo.findAll(hasIdentifier(param.getSystem(), param.getValue())).spliterator(), false)
+                .map(ScheduleEntity::toFHIR)
+                .collect(Collectors.toList());
+
+
     }
 
     public Collection<Schedule> getSchedulesForLocation(String reference) {
@@ -62,7 +77,7 @@ public class ScheduleService {
 
         // Figure out which location we need to search for
         final String reference = resource.getActor().get(0).getReference();
-        final List<LocationEntity> locations = lRepo.findAll(hasIdentifier(ORIGINAL_ID_SYSTEM, reference));
+        final List<LocationEntity> locations = lRepo.findAll(LocationRepository.hasIdentifier(ORIGINAL_ID_SYSTEM, reference));
         if (locations.isEmpty()) {
             throw new IllegalStateException("Cannot add to missing location");
         }
