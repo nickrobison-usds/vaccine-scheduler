@@ -21,10 +21,9 @@ public class TigerRepository {
     }
 
     public String geocoder(AddressElement address) {
-        final Query query = em.createNativeQuery("SELECT g.rating, ST_X(g.geomout) as lon, ST_Y(g.geomout) as lat FROM geocode(CAST(normalize_address(?1) as tiger.norm_addy), 1) as g");
-        query.setParameter(1, address.getStreet().get(0));
+        final Query query = em.createNativeQuery("SELECT ROW_NUMBER() OVER() as id, g.rating, ST_X(g.geomout) as lon, ST_Y(g.geomout) as lat FROM geocode(normalize_address(?1), 100) as g", GeocoderResponseEntity.class);
+        query.setParameter(1, "4849 Connecticut Ave NW Washington, DC");
         final List resultList = query.getResultList();
-        final int firstResult = query.getFirstResult();
         query.getParameters();
         return null;
     }

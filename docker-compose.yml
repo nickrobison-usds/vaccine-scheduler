@@ -11,6 +11,13 @@ services:
     environment:
       - POSTGRES_PASSWORD=this_is_not_safe
     volumes:
+      - type: volume
+        source: vs-dev-db-data
+        target: /var/lib/postgresql/data
+      # Create/use a named volume so that the database is not wiped if we recreate the container
+      - type: volume
+        source: vs-dev-db-gisdata
+        target: /gisdata
       - type: bind
         source: ./db/setup-postgis.sh
         target: /docker-entrypoint-initdb.d/20-vs-db-creation.sh
@@ -46,4 +53,5 @@ services:
     ports:
       - "${VS_API_PORT:-8080}:8080"
 volumes:
+  vs-dev-db-data:
   vs-dev-db-gisdata:
