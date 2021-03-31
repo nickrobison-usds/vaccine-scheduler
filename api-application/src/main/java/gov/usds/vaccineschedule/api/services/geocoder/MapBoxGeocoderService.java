@@ -1,4 +1,4 @@
-package gov.usds.vaccineschedule.api.services;
+package gov.usds.vaccineschedule.api.services.geocoder;
 
 import gov.usds.vaccineschedule.api.config.GeocoderConfig;
 import gov.usds.vaccineschedule.api.db.models.AddressElement;

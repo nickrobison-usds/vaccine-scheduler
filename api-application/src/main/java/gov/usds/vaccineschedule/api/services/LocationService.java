@@ -2,6 +2,7 @@ package gov.usds.vaccineschedule.api.services;
 
 import gov.usds.vaccineschedule.api.db.models.LocationEntity;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
+import gov.usds.vaccineschedule.api.services.geocoder.GeocoderService;
 import org.hl7.fhir.r4.model.Location;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;

@@ -3,9 +3,10 @@ package gov.usds.vaccineschedule.api;
 import gov.usds.vaccineschedule.api.config.GeocoderConfig;
 import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
 import gov.usds.vaccineschedule.api.services.ExampleDataService;
-import gov.usds.vaccineschedule.api.services.GeocoderService;
-import gov.usds.vaccineschedule.api.services.MapBoxGeocoderService;
 import gov.usds.vaccineschedule.api.services.ScheduledTaskService;
+import gov.usds.vaccineschedule.api.services.geocoder.DBGeocoderService;
+import gov.usds.vaccineschedule.api.services.geocoder.GeocoderService;
+import gov.usds.vaccineschedule.api.services.geocoder.TigerRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -48,7 +49,7 @@ public class ScheduleApiApplication {
     }
 
     @Bean
-    public GeocoderService provideGeocoder(GeocoderConfig config) {
-        return new MapBoxGeocoderService(config);
+    public GeocoderService provideGeocoder(TigerRepository repo) {
+        return new DBGeocoderService(repo);
     }
 }

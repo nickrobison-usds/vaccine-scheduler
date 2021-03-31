@@ -18,6 +18,12 @@ logging:
     ca.uhn.fhir.jaxrs: debug
     gov.usds: debug
 vs:
+  geocoder:
+    db:
+      schema: tiger
+      username: vaccine_schedule
+      password: this_is_not_safe
+      url: jdbc:postgresql://localhost:${VS_DB_PORT:5432}/vs
   schedule-source:
     schedule-enabled: false
     upload-schedule: "0 0 11 * * *" # Daily at 11:00 AM Eastern Time
