@@ -2,6 +2,7 @@ package gov.usds.vaccineschedule.api.services;
 
 import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
 import gov.usds.vaccineschedule.api.providers.PatientProvider;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -27,6 +28,7 @@ import java.util.function.Function;
 @EnableConfigurationProperties({
         ScheduleSourceConfig.class
 })
+@Disabled
 public class FetchServiceTest {
 
     @Autowired
