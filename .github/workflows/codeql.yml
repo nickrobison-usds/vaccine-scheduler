@@ -1,0 +1,26 @@
+name: CodeQL
+
+# Run this on pushes to any branch that change a backend file or the workflow definition
+on:
+  workflow_dispatch: # because sometimes you just want to force a branch to have tests run
+  pull_request:
+    branches:
+      - "**"
+  push:
+    branches:
+      - main
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: java
+      - name: Build sourcecode
+        uses: github/codeql-action/autobuild@v1
+      - name: Perform Analysis
+        uses: github/codeql-action/analyze@v1
