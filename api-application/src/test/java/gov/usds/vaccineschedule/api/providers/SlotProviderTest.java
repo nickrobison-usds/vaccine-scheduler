@@ -1,6 +1,7 @@
 package gov.usds.vaccineschedule.api.providers;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import cov.usds.vaccineschedule.common.models.VaccineSlot;
 import gov.usds.vaccineschedule.api.BaseApplicationTest;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Location;
@@ -11,7 +12,9 @@ import org.junit.jupiter.api.Test;
 import java.sql.Date;
 
 import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Created by nickrobison on 3/31/21
@@ -95,5 +98,24 @@ public class SlotProviderTest extends BaseApplicationTest {
                 .execute();
 
         assertEquals(5, unboundedBundle.getEntry().size(), "Should have a subset of values");
+    }
+
+    @Test
+    void testSlotExtensions() {
+        final IGenericClient client = provideFhirClient();
+
+        final Bundle singleSlot = client
+                .search()
+                .forResource(Slot.class)
+                .where(Slot.IDENTIFIER.exactly().systemAndCode(ORIGINAL_ID_SYSTEM, "Slot/28"))
+                .returnBundle(Bundle.class)
+                .preferResponseType(VaccineSlot.class)
+                .encodedJson()
+                .execute();
+
+        final VaccineSlot single = (VaccineSlot) singleSlot.getEntry().get(0).getResource();
+        assertAll(() -> assertEquals("https://ehr-portal.example.org/bookings?slot=1000008", single.getBookingUrl().asStringValue(), "Should have correct URL"),
+                () -> assertEquals(100, single.getCapacity().getValue(), "Should have correct value"),
+                () -> assertTrue(single.getBookingPhone().isEmpty(), "Should not have phone number"));
     }
 }

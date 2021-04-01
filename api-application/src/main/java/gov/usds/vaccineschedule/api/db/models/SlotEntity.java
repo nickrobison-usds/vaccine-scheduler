@@ -1,8 +1,12 @@
 package gov.usds.vaccineschedule.api.db.models;
 
+import cov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Slot;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UrlType;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -11,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Min;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -26,7 +31,7 @@ import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTE
  */
 @Entity
 @Table(name = "slots")
-public class SlotEntity extends BaseEntity implements Flammable<Slot> {
+public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
 
     private static final ZoneId UTC = ZoneId.of("GMT");
     private static final DateTimeFormatter FHIR_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSVV");
@@ -45,6 +50,13 @@ public class SlotEntity extends BaseEntity implements Flammable<Slot> {
 
     @Column(nullable = false)
     private Slot.SlotStatus status;
+
+    // Optional extensions that MAY be included
+    private String bookingUrl;
+    private String bookingPhone;
+
+    @Min(value = 0L, message = "Capacity must be positive")
+    private Integer capacity = 1;
 
     public SlotEntity() {
         // Hibernate required
@@ -90,9 +102,33 @@ public class SlotEntity extends BaseEntity implements Flammable<Slot> {
         this.status = status;
     }
 
+    public String getBookingUrl() {
+        return bookingUrl;
+    }
+
+    public void setBookingUrl(String bookingUrl) {
+        this.bookingUrl = bookingUrl;
+    }
+
+    public String getBookingPhone() {
+        return bookingPhone;
+    }
+
+    public void setBookingPhone(String bookingPhone) {
+        this.bookingPhone = bookingPhone;
+    }
+
+    public Integer getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
+    }
+
     @Override
-    public Slot toFHIR() {
-        final Slot slot = new Slot();
+    public VaccineSlot toFHIR() {
+        final VaccineSlot slot = new VaccineSlot();
 
         slot.setId(this.getInternalId().toString());
         this.identifiers.stream().map(SlotIdentifier::toFHIR).forEach(slot::addIdentifier);
@@ -102,10 +138,19 @@ public class SlotEntity extends BaseEntity implements Flammable<Slot> {
         slot.setEndElement(new InstantType(this.endTime.toInstant().toString()));
         slot.setStatus(this.getStatus());
 
+        // Vaccine Slot extensions
+        if (bookingUrl != null) {
+            slot.setBookingUrl(new UrlType(bookingUrl));
+        }
+        if (bookingPhone != null) {
+            slot.setBookingPhone(new StringType(bookingPhone));
+        }
+        slot.setCapacity(new IntegerType(capacity));
+
         return slot;
     }
 
-    public static SlotEntity fromFHIR(ScheduleEntity schedule, Slot resource) {
+    public static SlotEntity fromFHIR(ScheduleEntity schedule, VaccineSlot resource) {
         final SlotEntity entity = new SlotEntity();
 
         entity.setSchedule(schedule);
@@ -119,6 +164,17 @@ public class SlotEntity extends BaseEntity implements Flammable<Slot> {
         entity.setStartTime(OffsetDateTime.parse(resource.getStartElement().getValueAsString(), FHIR_FORMATTER));
         entity.setEndTime(OffsetDateTime.parse(resource.getEndElement().getValueAsString(), FHIR_FORMATTER));
         entity.setStatus(resource.getStatus());
+
+        // Vaccine slot extensions
+        if (!resource.getBookingUrl().isEmpty()) {
+            entity.setBookingUrl(resource.getBookingUrl().asStringValue());
+        }
+        if (!resource.getBookingPhone().isEmpty()) {
+            entity.setBookingPhone(resource.getBookingPhone().getValueAsString());
+        }
+        if (!resource.getCapacity().isEmpty()) {
+            entity.setCapacity(resource.getCapacity().getValue());
+        }
 
         entity.setIdentifiers(identifiers);
         return entity;
