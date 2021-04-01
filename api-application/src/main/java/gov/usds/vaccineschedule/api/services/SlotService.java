@@ -1,11 +1,13 @@
 package gov.usds.vaccineschedule.api.services;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import gov.usds.vaccineschedule.api.db.models.ScheduleEntity;
 import gov.usds.vaccineschedule.api.db.models.SlotEntity;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
 import gov.usds.vaccineschedule.api.repositories.SlotRepository;
 import org.hl7.fhir.r4.model.Slot;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import java.util.stream.StreamSupport;
 
 import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
 import static gov.usds.vaccineschedule.api.repositories.SlotRepository.forLocation;
+import static gov.usds.vaccineschedule.api.repositories.SlotRepository.forLocationAndTime;
 
 /**
  * Created by nickrobison on 3/29/21
@@ -41,9 +44,17 @@ public class SlotService {
                 .collect(Collectors.toList());
     }
 
-    public Collection<Slot> getSlotsForLocation(ReferenceParam idParam) {
+    public Collection<Slot> getSlotsForLocation(ReferenceParam idParam, DateRangeParam dateParam) {
         final UUID id = UUID.fromString(idParam.getIdPart());
-        return this.repo.findAll(forLocation(id))
+
+        final Specification<SlotEntity> searchParams;
+        if (dateParam.isEmpty()) {
+            searchParams = forLocation(id);
+        } else {
+            searchParams = forLocationAndTime(id, dateParam);
+        }
+
+        return this.repo.findAll(searchParams)
                 .stream()
                 .map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
