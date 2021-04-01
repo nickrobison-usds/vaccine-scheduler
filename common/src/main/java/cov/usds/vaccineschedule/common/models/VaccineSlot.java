@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.UrlType;
 /**
  * Created by nickrobison on 4/1/21
  */
-@ResourceDef(name = "Slot", profile = "http://example.slot")
+@ResourceDef(name = "Slot", profile = "http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-slot")
 public class VaccineSlot extends Slot {
     private static final long serialVersionUID = 42L;
 
