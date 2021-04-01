@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.usds.vaccineschedule.api.services.LocationService;
@@ -34,16 +35,20 @@ public class LocationProvider extends AbstractJaxRsResourceProvider<Location> {
     }
 
     @Search
-    public Collection<Location> locationNearest(@OptionalParam(name = Location.SP_NEAR) TokenParam nearestParam, @OptionalParam(name = Location.SP_IDENTIFIER) TokenParam identifier) {
+    public Collection<Location> locationSearch(
+            @OptionalParam(name = Location.SP_NEAR) TokenParam nearestParam,
+            @OptionalParam(name = Location.SP_IDENTIFIER) TokenParam identifier,
+            @OptionalParam(name = Location.SP_ADDRESS_CITY) StringParam city,
+            @OptionalParam(name = Location.SP_ADDRESS_STATE) StringParam state) {
+        // If we have a nearestParam, do that, rather than anything else
         if (nearestParam != null) {
             final String[] values = nearestParam.getValue().split("\\|");
             final GeometryFactory factory = new GeometryFactory(new PrecisionModel(), 4326);
             final Point point = factory.createPoint(new Coordinate(Double.parseDouble(values[1]), Double.parseDouble(values[0])));
             return this.service.findByLocation(point);
-        } else if (identifier != null) {
-            return service.findByIdentifier(identifier);
+        } else {
+            return service.findLocations(identifier, city, state);
         }
-        return service.getLocations();
     }
 
     @Read
