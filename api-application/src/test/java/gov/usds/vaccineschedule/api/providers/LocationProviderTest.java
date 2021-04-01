@@ -73,4 +73,58 @@ public class LocationProviderTest extends BaseApplicationTest {
 
         assertTrue(origLocation.equalsDeep(readLocation), "Locations should match");
     }
+
+    @Test
+    void cityStateQuery() {
+        final IGenericClient client = provideFhirClient();
+        // Look for all by state
+
+        final Bundle maLocations = client
+                .search()
+                .forResource(Location.class)
+                .where(Location.ADDRESS_STATE.matchesExactly().value("MA"))
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(10, maLocations.getEntry().size(), "Should have all locations");
+
+        final Location first = (Location) maLocations.getEntry().get(0).getResource();
+
+        // Search for a given city
+        final Bundle cityLocations = client
+                .search()
+                .forResource(Location.class)
+                .where(Location.ADDRESS_STATE.matchesExactly().value(first.getAddress().getState()))
+                .and(Location.ADDRESS_CITY.matchesExactly().value(first.getAddress().getCity()))
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(1, cityLocations.getEntry().size(), "Should have a single location");
+
+        // City with wrong state
+        final Bundle badStateLocations = client
+                .search()
+                .forResource(Location.class)
+                .where(Location.ADDRESS_STATE.matchesExactly().value("IN"))
+                .and(Location.ADDRESS_CITY.matchesExactly().value(first.getAddress().getCity()))
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(0, badStateLocations.getEntry().size(), "Should not have any locations");
+
+        // City with wrong state
+        final Bundle wrongCity = client
+                .search()
+                .forResource(Location.class)
+                .where(Location.ADDRESS_STATE.matchesExactly().value(first.getAddress().getState()))
+                .and(Location.ADDRESS_CITY.matchesExactly().value("Nowhere")) // Actually a city in CO
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(0, wrongCity.getEntry().size(), "Should have a single location");
+    }
 }
