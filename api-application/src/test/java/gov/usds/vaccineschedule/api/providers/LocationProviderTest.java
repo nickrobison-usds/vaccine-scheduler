@@ -37,7 +37,7 @@ public class LocationProviderTest extends BaseApplicationTest {
     public void testLocationSearch() {
         final IGenericClient client = provideFhirClient();
         Map<String, List<IQueryParameterType>> params = new HashMap<>();
-        params.put("near", List.of(new TokenParam().setValue("42.4887|-71.2837")));
+        params.put("near", List.of(new TokenParam().setValue("42.4887|-71.2837|50")));
 
         final Bundle results = client.search()
                 .forResource(Location.class)
