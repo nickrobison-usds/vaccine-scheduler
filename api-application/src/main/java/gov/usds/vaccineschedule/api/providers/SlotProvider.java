@@ -2,8 +2,11 @@ package gov.usds.vaccineschedule.api.providers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import gov.usds.vaccineschedule.api.services.SlotService;
+import org.hl7.fhir.r4.model.Schedule;
 import org.hl7.fhir.r4.model.Slot;
 import org.springframework.stereotype.Component;
 
@@ -23,8 +26,13 @@ public class SlotProvider extends AbstractJaxRsResourceProvider<Slot> {
     }
 
     @Search
-    public Collection<Slot> findSlots() {
-        return service.getSlots();
+    public Collection<Slot> findSlots(@OptionalParam(name = Slot.SP_SCHEDULE + '.' + Schedule.SP_ACTOR) ReferenceParam locationID) {
+        if (locationID != null) {
+            return this.service.getSlotsForLocation(locationID);
+        } else {
+            return service.getSlots();
+        }
+
     }
 
     @Override

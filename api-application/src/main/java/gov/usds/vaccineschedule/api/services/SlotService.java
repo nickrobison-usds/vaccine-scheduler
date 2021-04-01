@@ -1,5 +1,6 @@
 package gov.usds.vaccineschedule.api.services;
 
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import gov.usds.vaccineschedule.api.db.models.ScheduleEntity;
 import gov.usds.vaccineschedule.api.db.models.SlotEntity;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
@@ -10,10 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
+import static gov.usds.vaccineschedule.api.repositories.SlotRepository.forLocation;
 
 /**
  * Created by nickrobison on 3/29/21
@@ -34,6 +37,14 @@ public class SlotService {
     public Collection<Slot> getSlots() {
         return StreamSupport
                 .stream(this.repo.findAll().spliterator(), false)
+                .map(SlotEntity::toFHIR)
+                .collect(Collectors.toList());
+    }
+
+    public Collection<Slot> getSlotsForLocation(ReferenceParam idParam) {
+        final UUID id = UUID.fromString(idParam.getIdPart());
+        return this.repo.findAll(forLocation(id))
+                .stream()
                 .map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
     }
