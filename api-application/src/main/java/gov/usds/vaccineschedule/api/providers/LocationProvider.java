@@ -9,13 +9,10 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.usds.vaccineschedule.api.models.NearestQuery;
 import gov.usds.vaccineschedule.api.services.LocationService;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Location;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -42,10 +39,8 @@ public class LocationProvider extends AbstractJaxRsResourceProvider<Location> {
             @OptionalParam(name = Location.SP_ADDRESS_STATE) StringParam state) {
         // If we have a nearestParam, do that, rather than anything else
         if (nearestParam != null) {
-            final String[] values = nearestParam.getValue().split("\\|");
-            final GeometryFactory factory = new GeometryFactory(new PrecisionModel(), 4326);
-            final Point point = factory.createPoint(new Coordinate(Double.parseDouble(values[1]), Double.parseDouble(values[0])));
-            return this.service.findByLocation(point);
+            final NearestQuery query = NearestQuery.fromToken(nearestParam.getValue());
+            return this.service.findByLocation(query);
         } else {
             return service.findLocations(identifier, city, state);
         }

@@ -3,6 +3,7 @@ apply plugin: 'org.springframework.boot'
 
 ext {
     set('springCloudVersion', '2020.0.2')
+    set('uomVersion', '2.0.2')
 }
 
 dependencyManagement {
@@ -40,6 +41,11 @@ dependencies {
     implementation 'de.grundid.opendatalab:geojson-jackson:1.14'
     implementation 'org.hibernate:hibernate-spatial'
 
+    // Unit conversion
+    implementation 'tech.units:indriya:2.1.2'
+    implementation "systems.uom:systems-common:${uomVersion}"
+    implementation "systems.uom:systems-unicode:${uomVersion}"
+    implementation "systems.uom:systems-quantity:${uomVersion}"
 
     // FHIR
     implementation "ca.uhn.hapi.fhir:hapi-fhir-spring-boot-starter:${hapiVersion}"

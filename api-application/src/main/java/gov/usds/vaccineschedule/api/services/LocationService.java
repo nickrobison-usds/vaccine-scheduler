@@ -3,6 +3,7 @@ package gov.usds.vaccineschedule.api.services;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import gov.usds.vaccineschedule.api.db.models.LocationEntity;
+import gov.usds.vaccineschedule.api.models.NearestQuery;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
 import gov.usds.vaccineschedule.api.services.geocoder.GeocoderService;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -26,6 +27,7 @@ import static gov.usds.vaccineschedule.api.repositories.LocationRepository.hasId
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inCity;
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inState;
 import static gov.usds.vaccineschedule.api.services.ServiceHelpers.fromIterable;
+import static tech.units.indriya.unit.Units.METRE;
 
 /**
  * Created by nickrobison on 3/26/21
@@ -99,8 +101,9 @@ public class LocationService {
     }
 
     @Transactional
-    public Collection<Location> findByLocation(Point point) {
-        return fromIterable(() -> this.repo.locationsWithinDistance(point), LocationEntity::toFHIR);
+    public Collection<Location> findByLocation(NearestQuery point) {
+        final double distance = point.getDistance().to(METRE).getValue().doubleValue();
+        return fromIterable(() -> this.repo.locationsWithinDistance(point.getPoint(), distance), LocationEntity::toFHIR);
     }
 
 

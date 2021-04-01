@@ -20,9 +20,9 @@ import java.util.UUID;
 public interface LocationRepository extends CrudRepository<LocationEntity, UUID>, JpaSpecificationExecutor<LocationEntity> {
 
     @Query(
-            "from LocationEntity l where distance(l.coordinates, :location) < 50000"
+            "from LocationEntity l where distance(l.coordinates, :location) < :distance"
     )
-    List<LocationEntity> locationsWithinDistance(Point location);
+    List<LocationEntity> locationsWithinDistance(Point location, double distance);
 
     static Specification<LocationEntity> hasIdentifier(String system, String value) {
         return (root, cq, cb) -> {
