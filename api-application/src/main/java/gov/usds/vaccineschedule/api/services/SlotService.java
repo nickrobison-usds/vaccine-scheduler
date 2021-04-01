@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -44,11 +45,11 @@ public class SlotService {
                 .collect(Collectors.toList());
     }
 
-    public Collection<Slot> getSlotsForLocation(ReferenceParam idParam, DateRangeParam dateParam) {
+    public Collection<Slot> getSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam) {
         final UUID id = UUID.fromString(idParam.getIdPart());
 
         final Specification<SlotEntity> searchParams;
-        if (dateParam.isEmpty()) {
+        if (dateParam == null) {
             searchParams = forLocation(id);
         } else {
             searchParams = forLocationAndTime(id, dateParam);
