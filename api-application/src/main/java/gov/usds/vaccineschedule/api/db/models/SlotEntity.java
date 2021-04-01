@@ -2,8 +2,11 @@ package gov.usds.vaccineschedule.api.db.models;
 
 import cov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Slot;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UrlType;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -12,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Min;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -46,6 +50,13 @@ public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
 
     @Column(nullable = false)
     private Slot.SlotStatus status;
+
+    // Optional extensions that MAY be included
+    private String bookingUrl;
+    private String bookingPhone;
+
+    @Min(value = 0L, message = "Capacity must be positive")
+    private Integer capacity = 1;
 
     public SlotEntity() {
         // Hibernate required
@@ -91,6 +102,30 @@ public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
         this.status = status;
     }
 
+    public String getBookingUrl() {
+        return bookingUrl;
+    }
+
+    public void setBookingUrl(String bookingUrl) {
+        this.bookingUrl = bookingUrl;
+    }
+
+    public String getBookingPhone() {
+        return bookingPhone;
+    }
+
+    public void setBookingPhone(String bookingPhone) {
+        this.bookingPhone = bookingPhone;
+    }
+
+    public Integer getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
+    }
+
     @Override
     public VaccineSlot toFHIR() {
         final VaccineSlot slot = new VaccineSlot();
@@ -103,7 +138,14 @@ public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
         slot.setEndElement(new InstantType(this.endTime.toInstant().toString()));
         slot.setStatus(this.getStatus());
 
-        // Set our vaccine specific things
+        // Vaccine Slot extensions
+        if (bookingUrl != null) {
+            slot.setBookingUrl(new UrlType(bookingUrl));
+        }
+        if (bookingPhone != null) {
+            slot.setBookingPhone(new StringType(bookingPhone));
+        }
+        slot.setCapacity(new IntegerType(capacity));
 
         return slot;
     }
@@ -123,7 +165,16 @@ public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
         entity.setEndTime(OffsetDateTime.parse(resource.getEndElement().getValueAsString(), FHIR_FORMATTER));
         entity.setStatus(resource.getStatus());
 
-        // Get vaccine slot values here
+        // Vaccine slot extensions
+        if (!resource.getBookingUrl().isEmpty()) {
+            entity.setBookingUrl(resource.getBookingUrl().asStringValue());
+        }
+        if (!resource.getBookingPhone().isEmpty()) {
+            entity.setBookingPhone(resource.getBookingPhone().getValueAsString());
+        }
+        if (!resource.getCapacity().isEmpty()) {
+            entity.setCapacity(resource.getCapacity().getValue());
+        }
 
         entity.setIdentifiers(identifiers);
         return entity;

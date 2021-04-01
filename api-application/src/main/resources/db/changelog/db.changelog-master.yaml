@@ -250,3 +250,26 @@ databaseChangeLog:
         sql: |
           DROP INDEX ${database.defaultSchemaName}.spx__locations__coordinates
 
+  - changeSet:
+      id: add-slot-extensions
+      author: nicholas.a.robison@omb.eop.gov
+      comment: Add optional slot extensions
+      changes:
+        - addColumn:
+            tableName: slots
+            columns:
+              - column:
+                  name: booking_url
+                  type: *string
+                  remarks: Optional Deep-link booking URL
+              - column:
+                  name: booking_phone
+                  type: *string
+                  remarks: Optional booking location phone number
+              - column:
+                  name: capacity
+                  type: integer
+                  remarks: Slot capacity (defaults to 1 if not provided)
+                  constraints:
+                    nullable: false
+

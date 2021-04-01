@@ -114,7 +114,7 @@ public class SlotProviderTest extends BaseApplicationTest {
                 .execute();
 
         final VaccineSlot single = (VaccineSlot) singleSlot.getEntry().get(0).getResource();
-        assertAll(() -> assertEquals("https://ehr-portal.example.org/bookings?slot=1000009", single.getBookingUrl().asStringValue(), "Should have correct URL"),
+        assertAll(() -> assertEquals("https://ehr-portal.example.org/bookings?slot=1000008", single.getBookingUrl().asStringValue(), "Should have correct URL"),
                 () -> assertEquals(100, single.getCapacity().getValue(), "Should have correct value"),
                 () -> assertTrue(single.getBookingPhone().isEmpty(), "Should not have phone number"));
     }
