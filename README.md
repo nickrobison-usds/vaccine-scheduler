@@ -14,7 +14,7 @@ The `api` regularly polls the publisher and loads the data into the repository.
 
 Users can access the `api` and search for available slots at given locations.
 
-## Refreshing the data.
+## Refreshing the data:
 
 The API service sets up some cron jobs to regularly poll a list of upstream publishers for their data. The cron jobs
 don't actually fetch the data, instead, they submit jobs to a `RabbitMQ` queue, which is subscribed to by the various
@@ -48,7 +48,7 @@ The endpoints support a couple of common search parameters.
 For example, searching for locations in Boston, MA
 
 ```bash
-curl --location --request GET 'http://localhost:8080/fhir/Location?city=Boston&state=MA' \
+curl --location --request GET 'http://localhost:8080/fhir/Location?address-city=Boston&address-state=MA' \
 --header 'Content-Type: application/fhir+json'
 ```
 
@@ -62,7 +62,7 @@ curl --location --request GET 'http://localhost:8080/fhir/Location?near=42.4887%
 You can also look for slots within a period of time:
 
 ```bash
-curl --location --request GET 'http://localhost:8080/fhir/Slot?&state=gt2021-03-01 \
+curl --location --request GET 'http://localhost:8080/fhir/Slot?&start=gt2021-03-01 \
 --header 'Content-Type: application/fhir+json'
 ```
 
