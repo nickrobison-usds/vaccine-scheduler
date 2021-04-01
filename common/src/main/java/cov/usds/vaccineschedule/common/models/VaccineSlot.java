@@ -33,6 +33,9 @@ public class VaccineSlot extends Slot {
 
 
     public UrlType getBookingUrl() {
+        if (bookingUrl == null) {
+            bookingUrl = new UrlType();
+        }
         return bookingUrl;
     }
 
@@ -41,6 +44,9 @@ public class VaccineSlot extends Slot {
     }
 
     public StringType getBookingPhone() {
+        if (bookingPhone == null) {
+            bookingPhone = new StringType();
+        }
         return bookingPhone;
     }
 
@@ -49,6 +55,9 @@ public class VaccineSlot extends Slot {
     }
 
     public IntegerType getCapacity() {
+        if (capacity == null) {
+            capacity = new IntegerType();
+        }
         return capacity;
     }
 

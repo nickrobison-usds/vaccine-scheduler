@@ -2,6 +2,7 @@ package gov.usds.vaccineschedule.api.services;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import cov.usds.vaccineschedule.common.models.VaccineSlot;
 import gov.usds.vaccineschedule.api.db.models.ScheduleEntity;
 import gov.usds.vaccineschedule.api.db.models.SlotEntity;
@@ -21,6 +22,7 @@ import java.util.stream.StreamSupport;
 import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
 import static gov.usds.vaccineschedule.api.repositories.SlotRepository.forLocation;
 import static gov.usds.vaccineschedule.api.repositories.SlotRepository.forLocationAndTime;
+import static gov.usds.vaccineschedule.api.repositories.SlotRepository.withIdentifier;
 
 /**
  * Created by nickrobison on 3/29/21
@@ -36,6 +38,12 @@ public class SlotService {
     public SlotService(ScheduleRepository scheduleRepository, SlotRepository repo) {
         this.scheduleRepository = scheduleRepository;
         this.repo = repo;
+    }
+
+    public Collection<VaccineSlot> findSlots(TokenParam identifier) {
+        return this.repo.findAll(withIdentifier(identifier.getSystem(), identifier.getValue()))
+                .stream().map(SlotEntity::toFHIR)
+                .collect(Collectors.toList());
     }
 
     public Collection<VaccineSlot> getSlots() {

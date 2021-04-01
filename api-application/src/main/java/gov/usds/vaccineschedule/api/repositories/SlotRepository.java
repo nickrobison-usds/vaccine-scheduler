@@ -6,12 +6,15 @@ import gov.usds.vaccineschedule.api.db.models.LocationEntity;
 import gov.usds.vaccineschedule.api.db.models.LocationEntity_;
 import gov.usds.vaccineschedule.api.db.models.ScheduleEntity;
 import gov.usds.vaccineschedule.api.db.models.ScheduleEntity_;
+import gov.usds.vaccineschedule.api.db.models.ScheduleIdentifier_;
 import gov.usds.vaccineschedule.api.db.models.SlotEntity;
 import gov.usds.vaccineschedule.api.db.models.SlotEntity_;
+import gov.usds.vaccineschedule.api.db.models.SlotIdentifier;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.criteria.CollectionJoin;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
@@ -36,6 +39,16 @@ public interface SlotRepository extends CrudRepository<SlotEntity, UUID> {
             final Join<ScheduleEntity, LocationEntity> locationJoin = scheduleJoin.join(ScheduleEntity_.location);
 
             return cb.equal(locationJoin.get(LocationEntity_.internalId), locationId);
+        };
+    }
+
+    static Specification<SlotEntity> withIdentifier(String system, String value) {
+        return (root, cq, cb) -> {
+            final CollectionJoin<SlotEntity, SlotIdentifier> join = root.join(SlotEntity_.identifiers);
+            return cb.and(
+                    cb.equal(join.get(ScheduleIdentifier_.system), system),
+                    cb.equal(join.get(ScheduleIdentifier_.value), value)
+            );
         };
     }
 

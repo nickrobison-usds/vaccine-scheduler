@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import cov.usds.vaccineschedule.common.models.VaccineSlot;
 import gov.usds.vaccineschedule.api.services.SlotService;
 import org.hl7.fhir.r4.model.Schedule;
@@ -28,14 +29,16 @@ public class SlotProvider extends AbstractJaxRsResourceProvider<VaccineSlot> {
     }
 
     @Search
-    public Collection<VaccineSlot> findSlots(@OptionalParam(name = Slot.SP_SCHEDULE + '.' + Schedule.SP_ACTOR) ReferenceParam locationID,
+    public Collection<VaccineSlot> findSlots(@OptionalParam(name = Slot.SP_IDENTIFIER) TokenParam slotIdentifier,
+                                             @OptionalParam(name = Slot.SP_SCHEDULE + '.' + Schedule.SP_ACTOR) ReferenceParam locationID,
                                              @OptionalParam(name = Slot.SP_START) DateRangeParam dateRange) {
         if (locationID != null) {
             return this.service.getSlotsForLocation(locationID, dateRange);
+        } else if (slotIdentifier != null) {
+            return service.findSlots(slotIdentifier);
         } else {
             return service.getSlots();
         }
-
     }
 
     @Override
