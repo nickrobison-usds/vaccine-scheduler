@@ -42,4 +42,14 @@ public class NDJSONToFHIR {
             throw new RuntimeException(e); // Don't throw runtime exceptions here
         }
     }
+
+    public <T extends IBaseResource> List<T> inputStreamToTypedResource(Class<T> clazz, InputStream stream) {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+            return bufferedReader.lines()
+                    .map(r -> parser.parseResource(clazz, r))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException(e); // Don't throw runtime exceptions here
+        }
+    }
 }

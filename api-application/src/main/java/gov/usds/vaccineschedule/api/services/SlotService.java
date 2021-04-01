@@ -2,11 +2,11 @@ package gov.usds.vaccineschedule.api.services;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import cov.usds.vaccineschedule.common.models.VaccineSlot;
 import gov.usds.vaccineschedule.api.db.models.ScheduleEntity;
 import gov.usds.vaccineschedule.api.db.models.SlotEntity;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
 import gov.usds.vaccineschedule.api.repositories.SlotRepository;
-import org.hl7.fhir.r4.model.Slot;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,14 +38,14 @@ public class SlotService {
         this.repo = repo;
     }
 
-    public Collection<Slot> getSlots() {
+    public Collection<VaccineSlot> getSlots() {
         return StreamSupport
                 .stream(this.repo.findAll().spliterator(), false)
                 .map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
     }
 
-    public Collection<Slot> getSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam) {
+    public Collection<VaccineSlot> getSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam) {
         final UUID id = UUID.fromString(idParam.getIdPart());
 
         final Specification<SlotEntity> searchParams;
@@ -62,7 +62,7 @@ public class SlotService {
     }
 
     @Transactional
-    public Collection<Slot> addSlots(Collection<Slot> resources) {
+    public Collection<VaccineSlot> addSlots(Collection<VaccineSlot> resources) {
         return resources
                 .stream().map(this::addSlot)
                 .map(SlotEntity::toFHIR)
@@ -70,7 +70,7 @@ public class SlotService {
     }
 
     @Transactional
-    public SlotEntity addSlot(Slot resource) {
+    public SlotEntity addSlot(VaccineSlot resource) {
         final String scheduleRef = resource.getSchedule().getReference();
 
         final List<ScheduleEntity> schedule = StreamSupport.stream(scheduleRepository.findAll(ScheduleRepository.hasIdentifier(ORIGINAL_ID_SYSTEM, scheduleRef)).spliterator(), false).collect(Collectors.toList());

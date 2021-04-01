@@ -1,5 +1,6 @@
 package gov.usds.vaccineschedule.api.db.models;
 
+import cov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Slot;
@@ -26,7 +27,7 @@ import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTE
  */
 @Entity
 @Table(name = "slots")
-public class SlotEntity extends BaseEntity implements Flammable<Slot> {
+public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
 
     private static final ZoneId UTC = ZoneId.of("GMT");
     private static final DateTimeFormatter FHIR_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSVV");
@@ -91,8 +92,8 @@ public class SlotEntity extends BaseEntity implements Flammable<Slot> {
     }
 
     @Override
-    public Slot toFHIR() {
-        final Slot slot = new Slot();
+    public VaccineSlot toFHIR() {
+        final VaccineSlot slot = new VaccineSlot();
 
         slot.setId(this.getInternalId().toString());
         this.identifiers.stream().map(SlotIdentifier::toFHIR).forEach(slot::addIdentifier);
@@ -102,10 +103,12 @@ public class SlotEntity extends BaseEntity implements Flammable<Slot> {
         slot.setEndElement(new InstantType(this.endTime.toInstant().toString()));
         slot.setStatus(this.getStatus());
 
+        // Set our vaccine specific things
+
         return slot;
     }
 
-    public static SlotEntity fromFHIR(ScheduleEntity schedule, Slot resource) {
+    public static SlotEntity fromFHIR(ScheduleEntity schedule, VaccineSlot resource) {
         final SlotEntity entity = new SlotEntity();
 
         entity.setSchedule(schedule);
@@ -119,6 +122,8 @@ public class SlotEntity extends BaseEntity implements Flammable<Slot> {
         entity.setStartTime(OffsetDateTime.parse(resource.getStartElement().getValueAsString(), FHIR_FORMATTER));
         entity.setEndTime(OffsetDateTime.parse(resource.getEndElement().getValueAsString(), FHIR_FORMATTER));
         entity.setStatus(resource.getStatus());
+
+        // Get vaccine slot values here
 
         entity.setIdentifiers(identifiers);
         return entity;

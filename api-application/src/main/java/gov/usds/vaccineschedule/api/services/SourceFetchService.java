@@ -2,6 +2,7 @@ package gov.usds.vaccineschedule.api.services;
 
 import ca.uhn.fhir.context.FhirContext;
 import cov.usds.vaccineschedule.common.models.PublishResponse;
+import cov.usds.vaccineschedule.common.models.VaccineSlot;
 import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
 import gov.usds.vaccineschedule.api.db.models.LocationEntity;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
@@ -9,7 +10,6 @@ import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Schedule;
-import org.hl7.fhir.r4.model.Slot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -102,8 +102,8 @@ public class SourceFetchService {
             locationRepo.save(entity);
         } else if (resource instanceof Schedule) {
             this.sService.addSchedule((Schedule) resource);
-        } else if (resource instanceof Slot) {
-            this.slService.addSlot((Slot) resource);
+        } else if (resource instanceof VaccineSlot) {
+            this.slService.addSlot((VaccineSlot) resource);
         } else {
             logger.error("Cannot handle resource of type: {}", resource);
         }

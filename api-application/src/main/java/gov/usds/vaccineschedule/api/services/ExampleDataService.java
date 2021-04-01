@@ -1,11 +1,11 @@
 package gov.usds.vaccineschedule.api.services;
 
 import ca.uhn.fhir.context.FhirContext;
+import cov.usds.vaccineschedule.common.models.VaccineSlot;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Schedule;
-import org.hl7.fhir.r4.model.Slot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Created by nickrobison on 3/30/21
@@ -60,15 +59,13 @@ public class ExampleDataService {
     }
 
     private void loadSlots() {
-        loadResources(Slot.class, "example-slots.ndjson", this.slotService::addSlots);
+        loadResources(VaccineSlot.class, "example-slots.ndjson", this.slotService::addSlots);
     }
 
     private <R extends IBaseResource> void loadResources(Class<R> clazz, String fileName, Consumer<Collection<R>> consumer) {
         try (InputStream is = ExampleDataService.class.getClassLoader().getResourceAsStream(fileName)) {
             final List<R> resource = this.converter
-                    .inputStreamToResource(is)
-                    .stream().map(clazz::cast)
-                    .collect(Collectors.toList());
+                    .inputStreamToTypedResource(clazz, is);
             consumer.accept(resource);
 
 
