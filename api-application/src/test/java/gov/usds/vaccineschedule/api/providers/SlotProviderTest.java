@@ -10,6 +10,8 @@ import org.hl7.fhir.r4.model.Slot;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -25,14 +27,24 @@ public class SlotProviderTest extends BaseApplicationTest {
     void testAllSlots() {
         final IGenericClient client = provideFhirClient();
 
-        final Bundle slots = client
+        Bundle slots = client
                 .search()
                 .forResource(Slot.class)
+                .preferResponseType(VaccineSlot.class)
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
 
-        assertEquals(70, slots.getEntry().size(), "Should have all the slots");
+        List<VaccineSlot> vSlots = new ArrayList<>();
+
+        // Loop through all the pages
+        slots.getEntry().forEach(e -> vSlots.add((VaccineSlot) e.getResource()));
+
+        while (slots.getLink(Bundle.LINK_NEXT) != null) {
+            slots = client.loadPage().next(slots).preferResponseType(VaccineSlot.class).execute();
+            slots.getEntry().forEach(e -> vSlots.add((VaccineSlot) e.getResource()));
+        }
+        assertEquals(70, vSlots.size(), "Should have all the slots");
     }
 
     @Test

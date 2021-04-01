@@ -8,6 +8,8 @@ import gov.usds.vaccineschedule.api.db.models.SlotEntity;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
 import gov.usds.vaccineschedule.api.repositories.SlotRepository;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,20 +42,24 @@ public class SlotService {
         this.repo = repo;
     }
 
-    public Collection<VaccineSlot> findSlots(TokenParam identifier) {
-        return this.repo.findAll(withIdentifier(identifier.getSystem(), identifier.getValue()))
+    public List<IBaseResource> findSlots(TokenParam identifier, Pageable page) {
+        return this.repo.findAll(withIdentifier(identifier.getSystem(), identifier.getValue()), page)
                 .stream().map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
     }
 
-    public Collection<VaccineSlot> getSlots() {
+    public List<IBaseResource> getSlots(Pageable page) {
         return StreamSupport
-                .stream(this.repo.findAll().spliterator(), false)
+                .stream(this.repo.findAll(page).spliterator(), false)
                 .map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
     }
 
-    public Collection<VaccineSlot> getSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam) {
+    public long getQueryCount() {
+        return this.repo.count();
+    }
+
+    public List<IBaseResource> getSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam, Pageable page) {
         final UUID id = UUID.fromString(idParam.getIdPart());
 
         final Specification<SlotEntity> searchParams;
@@ -63,7 +69,7 @@ public class SlotService {
             searchParams = forLocationAndTime(id, dateParam);
         }
 
-        return this.repo.findAll(searchParams)
+        return this.repo.findAll(searchParams, page)
                 .stream()
                 .map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
