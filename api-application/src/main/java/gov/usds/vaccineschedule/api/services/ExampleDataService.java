@@ -1,8 +1,8 @@
 package gov.usds.vaccineschedule.api.services;
 
 import ca.uhn.fhir.context.FhirContext;
-import cov.usds.vaccineschedule.common.models.VaccineSlot;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
+import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Schedule;

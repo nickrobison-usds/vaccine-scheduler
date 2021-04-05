@@ -1,7 +1,7 @@
 package gov.usds.vaccineschedule.common.helpers;
 
 import ca.uhn.fhir.parser.IParser;
-import cov.usds.vaccineschedule.common.models.VaccineSlot;
+import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

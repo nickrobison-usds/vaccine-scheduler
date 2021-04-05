@@ -1,4 +1,4 @@
-package cov.usds.vaccineschedule.common.models;
+package gov.usds.vaccineschedule.common.models;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
