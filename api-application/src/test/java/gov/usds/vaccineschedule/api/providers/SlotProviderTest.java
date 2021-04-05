@@ -1,8 +1,8 @@
 package gov.usds.vaccineschedule.api.providers;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import cov.usds.vaccineschedule.common.models.VaccineSlot;
 import gov.usds.vaccineschedule.api.BaseApplicationTest;
+import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Schedule;

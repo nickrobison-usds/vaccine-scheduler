@@ -1,4 +1,4 @@
-package cov.usds.vaccineschedule.common.models;
+package gov.usds.vaccineschedule.common.models;
 
 import java.time.OffsetDateTime;
 import java.util.List;

@@ -1,6 +1,6 @@
 package gov.usds.vaccineschedule.api.db.models;
 
-import cov.usds.vaccineschedule.common.models.VaccineSlot;
+import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Reference;
