@@ -1,4 +1,4 @@
-package gov.usds.vaccineschedule.api.models;
+package gov.usds.vaccineschedule.api.pagination;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;

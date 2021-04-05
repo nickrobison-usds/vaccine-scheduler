@@ -5,6 +5,7 @@ import gov.usds.vaccineschedule.api.BaseApplicationTest;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Schedule;
 import org.hl7.fhir.r4.model.Slot;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class SlotProviderTest extends BaseApplicationTest {
 
     @Test
-    void testAllSlots() {
+    void testAllSlotsWithPagination() {
         final IGenericClient client = provideFhirClient();
 
         Bundle slots = client
@@ -32,6 +33,7 @@ public class SlotProviderTest extends BaseApplicationTest {
                 .forResource(Slot.class)
                 .preferResponseType(VaccineSlot.class)
                 .returnBundle(Bundle.class)
+                .count(10)
                 .encodedJson()
                 .execute();
 
@@ -44,7 +46,10 @@ public class SlotProviderTest extends BaseApplicationTest {
             slots = client.loadPage().next(slots).preferResponseType(VaccineSlot.class).execute();
             slots.getEntry().forEach(e -> vSlots.add((VaccineSlot) e.getResource()));
         }
-        assertEquals(70, vSlots.size(), "Should have all the slots");
+
+        final long uniqueIds = vSlots.stream().map(Resource::getId).distinct().count();
+        assertAll(() -> assertEquals(70, vSlots.size(), "Should have all the slots"),
+                () -> assertEquals(70, uniqueIds, "Should have all unique IDs"));
     }
 
     @Test

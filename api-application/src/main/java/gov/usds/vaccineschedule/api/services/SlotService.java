@@ -8,8 +8,7 @@ import gov.usds.vaccineschedule.api.db.models.SlotEntity;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
 import gov.usds.vaccineschedule.api.repositories.SlotRepository;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,34 +41,37 @@ public class SlotService {
         this.repo = repo;
     }
 
-    public List<IBaseResource> findSlots(TokenParam identifier, Pageable page) {
-        return this.repo.findAll(withIdentifier(identifier.getSystem(), identifier.getValue()), page)
+
+    public long countSlotsWithId(TokenParam identifier) {
+        return this.repo.count(withIdentifier(identifier.getSystem(), identifier.getValue()));
+    }
+
+    public List<VaccineSlot> findSlotsWithId(TokenParam identifier, int offset, int pageSize) {
+        return this.repo.findAll(withIdentifier(identifier.getSystem(), identifier.getValue()), PageRequest.of(offset, pageSize))
                 .stream().map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
     }
 
-    public List<IBaseResource> getSlots(Pageable page) {
+    public List<VaccineSlot> getSlots(int offset, int pageSize) {
         return StreamSupport
-                .stream(this.repo.findAll(page).spliterator(), false)
+                .stream(this.repo.findAll(PageRequest.of(offset, pageSize)).spliterator(), false)
                 .map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
     }
 
-    public long getQueryCount() {
+    public long countSlots() {
         return this.repo.count();
     }
 
-    public List<IBaseResource> getSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam, Pageable page) {
-        final UUID id = UUID.fromString(idParam.getIdPart());
+    public long countSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam) {
+        final Specification<SlotEntity> query = buildLocationSearchQuery(idParam, dateParam);
+        return this.repo.count(query);
+    }
 
-        final Specification<SlotEntity> searchParams;
-        if (dateParam == null) {
-            searchParams = forLocation(id);
-        } else {
-            searchParams = forLocationAndTime(id, dateParam);
-        }
+    public List<VaccineSlot> getSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam, int offset, int pageSize) {
+        final Specification<SlotEntity> searchParams = buildLocationSearchQuery(idParam, dateParam);
 
-        return this.repo.findAll(searchParams, page)
+        return this.repo.findAll(searchParams, PageRequest.of(offset, pageSize))
                 .stream()
                 .map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
@@ -94,5 +96,17 @@ public class SlotService {
 
         final SlotEntity entity = SlotEntity.fromFHIR(schedule.get(0), resource);
         return repo.save(entity);
+    }
+
+    private static Specification<SlotEntity> buildLocationSearchQuery(ReferenceParam idParam, DateRangeParam dateParam) {
+        final UUID id = UUID.fromString(idParam.getIdPart());
+
+        final Specification<SlotEntity> searchParams;
+        if (dateParam == null) {
+            searchParams = forLocation(id);
+        } else {
+            searchParams = forLocationAndTime(id, dateParam);
+        }
+        return searchParams;
     }
 }
