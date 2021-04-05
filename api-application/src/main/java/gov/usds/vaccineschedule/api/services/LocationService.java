@@ -9,6 +9,7 @@ import gov.usds.vaccineschedule.api.services.geocoder.GeocoderService;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Location;
 import org.locationtech.jts.geom.Point;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,7 +71,33 @@ public class LocationService {
         return this.repo.findById(locID).map(LocationEntity::toFHIR);
     }
 
-    public Collection<Location> findLocations(@Nullable TokenParam identifier, @Nullable StringParam city, @Nullable StringParam state) {
+    public long countLocations(@Nullable TokenParam identifier, @Nullable StringParam city, @Nullable StringParam state) {
+        final Optional<Specification<LocationEntity>> optional = buildLocationSpec(identifier, city, state);
+        return optional.map(this.repo::count).orElseGet(this.repo::count);
+    }
+
+    public List<Location> findLocations(@Nullable TokenParam identifier, @Nullable StringParam city, @Nullable StringParam state, Pageable page) {
+        Supplier<Iterable<LocationEntity>> supplier;
+        final Optional<Specification<LocationEntity>> optional = buildLocationSpec(identifier, city, state);
+        supplier = optional.<Supplier<Iterable<LocationEntity>>>map(specification -> () -> this.repo.findAll(specification, page)).orElseGet(() -> () -> this.repo.findAll(page));
+        return StreamSupport.stream(supplier.get().spliterator(), false)
+                .map(LocationEntity::toFHIR)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<Location> findByLocation(NearestQuery point, Pageable pageable) {
+        final double distance = point.getDistance().to(METRE).getValue().doubleValue();
+        return fromIterable(() -> this.repo.locationsWithinDistance(point.getPoint(), distance, pageable), LocationEntity::toFHIR);
+    }
+
+    @Transactional
+    public long countByLocation(NearestQuery point) {
+        final double distance = point.getDistance().to(METRE).getValue().doubleValue();
+        return this.repo.countLocationsWithinDistance(point.getPoint(), distance);
+    }
+
+    private Optional<Specification<LocationEntity>> buildLocationSpec(@Nullable TokenParam identifier, @Nullable StringParam city, @Nullable StringParam state) {
 
         List<Specification<LocationEntity>> specifications = new ArrayList<>();
         if (identifier != null) {
@@ -84,32 +111,13 @@ public class LocationService {
         }
 
         // Combine everything using where/and
-        final Supplier<Iterable<LocationEntity>> supplier;
         if (!specifications.isEmpty()) {
             final Specification<LocationEntity> where = Specification.where(specifications.get(0));
             final Specification<LocationEntity> combined = specifications
                     .subList(1, specifications.size())
                     .stream().reduce(where, Specification::and);
-            supplier = () -> this.repo.findAll(combined);
-        } else {
-            supplier = this.repo::findAll;
+            return Optional.of(combined);
         }
-
-        return StreamSupport.stream(supplier.get().spliterator(), false)
-                .map(LocationEntity::toFHIR)
-                .collect(Collectors.toList());
+        return Optional.empty();
     }
-
-    @Transactional
-    public Collection<Location> findByLocation(NearestQuery point) {
-        final double distance = point.getDistance().to(METRE).getValue().doubleValue();
-        return fromIterable(() -> this.repo.locationsWithinDistance(point.getPoint(), distance), LocationEntity::toFHIR);
-    }
-
-
-    public Collection<Location> getLocations() {
-        return fromIterable(this.repo::findAll, LocationEntity::toFHIR);
-    }
-
-
 }

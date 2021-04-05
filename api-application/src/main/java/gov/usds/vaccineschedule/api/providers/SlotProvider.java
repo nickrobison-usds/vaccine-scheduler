@@ -65,7 +65,7 @@ public class SlotProvider extends AbstractJaxRsResourceProvider<VaccineSlot> {
             slots = service.getSlots(pageOffset, pageSize);
         }
         final OffsetLinkBuilder builder = new OffsetLinkBuilder(baseUrl.get(), requestDetails, "Slot", pageSize, pageOffset, totalCount);
-        return BundleFactory.createBundle(slots, builder, searchTime, totalCount);
+        return BundleFactory.createBundle(baseUrl.get(), slots, builder, searchTime, totalCount);
     }
 
     @Override
