@@ -4,6 +4,11 @@
       "name": "vs.load-example-data",
       "type": "java.lang.String",
       "description": "Load the example data into the database."
+    },
+    {
+      "name": "vs.baseUrl",
+      "type": "java.lang.String",
+      "description": "Base URL for the application"
     }
   ]
 }

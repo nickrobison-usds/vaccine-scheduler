@@ -4,6 +4,7 @@ import gov.usds.vaccineschedule.api.db.models.Flammable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -22,9 +23,9 @@ public class ServiceHelpers {
      * @param converter - {@link Function} which takes an entity {@link C} and returns a FHIR resource {@link R}
      * @param <R>       - {@link R} FHIR resource extending {@link IBaseResource}
      * @param <C>       - {@link C} data entity implementing {@link Flammable} which implies we can go to and from FHIR resources
-     * @return - {@link Collection} of FHIR Resource {@link C}
+     * @return - {@link List} of FHIR Resource {@link C}
      */
-    public static <R extends IBaseResource, C extends Flammable<R>> Collection<R> fromIterable(Supplier<Iterable<C>> supplier, Function<C, R> converter) {
+    public static <R extends IBaseResource, C extends Flammable<R>> List<R> fromIterable(Supplier<Iterable<C>> supplier, Function<C, R> converter) {
         return StreamSupport
                 .stream(supplier.get().spliterator(), false)
                 .map(converter)

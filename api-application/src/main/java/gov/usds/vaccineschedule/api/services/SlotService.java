@@ -8,11 +8,14 @@ import gov.usds.vaccineschedule.api.db.models.SlotEntity;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
 import gov.usds.vaccineschedule.api.repositories.SlotRepository;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
+import org.hl7.fhir.r4.model.Slot;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -40,37 +43,44 @@ public class SlotService {
         this.repo = repo;
     }
 
-    public Collection<VaccineSlot> findSlots(TokenParam identifier) {
-        return this.repo.findAll(withIdentifier(identifier.getSystem(), identifier.getValue()))
+
+    public long countSlotsWithId(TokenParam identifier) {
+        return this.repo.count(withIdentifier(identifier.getSystem(), identifier.getValue()));
+    }
+
+    public List<Slot> findSlotsWithId(TokenParam identifier, Pageable pageable) {
+        return this.repo.findAll(withIdentifier(identifier.getSystem(), identifier.getValue()), pageable)
                 .stream().map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
     }
 
-    public Collection<VaccineSlot> getSlots() {
+    public List<Slot> getSlots(Pageable pageable) {
         return StreamSupport
-                .stream(this.repo.findAll().spliterator(), false)
+                .stream(this.repo.findAll(pageable).spliterator(), false)
                 .map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
     }
 
-    public Collection<VaccineSlot> getSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam) {
-        final UUID id = UUID.fromString(idParam.getIdPart());
+    public long countSlots() {
+        return this.repo.count();
+    }
 
-        final Specification<SlotEntity> searchParams;
-        if (dateParam == null) {
-            searchParams = forLocation(id);
-        } else {
-            searchParams = forLocationAndTime(id, dateParam);
-        }
+    public long countSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam) {
+        final Specification<SlotEntity> query = buildLocationSearchQuery(idParam, dateParam);
+        return this.repo.count(query);
+    }
 
-        return this.repo.findAll(searchParams)
+    public List<Slot> getSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam, Pageable pageable) {
+        final Specification<SlotEntity> searchParams = buildLocationSearchQuery(idParam, dateParam);
+
+        return this.repo.findAll(searchParams, pageable)
                 .stream()
                 .map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public Collection<VaccineSlot> addSlots(Collection<VaccineSlot> resources) {
+    public Collection<Slot> addSlots(Collection<VaccineSlot> resources) {
         return resources
                 .stream().map(this::addSlot)
                 .map(SlotEntity::toFHIR)
@@ -81,12 +91,24 @@ public class SlotService {
     public SlotEntity addSlot(VaccineSlot resource) {
         final String scheduleRef = resource.getSchedule().getReference();
 
-        final List<ScheduleEntity> schedule = StreamSupport.stream(scheduleRepository.findAll(ScheduleRepository.hasIdentifier(ORIGINAL_ID_SYSTEM, scheduleRef)).spliterator(), false).collect(Collectors.toList());
+        final List<ScheduleEntity> schedule = new ArrayList<>(scheduleRepository.findAll(ScheduleRepository.hasIdentifier(ORIGINAL_ID_SYSTEM, scheduleRef)));
         if (schedule.isEmpty()) {
             throw new IllegalStateException("Cannot add to missing schedule");
         }
 
         final SlotEntity entity = SlotEntity.fromFHIR(schedule.get(0), resource);
         return repo.save(entity);
+    }
+
+    private static Specification<SlotEntity> buildLocationSearchQuery(ReferenceParam idParam, DateRangeParam dateParam) {
+        final UUID id = UUID.fromString(idParam.getIdPart());
+
+        final Specification<SlotEntity> searchParams;
+        if (dateParam == null) {
+            searchParams = forLocation(id);
+        } else {
+            searchParams = forLocationAndTime(id, dateParam);
+        }
+        return searchParams;
     }
 }

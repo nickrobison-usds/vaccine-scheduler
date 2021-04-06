@@ -1,49 +1,68 @@
 package gov.usds.vaccineschedule.api.providers;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
+import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Offset;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.usds.vaccineschedule.api.helpers.BaseURLProvider;
 import gov.usds.vaccineschedule.api.models.NearestQuery;
+import gov.usds.vaccineschedule.api.pagination.AbstractPaginatingProvider;
 import gov.usds.vaccineschedule.api.services.LocationService;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Location;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 /**
  * Created by nickrobison on 3/26/21
  */
 @Component
-public class LocationProvider extends AbstractJaxRsResourceProvider<Location> {
+public class LocationProvider extends AbstractPaginatingProvider<Location> {
 
     private final LocationService service;
 
-    public LocationProvider(FhirContext ctx, LocationService service) {
-        super(ctx);
+    public LocationProvider(FhirContext ctx, LocationService service, BaseURLProvider provider) {
+        super(ctx, provider);
         this.service = service;
     }
 
     @Search
-    public Collection<Location> locationSearch(
+    public Bundle locationSearch(
             @OptionalParam(name = Location.SP_NEAR) TokenParam nearestParam,
             @OptionalParam(name = Location.SP_IDENTIFIER) TokenParam identifier,
             @OptionalParam(name = Location.SP_ADDRESS_CITY) StringParam city,
-            @OptionalParam(name = Location.SP_ADDRESS_STATE) StringParam state) {
+            @OptionalParam(name = Location.SP_ADDRESS_STATE) StringParam state,
+            RequestDetails requestDetails,
+            @Offset Integer pageOffset,
+            @Count Integer pageSize) {
         // If we have a nearestParam, do that, rather than anything else
+        final Pageable pageRequest = super.buildPageRequest(pageOffset, pageSize);
+
+        final InstantType searchTime = InstantType.now();
+        final long totalCount;
+        List<Location> locations;
         if (nearestParam != null) {
             final NearestQuery query = NearestQuery.fromToken(nearestParam.getValue());
-            return this.service.findByLocation(query);
+            totalCount = this.service.countByLocation(query);
+            locations = this.service.findByLocation(query, pageRequest);
         } else {
-            return service.findLocations(identifier, city, state);
+            totalCount = this.service.countLocations(identifier, city, state);
+            locations = service.findLocations(identifier, city, state, pageRequest);
         }
+
+        return super.createBundle(requestDetails, locations, searchTime, pageRequest, totalCount);
     }
 
     @Read
