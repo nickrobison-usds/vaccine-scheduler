@@ -10,6 +10,8 @@ hapi:
       default-response-encoding: json
       e-tag-support: enabled
       default-pretty-print: true
+      default-page-size: 50
+      maximum-page-size: 500
     validation:
       enabled: true
       request-only: true

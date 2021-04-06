@@ -7,6 +7,7 @@ import gov.usds.vaccineschedule.api.repositories.LocationRepository;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Schedule;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,29 +38,40 @@ public class ScheduleService {
         this.lRepo = lRepo;
     }
 
-    public Collection<Schedule> getAllSchedules() {
+    public List<Schedule> getAllSchedules(Pageable pageable) {
         return StreamSupport
-                .stream(this.repo.findAll().spliterator(), false)
+                .stream(this.repo.findAll(pageable).spliterator(), false)
                 .map(ScheduleEntity::toFHIR)
                 .collect(Collectors.toList());
+    }
+
+    public long countAllSchedules() {
+        return this.repo.count();
     }
 
     public Optional<Schedule> getSchedule(IIdType id) {
         return this.repo.findById(UUID.fromString(id.getIdPart())).map(ScheduleEntity::toFHIR);
     }
 
-    public Collection<Schedule> getScheduleWithIdentifier(TokenParam param) {
-        return StreamSupport.stream(this.repo.findAll(hasIdentifier(param.getSystem(), param.getValue())).spliterator(), false)
-                .map(ScheduleEntity::toFHIR)
-                .collect(Collectors.toList());
-
-
+    public long countScheduleWithIdentifier(TokenParam param) {
+        return this.repo.count(hasIdentifier(param.getSystem(), param.getValue()));
     }
 
-    public Collection<Schedule> getSchedulesForLocation(String reference) {
+    public List<Schedule> getScheduleWithIdentifier(TokenParam param, Pageable pageable) {
+        return StreamSupport.stream(this.repo.findAll(hasIdentifier(param.getSystem(), param.getValue()), pageable).spliterator(), false)
+                .map(ScheduleEntity::toFHIR)
+                .collect(Collectors.toList());
+    }
+
+    public long countSchedulesForLocation(String reference) {
+        final UUID locationId = UUID.fromString(reference);
+        return this.repo.count(byLocation(locationId));
+    }
+
+    public List<Schedule> getSchedulesForLocation(String reference, Pageable pageable) {
         final UUID locationId = UUID.fromString(reference);
         return StreamSupport
-                .stream(this.repo.findAll(byLocation(locationId)).spliterator(), false)
+                .stream(this.repo.findAll(byLocation(locationId), pageable).spliterator(), false)
                 .map(ScheduleEntity::toFHIR)
                 .collect(Collectors.toList());
     }
