@@ -62,7 +62,7 @@ public class PublisherTests extends BaseApplicationTest {
 
         final HttpEntity<Object> entity = new HttpEntity<>(httpHeaders);
         final ResponseEntity<String> ndjson = template
-                .exchange("/data/" + o.getUrl(), HttpMethod.GET, entity, String.class);
+                .exchange(o.getUrl(), HttpMethod.GET, entity, String.class);
         assertAll(() -> assertEquals(HttpStatus.OK, ndjson.getStatusCode()),
                 () -> assertNotNull(ndjson.getBody()));
         assertNotNull(ndjson, "Should have response");

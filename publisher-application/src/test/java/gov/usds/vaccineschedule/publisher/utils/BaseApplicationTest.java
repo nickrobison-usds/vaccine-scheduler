@@ -7,7 +7,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 /**
  * Created by nickrobison on 4/6/21
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureMockMvc
 public class BaseApplicationTest {
     @LocalServerPort

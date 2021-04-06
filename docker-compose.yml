@@ -36,6 +36,8 @@ services:
       dockerfile: publisher-application/Dockerfile
     image: vs-publisher
     command: bootRun
+    environment:
+      SPRING_PROFILES_ACTIVE: dockerized
     ports:
       - "${VS_PUBLISHER_PORT:-9090}:9090"
   api:
