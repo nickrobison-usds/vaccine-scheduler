@@ -1,4 +1,4 @@
-package cov.usds.vaccineshedule.publisher.models;
+package gov.usds.vaccineschedule.publisher.models;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import org.hl7.fhir.r4.model.Location;

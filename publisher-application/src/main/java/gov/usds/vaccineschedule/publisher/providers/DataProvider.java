@@ -1,10 +1,10 @@
-package cov.usds.vaccineshedule.publisher.providers;
+package gov.usds.vaccineschedule.publisher.providers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import cov.usds.vaccineshedule.publisher.respositories.LocationRepository;
-import cov.usds.vaccineshedule.publisher.respositories.ScheduleRepository;
-import cov.usds.vaccineshedule.publisher.respositories.SlotRepository;
+import gov.usds.vaccineschedule.publisher.respositories.LocationRepository;
+import gov.usds.vaccineschedule.publisher.respositories.ScheduleRepository;
+import gov.usds.vaccineschedule.publisher.respositories.SlotRepository;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +38,7 @@ public class DataProvider {
         repos.put("test-slot", slRepo::getAll);
     }
 
-    @GetMapping(value = "/{id}.ndjson", produces = "application/ndjson")
+    @GetMapping(value = "/{id}.ndjson", produces = "application/fhir+ndjson", consumes = {"application/fhir+ndjson", "application/ndjson"})
     public ResponseEntity<String> getFile(@PathVariable String id) {
 
         if (!repos.containsKey(id)) {

@@ -1,4 +1,4 @@
-package cov.usds.vaccineshedule.publisher.respositories;
+package gov.usds.vaccineschedule.publisher.respositories;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;

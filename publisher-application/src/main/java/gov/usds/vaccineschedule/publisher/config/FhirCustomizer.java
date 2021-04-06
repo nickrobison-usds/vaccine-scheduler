@@ -1,8 +1,7 @@
-package cov.usds.vaccineshedule.publisher.config;
+package gov.usds.vaccineschedule.publisher.config;
 
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.spring.boot.autoconfigure.FhirRestfulServerCustomizer;
-import cov.usds.vaccineshedule.publisher.providers.PublishProvider;
 import org.springframework.context.annotation.Configuration;
 
 /**
