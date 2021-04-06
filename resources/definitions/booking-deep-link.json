@@ -1,0 +1,41 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "booking-deep-link",
+  "url": "http://fhir-registry.smarthealthit.org/StructureDefinition/booking-deep-link",
+  "kind": "complex-type",
+  "context": [
+    {
+      "type": "element",
+      "expression": "Element"
+    }
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUrl": "http://fhir-registry.smarthealthit.org/StructureDefinition/booking-deep-link"
+      },
+      {
+        "id": "Extension.valueUrl",
+        "path": "Extension.valueUrl",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "url"
+          }
+        ]
+      }
+    ]
+  }
+}

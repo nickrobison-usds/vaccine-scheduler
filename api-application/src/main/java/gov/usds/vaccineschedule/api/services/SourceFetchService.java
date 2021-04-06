@@ -1,6 +1,7 @@
 package gov.usds.vaccineschedule.api.services;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.validation.FhirValidator;
 import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
 import gov.usds.vaccineschedule.api.db.models.LocationEntity;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
@@ -40,13 +41,15 @@ public class SourceFetchService {
     private final LocationRepository locationRepo;
     private final ScheduleService sService;
     private final SlotService slService;
+    private final FhirValidator validator;
 
     private Disposable disposable;
 
-    public SourceFetchService(FhirContext context, ScheduleSourceConfig config, LocationRepository locationRepository, ScheduleService sService, SlotService slService) {
+    public SourceFetchService(FhirContext context, ScheduleSourceConfig config, LocationRepository locationRepository, ScheduleService sService, SlotService slService, FhirValidator validator) {
         this.config = config;
         this.converter = new NDJSONToFHIR(context.newJsonParser());
         this.slService = slService;
+        this.validator = validator;
         this.processor = Sinks.many().unicast().onBackpressureBuffer();
         this.locationRepo = locationRepository;
         this.sService = sService;

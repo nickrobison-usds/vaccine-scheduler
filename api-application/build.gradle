@@ -51,8 +51,9 @@ dependencies {
     // FHIR
     implementation "ca.uhn.hapi.fhir:hapi-fhir-spring-boot-starter:${hapiVersion}"
     implementation "ca.uhn.hapi.fhir:hapi-fhir-jaxrsserver-base:${hapiVersion}"
-    implementation "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:${hapiVersion}"
     implementation "ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${hapiVersion}"
+    implementation "ca.uhn.hapi.fhir:hapi-fhir-validation:${hapiVersion}"
+    implementation "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:${hapiVersion}"
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
@@ -75,6 +76,7 @@ test {
 
 processResources {
     from("$rootDir/examples")
+    from("$rootDir/resources")
 }
 
 springBoot {
