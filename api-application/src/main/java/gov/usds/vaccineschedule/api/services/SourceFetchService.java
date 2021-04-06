@@ -104,8 +104,9 @@ public class SourceFetchService {
                 .bodyToMono(PublishResponse.class);
 
         this.disposable = buildResourceFetcher(client, publishResponseMono)
+                .doOnComplete(() -> logger.info("Finished refreshing data for {}", source))
                 .subscribe(resource -> {
-                    logger.info("Received resource: {}", resource);
+                    logger.debug("Received resource: {}", resource);
                     this.processResource(resource);
                 }, (error) -> {
                     throw new RuntimeException(error);
@@ -115,17 +116,22 @@ public class SourceFetchService {
     private Flux<IBaseResource> handleResource(WebClient client, String resourceType, PublishResponse response) {
         return Flux.fromIterable(response.getOutput())
                 .filter(o -> o.getType().equals(resourceType))
+                .doOnNext(o -> logger.debug("Fetching resource of type: {} from: {}", o.getType(), o.getUrl()))
                 .flatMap(output -> client.get().uri(output.getUrl()).accept(MediaType.parseMediaType("application/fhir+ndjson")).retrieve().bodyToMono(DataBuffer.class))
                 .flatMap(body -> Flux.fromIterable(converter.inputStreamToResource(body.asInputStream(true))))
-                .doOnNext(resource -> {
-                    final String profile = profileMap.get(resource.getClass().getSimpleName());
-                    final ValidationOptions options = new ValidationOptions();
-                    options.addProfile(profile);
-                    final ValidationResult result = this.validator.validateWithResult(resource, options);
-                    if (!result.isSuccessful()) {
-                        throw new ValidationFailureException(this.ctx, result.toOperationOutcome());
-                    }
-                });
+                .doOnNext(this::validateResource);
+    }
+
+    private void validateResource(IBaseResource resource) {
+        final String resourceName = resource.getClass().getSimpleName();
+        final String profile = profileMap.get(resourceName);
+        logger.debug("Validating {} resource against profile: {}", resourceName, profile);
+        final ValidationOptions options = new ValidationOptions();
+        options.addProfile(profile);
+        final ValidationResult result = this.validator.validateWithResult(resource, options);
+        if (!result.isSuccessful()) {
+            throw new ValidationFailureException(this.ctx, result.toOperationOutcome());
+        }
     }
 
 
