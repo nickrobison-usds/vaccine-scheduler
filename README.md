@@ -1,6 +1,7 @@
 # Vaccine Scheduler
 
-This is a prototype implementation of the [SMART Scheduling Links](https://github.com/smart-on-fhir/smart-scheduling-links/blob/master/specification.md#deep-links-hosted-by-provider-booking-portal)
+This is a prototype implementation of
+the [SMART Scheduling Links](https://github.com/smart-on-fhir/smart-scheduling-links/blob/master/specification.md#deep-links-hosted-by-provider-booking-portal)
 API.
 
 ## Theory of operation
@@ -9,6 +10,8 @@ This repo contains two services, a `publisher` and an `api`.
 
 The `publisher` implements the `$bulk-publish` FHIR operation and exposes some test locations, schedules and slots as
 FHIR bundles.
+
+> Note: The publisher is mostly provided for testing purposes, it's not yet ready for real usage.
 
 The `api` regularly polls the publisher and loads the data into the repository.
 
