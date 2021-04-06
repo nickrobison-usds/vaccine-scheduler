@@ -18,3 +18,5 @@ hapi:
 logging:
   level:
     ca.uhn.fhir.jaxrs: debug
+publisher:
+  base-url: http://localhost:${server.port}
