@@ -74,7 +74,6 @@ public class SourceFetchService {
         final WebClient client = WebClient.create(source);
         client.get()
                 .uri("/$bulk-publish")
-                .accept(MediaType.parseMediaType("application/fhir+ndjson"))
                 .retrieve()
                 .bodyToMono(PublishResponse.class)
                 .flatMapMany(response -> Flux.fromIterable(response.getOutput())
@@ -84,7 +83,7 @@ public class SourceFetchService {
                         // We can hack this by grouping and sorting, since they happen to be in alphabetical order
                         .sort(Comparator.comparing(GroupedFlux::key))
                         .flatMap(group -> group
-                                .flatMap(url -> client.get().uri("data" + url.getUrl()).retrieve().bodyToMono(DataBuffer.class))
+                                .flatMap(url -> client.get().uri(url.getUrl()).accept(MediaType.parseMediaType("application/fhir+ndjson")).retrieve().bodyToMono(DataBuffer.class))
                                 .flatMap(body -> Flux.fromIterable(converter.inputStreamToResource(body.asInputStream(true))))))
                 .onErrorContinue((error) -> error instanceof WebClientException,
                         (throwable, o) -> { // If we throw an exception
