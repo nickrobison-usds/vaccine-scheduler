@@ -1,6 +1,7 @@
 package gov.usds.vaccineschedule.api.utils;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 
@@ -19,7 +20,7 @@ public class FhirHandlers {
         bundle.getEntry().forEach(e -> resources.add((T) e.getResource()));
 
         while (bundle.getLink(Bundle.LINK_NEXT) != null) {
-            bundle = client.loadPage().next(bundle).execute();
+            bundle = client.loadPage().next(bundle).preferResponseType(VaccineSlot.class).execute();
             bundle.getEntry().forEach(e -> resources.add((T) e.getResource()));
         }
 

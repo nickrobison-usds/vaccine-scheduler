@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import gov.usds.vaccineschedule.api.BaseApplicationTest;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.Map;
 
 import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
 import static gov.usds.vaccineschedule.api.utils.FhirHandlers.unwrapBundle;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -27,10 +29,15 @@ public class LocationProviderTest extends BaseApplicationTest {
         final Bundle results = client.search()
                 .forResource(Location.class)
                 .returnBundle(Bundle.class)
+                .count(5)
                 .encodedJson()
                 .execute();
 
-        assertEquals(10, results.getTotal(), "Should have all the results");
+        final List<Location> locations = unwrapBundle(client, results);
+        final long uniqueIDs = locations.stream().map(Resource::getId).distinct().count();
+
+        assertAll(() -> assertEquals(10, locations.size(), "Should have all the results"),
+                () -> assertEquals(10, uniqueIDs, "Each resource should be unique"));
     }
 
     @Test

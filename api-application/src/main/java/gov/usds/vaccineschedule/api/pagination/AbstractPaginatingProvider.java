@@ -1,4 +1,4 @@
-package gov.usds.vaccineschedule.api.providers;
+package gov.usds.vaccineschedule.api.pagination;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
@@ -53,7 +53,7 @@ public abstract class AbstractPaginatingProvider<T extends IBaseResource> extend
 
     public Bundle createBundle(RequestDetails details, List<T> resources, InstantType searchTime, Pageable page, long totalCount) {
         final String baseUrl = provider.get();
-        final OffsetLinkBuilder builder = new OffsetLinkBuilder(baseUrl, details, super.getClass().getSimpleName(), page.getPageSize(), page.getPageNumber(), totalCount);
+        final OffsetLinkBuilder builder = new OffsetLinkBuilder(baseUrl, details, getResourceType().getSimpleName(), page.getPageSize(), page.getPageNumber(), totalCount);
         return BundleFactory.createBundle(baseUrl, resources, builder, searchTime, totalCount);
     }
 }

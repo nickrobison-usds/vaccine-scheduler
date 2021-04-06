@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.usds.vaccineschedule.api.helpers.BaseURLProvider;
 import gov.usds.vaccineschedule.api.models.NearestQuery;
+import gov.usds.vaccineschedule.api.pagination.AbstractPaginatingProvider;
 import gov.usds.vaccineschedule.api.services.LocationService;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;

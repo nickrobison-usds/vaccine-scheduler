@@ -8,12 +8,14 @@ import gov.usds.vaccineschedule.api.db.models.SlotEntity;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
 import gov.usds.vaccineschedule.api.repositories.SlotRepository;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
-import org.springframework.data.domain.PageRequest;
+import org.hl7.fhir.r4.model.Slot;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -46,15 +48,15 @@ public class SlotService {
         return this.repo.count(withIdentifier(identifier.getSystem(), identifier.getValue()));
     }
 
-    public List<VaccineSlot> findSlotsWithId(TokenParam identifier, int offset, int pageSize) {
-        return this.repo.findAll(withIdentifier(identifier.getSystem(), identifier.getValue()), PageRequest.of(offset, pageSize))
+    public List<Slot> findSlotsWithId(TokenParam identifier, Pageable pageable) {
+        return this.repo.findAll(withIdentifier(identifier.getSystem(), identifier.getValue()), pageable)
                 .stream().map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
     }
 
-    public List<VaccineSlot> getSlots(int offset, int pageSize) {
+    public List<Slot> getSlots(Pageable pageable) {
         return StreamSupport
-                .stream(this.repo.findAll(PageRequest.of(offset, pageSize)).spliterator(), false)
+                .stream(this.repo.findAll(pageable).spliterator(), false)
                 .map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
     }
@@ -68,17 +70,17 @@ public class SlotService {
         return this.repo.count(query);
     }
 
-    public List<VaccineSlot> getSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam, int offset, int pageSize) {
+    public List<Slot> getSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam, Pageable pageable) {
         final Specification<SlotEntity> searchParams = buildLocationSearchQuery(idParam, dateParam);
 
-        return this.repo.findAll(searchParams, PageRequest.of(offset, pageSize))
+        return this.repo.findAll(searchParams, pageable)
                 .stream()
                 .map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public Collection<VaccineSlot> addSlots(Collection<VaccineSlot> resources) {
+    public Collection<Slot> addSlots(Collection<VaccineSlot> resources) {
         return resources
                 .stream().map(this::addSlot)
                 .map(SlotEntity::toFHIR)
@@ -89,7 +91,7 @@ public class SlotService {
     public SlotEntity addSlot(VaccineSlot resource) {
         final String scheduleRef = resource.getSchedule().getReference();
 
-        final List<ScheduleEntity> schedule = StreamSupport.stream(scheduleRepository.findAll(ScheduleRepository.hasIdentifier(ORIGINAL_ID_SYSTEM, scheduleRef)).spliterator(), false).collect(Collectors.toList());
+        final List<ScheduleEntity> schedule = new ArrayList<>(scheduleRepository.findAll(ScheduleRepository.hasIdentifier(ORIGINAL_ID_SYSTEM, scheduleRef)));
         if (schedule.isEmpty()) {
             throw new IllegalStateException("Cannot add to missing schedule");
         }
