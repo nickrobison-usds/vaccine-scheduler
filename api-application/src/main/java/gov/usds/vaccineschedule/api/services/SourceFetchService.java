@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
@@ -73,6 +74,7 @@ public class SourceFetchService {
         final WebClient client = WebClient.create(source);
         client.get()
                 .uri("/$bulk-publish")
+                .accept(MediaType.parseMediaType("application/fhir+ndjson"))
                 .retrieve()
                 .bodyToMono(PublishResponse.class)
                 .flatMapMany(response -> Flux.fromIterable(response.getOutput())

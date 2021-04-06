@@ -1,4 +1,4 @@
-package cov.usds.vaccineshedule.publisher.providers;
+package gov.usds.vaccineschedule.publisher.providers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;

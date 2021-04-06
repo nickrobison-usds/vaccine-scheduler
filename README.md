@@ -11,6 +11,8 @@ This repo contains two services, a `publisher` and an `api`.
 The `publisher` implements the `$bulk-publish` FHIR operation and exposes some test locations, schedules and slots as
 FHIR bundles.
 
+> Note: The publisher is mostly provided for testing purposes, it's not yet ready for real usage.
+
 The `api` regularly polls the publisher and loads the data into the repository.
 
 Users can access the `api` and search for available slots at given locations.

@@ -1,6 +1,6 @@
-package cov.usds.vaccineshedule.publisher.providers;
+package gov.usds.vaccineschedule.publisher.providers;
 
-import cov.usds.vaccineshedule.publisher.models.PublishResponse;
+import gov.usds.vaccineschedule.publisher.models.PublishResponse;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

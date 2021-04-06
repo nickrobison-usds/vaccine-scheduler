@@ -1,8 +1,8 @@
-package cov.usds.vaccineshedule.publisher.respositories;
+package gov.usds.vaccineschedule.publisher.respositories;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
-import org.hl7.fhir.r4.model.Slot;
+import org.hl7.fhir.r4.model.Schedule;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -14,24 +14,23 @@ import java.util.stream.Collectors;
  * Created by nickrobison on 3/26/21
  */
 @Service
-public class MockSlotRepository implements SlotRepository {
+public class MockScheduleRepository implements ScheduleRepository {
 
-    private static final List<Slot> slots = createMockSlots();
-
+    private static final List<Schedule> schedules = createMockSchedules();
 
     @Override
-    public List<Slot> getAll() {
-        return slots;
+    public List<Schedule> getAll() {
+        return schedules;
     }
 
-    private static List<Slot> createMockSlots() {
+    private static List<Schedule> createMockSchedules() {
         final FhirContext fhirContext = FhirContext.forR4();
-        try (InputStream is = MockScheduleRepository.class.getClassLoader().getResourceAsStream("example-slots.ndjson")) {
+        try (InputStream is = MockScheduleRepository.class.getClassLoader().getResourceAsStream("example-schedules.ndjson")) {
 
             final NDJSONToFHIR converter = new NDJSONToFHIR(fhirContext.newJsonParser());
             return converter
                     .inputStreamToResource(is)
-                    .stream().map(r -> (Slot) r)
+                    .stream().map(r -> (Schedule) r)
                     .collect(Collectors.toList());
         } catch (IOException e) {
             throw new RuntimeException("Cannot open file");
