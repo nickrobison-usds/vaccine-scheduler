@@ -7,11 +7,14 @@ import gov.usds.vaccineschedule.api.BaseApplicationTest;
 import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
 import gov.usds.vaccineschedule.common.models.PublishResponse;
+import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Schedule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -28,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -35,6 +39,7 @@ import static gov.usds.vaccineschedule.common.Constants.FHIR_NDJSON;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Created by nickrobison on 3/26/21
@@ -89,7 +94,7 @@ public class FetchServiceTest extends BaseApplicationTest {
         final List<PublishResponse.OutputEntry> output = List.of(
                 new PublishResponse.OutputEntry("Schedule", buildURL("/test-schedule.ndjson")),
                 new PublishResponse.OutputEntry("Location", buildURL("/test-location.ndjson")),
-                new PublishResponse.OutputEntry("Location", buildURL("/test-slot.ndjson")));
+                new PublishResponse.OutputEntry("Slot", buildURL("/test-slot.ndjson")));
 
         final PublishResponse publishResponse = new PublishResponse();
         publishResponse.setTransactionTime(OffsetDateTime.now());
@@ -133,20 +138,29 @@ public class FetchServiceTest extends BaseApplicationTest {
         assertNotNull(resources);
         assertEquals(90, resources.size(), "Should have resources");
 
-        // Slots come first, as the requests are done in reverse order
-        final RecordedRequest third = mockWebServer.takeRequest();
-        assertAll(() -> assertEquals("GET", third.getMethod()),
-                () -> assertEquals("/data/test-slot.ndjson", third.getPath()));
+        // Verify the order is correct
+        final Optional<IBaseResource> nonLocations = resources.subList(0, 10).stream().filter(r -> !r.getClass().equals(Location.class)).findAny();
+        assertTrue(nonLocations.isEmpty(), "Should not have locations");
+        final Optional<IBaseResource> nonSchedules = resources.subList(10, 20).stream().filter(r -> !r.getClass().equals(Schedule.class)).findAny();
+        assertTrue(nonSchedules.isEmpty(), "Should not have schedules");
+        final Optional<IBaseResource> nonSlots = resources.subList(20, 90).stream().filter(r -> !r.getClass().equals(VaccineSlot.class)).findAny();
+        assertTrue(nonSlots.isEmpty(), "Should not have slots");
+
+
+        // First, locations
+        final RecordedRequest firstReq = mockWebServer.takeRequest();
+        assertAll(() -> assertEquals("GET", firstReq.getMethod()),
+                () -> assertEquals("/data/test-location.ndjson", firstReq.getPath()));
 
         // Schedules next
         final RecordedRequest second = mockWebServer.takeRequest();
         assertAll(() -> assertEquals("GET", second.getMethod()),
                 () -> assertEquals("/data/test-schedule.ndjson", second.getPath()));
 
-        // Should have requested locations first (which would be the last request in the queue
-        final RecordedRequest firstReq = mockWebServer.takeRequest();
-        assertAll(() -> assertEquals("GET", firstReq.getMethod()),
-                () -> assertEquals("/data/test-location.ndjson", firstReq.getPath()));
+        // Finally, slots
+        final RecordedRequest third = mockWebServer.takeRequest();
+        assertAll(() -> assertEquals("GET", third.getMethod()),
+                () -> assertEquals("/data/test-slot.ndjson", third.getPath()));
     }
 
     private String buildURL(String resource) {

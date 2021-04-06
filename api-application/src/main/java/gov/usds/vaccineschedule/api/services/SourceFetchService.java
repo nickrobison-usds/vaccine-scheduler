@@ -139,9 +139,10 @@ public class SourceFetchService {
 
     Flux<IBaseResource> buildResourceFetcher(WebClient client, Mono<PublishResponse> provider) {
         return provider
-                .flatMapMany(response -> Flux.fromIterable(resourceOrder)
+                .flatMapMany(response -> Flux.fromArray(resourceOrder.toArray(new String[]{}))
                         // Process the responses in the following order: Location -> Schedule -> Slot
-                        .flatMapSequential(resourceType -> handleResource(client, resourceType, response)))
+                        // It seems to me that we should be able to use a flatMapSequential, but this is the safer, albeit more pessimistic solution.
+                        .concatMap(resourceType -> handleResource(client, resourceType, response)))
                 .onErrorContinue((error) -> error instanceof WebClientException,
                         (throwable, o) -> { // If we throw an exception
                             logger.error("Cannot process resource: {}", o, throwable);
