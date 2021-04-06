@@ -2,6 +2,10 @@ package gov.usds.vaccineschedule.api.services;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationFailureException;
+import ca.uhn.fhir.validation.ValidationOptions;
+import ca.uhn.fhir.validation.ValidationResult;
+import com.google.common.collect.ImmutableList;
 import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
 import gov.usds.vaccineschedule.api.db.models.LocationEntity;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
@@ -21,10 +25,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.GroupedFlux;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
-import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -35,6 +40,10 @@ import java.util.function.Supplier;
 public class SourceFetchService {
     private static final Logger logger = LoggerFactory.getLogger(SourceFetchService.class);
 
+    private static final Map<String, String> profileMap = buildProfileMap();
+    private static final List<String> resourceOrder = ImmutableList.of("Location", "Schedule", "Slot");
+
+    private final FhirContext ctx;
     private final ScheduleSourceConfig config;
     private final NDJSONToFHIR converter;
     private final Sinks.Many<String> processor;
@@ -46,6 +55,7 @@ public class SourceFetchService {
     private Disposable disposable;
 
     public SourceFetchService(FhirContext context, ScheduleSourceConfig config, LocationRepository locationRepository, ScheduleService sService, SlotService slService, FhirValidator validator) {
+        this.ctx = context;
         this.config = config;
         this.converter = new NDJSONToFHIR(context.newJsonParser());
         this.slService = slService;
@@ -66,38 +76,10 @@ public class SourceFetchService {
     }
 
     /**
-     * Submit the sources to the job queue for processing, asynchronously by the workers
+     * Submit the sources to the job queue for processing asynchronously by the workers
      */
     public void refreshSources() {
         this.config.getSources().forEach(source -> this.processor.emitNext(source, Sinks.EmitFailureHandler.FAIL_FAST));
-    }
-
-    private void handleRefresh(String source) {
-        // Each upstream publisher is independent from the others, so we can process them in parallel
-        final WebClient client = WebClient.create(source);
-        client.get()
-                .uri("/$bulk-publish")
-                .retrieve()
-                .bodyToMono(PublishResponse.class)
-                .flatMapMany(response -> Flux.fromIterable(response.getOutput())
-                        .groupBy(PublishResponse.OutputEntry::getType)
-                        // Because the bulk spec doesn't provide any mechanism for hinting at order. we have to process things in this order:
-                        // Location -> Schedule -> Slot, since each depends on the previous resource
-                        // We can hack this by grouping and sorting, since they happen to be in alphabetical order
-                        .sort(Comparator.comparing(GroupedFlux::key))
-                        .flatMap(group -> group
-                                .flatMap(url -> client.get().uri(url.getUrl()).accept(MediaType.parseMediaType("application/fhir+ndjson")).retrieve().bodyToMono(DataBuffer.class))
-                                .flatMap(body -> Flux.fromIterable(converter.inputStreamToResource(body.asInputStream(true))))))
-                .onErrorContinue((error) -> error instanceof WebClientException,
-                        (throwable, o) -> { // If we throw an exception
-                            logger.error("Cannot process resource: {}", o, throwable);
-                        })
-                .subscribe(resource -> {
-                    logger.info("Received resource: {}", resource);
-                    this.processResource(resource);
-                }, (error) -> {
-                    throw new RuntimeException(error);
-                });
     }
 
     private void processResource(IBaseResource resource) {
@@ -111,5 +93,56 @@ public class SourceFetchService {
         } else {
             logger.error("Cannot handle resource of type: {}", resource);
         }
+    }
+
+    private void handleRefresh(String source) {
+        // Each upstream publisher is independent from the others, so we can process them in parallel
+        final WebClient client = WebClient.create(source);
+        final Mono<PublishResponse> publishResponseMono = client.get()
+                .uri("/$bulk-publish")
+                .retrieve()
+                .bodyToMono(PublishResponse.class);
+
+        this.disposable = buildResourceFetcher(client, publishResponseMono)
+                .subscribe(resource -> {
+                    logger.info("Received resource: {}", resource);
+                    this.processResource(resource);
+                }, (error) -> {
+                    throw new RuntimeException(error);
+                });
+    }
+
+    private Flux<IBaseResource> handleResource(WebClient client, String resourceType, PublishResponse response) {
+        return Flux.fromIterable(response.getOutput())
+                .filter(o -> o.getType().equals(resourceType))
+                .flatMap(output -> client.get().uri(output.getUrl()).accept(MediaType.parseMediaType("application/fhir+ndjson")).retrieve().bodyToMono(DataBuffer.class))
+                .flatMap(body -> Flux.fromIterable(converter.inputStreamToResource(body.asInputStream(true))))
+                .doOnNext(resource -> {
+                    final String profile = profileMap.get(resource.getClass().getSimpleName());
+                    final ValidationOptions options = new ValidationOptions();
+                    options.addProfile(profile);
+                    final ValidationResult result = this.validator.validateWithResult(resource, options);
+                    if (!result.isSuccessful()) {
+                        throw new ValidationFailureException(this.ctx, result.toOperationOutcome());
+                    }
+                });
+    }
+
+
+    Flux<IBaseResource> buildResourceFetcher(WebClient client, Mono<PublishResponse> provider) {
+        return provider
+                .flatMapMany(response -> Flux.fromIterable(resourceOrder)
+                        // Process the responses in the following order: Location -> Schedule -> Slot
+                        .flatMapSequential(resourceType -> handleResource(client, resourceType, response)))
+                .onErrorContinue((error) -> error instanceof WebClientException,
+                        (throwable, o) -> { // If we throw an exception
+                            logger.error("Cannot process resource: {}", o, throwable);
+                        });
+    }
+
+    private static Map<String, String> buildProfileMap() {
+        return Map.of("Location", "http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-location",
+                "Schedule", "http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-schedule",
+                "VaccineSlot", "http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-slot");
     }
 }

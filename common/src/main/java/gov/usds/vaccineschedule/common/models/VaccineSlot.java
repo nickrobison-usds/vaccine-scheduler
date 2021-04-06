@@ -26,7 +26,7 @@ public class VaccineSlot extends Slot {
     @Child(name = "bookingPhone")
     private StringType bookingPhone;
 
-    @Extension(url = "http://fhir-registry.smarthealthit.org/StructureDefinition/slot-capacity", isModifier = true, definedLocally = false)
+    @Extension(url = "http://fhir-registry.smarthealthit.org/StructureDefinition/slot-capacity", isModifier = false, definedLocally = false)
     @Description(shortDefinition = "used to enable aggregated discovery at mass vaccination sites")
     @Child(name = "capacity")
     private IntegerType capacity;
