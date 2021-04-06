@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static gov.usds.vaccineschedule.common.Constants.FHIR_NDJSON;
+
 /**
  * Created by nickrobison on 3/25/21
  */
@@ -117,7 +119,7 @@ public class SourceFetchService {
         return Flux.fromIterable(response.getOutput())
                 .filter(o -> o.getType().equals(resourceType))
                 .doOnNext(o -> logger.debug("Fetching resource of type: {} from: {}", o.getType(), o.getUrl()))
-                .flatMap(output -> client.get().uri(output.getUrl()).accept(MediaType.parseMediaType("application/fhir+ndjson")).retrieve().bodyToMono(DataBuffer.class))
+                .flatMap(output -> client.get().uri(output.getUrl()).accept(MediaType.parseMediaType(FHIR_NDJSON)).retrieve().bodyToMono(DataBuffer.class))
                 .flatMap(body -> Flux.fromIterable(converter.inputStreamToResource(body.asInputStream(true))))
                 .doOnNext(this::validateResource);
     }

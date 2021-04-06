@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import static gov.usds.vaccineschedule.common.Constants.FHIR_NDJSON;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -101,7 +102,7 @@ public class FetchServiceTest extends BaseApplicationTest {
         final String locations = IOUtils.toString(lIS, StandardCharsets.UTF_8);
         final MockResponse locResponse = new MockResponse()
                 .setBody(locations)
-                .addHeader("Content-Type", "application/fhir+ndjson");
+                .addHeader("Content-Type", FHIR_NDJSON);
         mockWebServer.enqueue(locResponse);
 
 
@@ -111,7 +112,7 @@ public class FetchServiceTest extends BaseApplicationTest {
         final String schedules = IOUtils.toString(sIS, StandardCharsets.UTF_8);
         final MockResponse schedResponse = new MockResponse()
                 .setBody(schedules)
-                .addHeader("Content-Type", "application/fhir+ndjson");
+                .addHeader("Content-Type", FHIR_NDJSON);
         mockWebServer.enqueue(schedResponse);
 
         // Slots
@@ -120,7 +121,7 @@ public class FetchServiceTest extends BaseApplicationTest {
         final String slots = IOUtils.toString(slotIS, StandardCharsets.UTF_8);
         final MockResponse slotResponse = new MockResponse()
                 .setBody(slots)
-                .addHeader("Content-Type", "application/fhir+ndjson");
+                .addHeader("Content-Type", FHIR_NDJSON);
         mockWebServer.enqueue(slotResponse);
 
         final WebClient client = WebClient.create(baseUrl);

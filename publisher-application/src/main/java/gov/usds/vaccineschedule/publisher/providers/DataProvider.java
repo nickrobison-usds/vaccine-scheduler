@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static gov.usds.vaccineschedule.publisher.config.Constants.FHIR_NDJSON;
+import static gov.usds.vaccineschedule.common.Constants.FHIR_NDJSON;
 
 /**
  * Created by nickrobison on 3/25/21
