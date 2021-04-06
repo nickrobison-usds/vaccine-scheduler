@@ -1,6 +1,7 @@
 # Vaccine Scheduler
 
-This is a prototype implementation of the [SMART Scheduling Links](https://github.com/smart-on-fhir/smart-scheduling-links/blob/master/specification.md#deep-links-hosted-by-provider-booking-portal)
+This is a prototype implementation of
+the [SMART Scheduling Links](https://github.com/smart-on-fhir/smart-scheduling-links/blob/master/specification.md#deep-links-hosted-by-provider-booking-portal)
 API.
 
 ## Theory of operation
@@ -13,17 +14,6 @@ FHIR bundles.
 The `api` regularly polls the publisher and loads the data into the repository.
 
 Users can access the `api` and search for available slots at given locations.
-
-## Refreshing the data:
-
-The API service sets up some cron jobs to regularly poll a list of upstream publishers for their data. The cron jobs
-don't actually fetch the data, instead, they submit jobs to a `RabbitMQ` queue, which is subscribed to by the various
-API services. When a job is received the attached URL is polled (by calling the `$bulk-publish` endpoint) and the listed
-files are downloaded and processed.
-
-Given the hierarchical nature of the data, we can process upstreams in parallel, but we have to process the resource
-groups sequentially.
-(e.g. load all the locations before we load the schedules)
 
 ## Running:
 
@@ -66,7 +56,27 @@ curl --location --request GET 'http://localhost:8080/fhir/Slot?&start=gt2021-03-
 --header 'Content-Type: application/fhir+json'
 ```
 
-If you want to trigger the background refersh, there's an actuator for that:
+### Pagination
+
+By default, the server will return results in batches of 50 but clients can request up to 500 values per page.
+Pagination is supported via the `_offset` and `_count` query parameters, which correspond to the page offset, and the
+number of results per page.
+
+When returning a `Bundle` the server automatically populates the `next` and `previous` link elements, which the client
+can use to request sequential pages.
+
+### Refreshing the data:
+
+The API service sets up some cron jobs to regularly poll a list of upstream publishers for their data. The cron jobs
+don't actually fetch the data, instead, they submit jobs to a `RabbitMQ` queue, which is subscribed to by the various
+API services. When a job is received the attached URL is polled (by calling the `$bulk-publish` endpoint) and the listed
+files are downloaded and processed.
+
+Given the hierarchical nature of the data, we can process upstreams in parallel, but we have to process the resource
+groups sequentially.
+(e.g. load all the locations before we load the schedules)
+
+If you want to trigger the background refresh, there's an actuator for that:
 
 ```bash
 curl http://localhost:8080/actuator/refresh
