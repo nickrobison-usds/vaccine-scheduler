@@ -38,4 +38,19 @@ subprojects {
     }
 }
 
+task stage {
+    dependsOn(['clean', ':api-application:assemble'])
+    assemble.mustRunAfter clean
+    doLast {
+        delete (fileTree(dir: "api-application/build", exclude: "libs"))
+        delete (fileTree(dir: "api-application/build/libs", exclude: "*.jar"))
+
+        delete (fileTree(dir: "publisher-application/build", exclude: "libs"))
+        delete (fileTree(dir: "publisher-application/build/libs", exclude: "*.jar"))
+
+        delete (fileTree(dir: "common/build", exclude: "libs"))
+        delete (fileTree(dir: "common/build/libs", exclude: "*.jar"))
+    }
+}
+
 
