@@ -33,7 +33,7 @@ jobs:
       - name: Build with cov-build
         run: |
           export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
-          cov-build --dir cov-int ./gradlew clean assemble
+          cov-build --dir cov-int ./gradlew clean compileJava compileTestJava
       - name: Submit the result to Coverity Scan
         run: |
           tar czvf vs.tgz cov-int
