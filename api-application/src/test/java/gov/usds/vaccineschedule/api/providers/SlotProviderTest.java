@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.Slot;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
+import java.time.Instant;
 import java.util.List;
 
 import static gov.usds.vaccineschedule.api.utils.FhirHandlers.unwrapBundle;
@@ -26,6 +27,7 @@ public class SlotProviderTest extends BaseApplicationTest {
 
     @Test
     void testAllSlotsWithPagination() {
+        final java.util.Date searchTime = Date.from(Instant.now());
         final IGenericClient client = provideFhirClient();
 
         Bundle slots = client
@@ -37,7 +39,7 @@ public class SlotProviderTest extends BaseApplicationTest {
                 .encodedJson()
                 .execute();
 
-        final List<VaccineSlot> vSlots = unwrapBundle(client, slots);
+        final List<VaccineSlot> vSlots = unwrapBundle(client, slots, searchTime);
 
         final long uniqueIds = vSlots.stream().map(Resource::getId).distinct().count();
         assertAll(() -> assertEquals(70, vSlots.size(), "Should have all the slots"),

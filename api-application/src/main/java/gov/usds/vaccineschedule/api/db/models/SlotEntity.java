@@ -1,8 +1,10 @@
 package gov.usds.vaccineschedule.api.db.models;
 
+import gov.usds.vaccineschedule.common.Constants;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Slot;
 import org.hl7.fhir.r4.model.StringType;
@@ -34,7 +36,6 @@ import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
 
     private static final ZoneId UTC = ZoneId.of("GMT");
-    private static final DateTimeFormatter FHIR_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSVV");
 
     @ManyToOne
     @JoinColumn(name = "schedule_id")
@@ -130,6 +131,13 @@ public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
     public VaccineSlot toFHIR() {
         final VaccineSlot slot = new VaccineSlot();
 
+        if (this.getUpdatedAt() != null) {
+            final Meta meta = new Meta();
+            final String fhirDateString = this.getUpdatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            meta.setLastUpdatedElement(new InstantType(fhirDateString));
+            slot.setMeta(meta);
+        }
+
         slot.setId(this.getInternalId().toString());
         this.identifiers.stream().map(SlotIdentifier::toFHIR).forEach(slot::addIdentifier);
         slot.setSchedule(new Reference("Schedule/" + this.schedule.getInternalId().toString()));
@@ -175,8 +183,8 @@ public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
         final SlotIdentifier origId = new SlotIdentifier(ORIGINAL_ID_SYSTEM, resource.getId());
         origId.setEntity(entity);
         identifiers.add(origId);
-        entity.setStartTime(OffsetDateTime.parse(resource.getStartElement().getValueAsString(), FHIR_FORMATTER));
-        entity.setEndTime(OffsetDateTime.parse(resource.getEndElement().getValueAsString(), FHIR_FORMATTER));
+        entity.setStartTime(OffsetDateTime.parse(resource.getStartElement().getValueAsString(), Constants.INSTANT_FORMATTER));
+        entity.setEndTime(OffsetDateTime.parse(resource.getEndElement().getValueAsString(), Constants.INSTANT_FORMATTER));
         entity.setStatus(resource.getStatus());
 
         // Vaccine slot extensions

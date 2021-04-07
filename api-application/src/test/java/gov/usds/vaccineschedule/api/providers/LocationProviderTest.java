@@ -9,6 +9,8 @@ import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,7 @@ public class LocationProviderTest extends BaseApplicationTest {
 
     @Test
     public void testLocationEverything() {
+        final java.util.Date searchTime = Date.from(Instant.now());
         final IGenericClient client = provideFhirClient();
         final Bundle results = client.search()
                 .forResource(Location.class)
@@ -33,7 +36,7 @@ public class LocationProviderTest extends BaseApplicationTest {
                 .encodedJson()
                 .execute();
 
-        final List<Location> locations = unwrapBundle(client, results);
+        final List<Location> locations = unwrapBundle(client, results, searchTime);
         final long uniqueIDs = locations.stream().map(Resource::getId).distinct().count();
 
         assertAll(() -> assertEquals(10, locations.size(), "Should have all the results"),
@@ -42,6 +45,7 @@ public class LocationProviderTest extends BaseApplicationTest {
 
     @Test
     public void testLocationSearch() {
+        final java.util.Date searchTime = Date.from(Instant.now());
         final IGenericClient client = provideFhirClient();
         Map<String, List<IQueryParameterType>> params = new HashMap<>();
         params.put("near", List.of(new TokenParam().setValue("42.4887|-71.2837|50")));
@@ -53,7 +57,7 @@ public class LocationProviderTest extends BaseApplicationTest {
                 .encodedJson()
                 .execute();
 
-        List<Location> resources = unwrapBundle(client, results);
+        List<Location> resources = unwrapBundle(client, results, searchTime);
 
         assertEquals(7, resources.size(), "Should equal");
     }

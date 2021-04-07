@@ -3,7 +3,9 @@ package gov.usds.vaccineschedule.api.db.models;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Meta;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -16,6 +18,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -111,6 +114,13 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
     @Override
     public Location toFHIR() {
         final Location location = new Location();
+
+        if (this.getUpdatedAt() != null) {
+            final Meta meta = new Meta();
+            final String fhirDateString = this.getUpdatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            meta.setLastUpdatedElement(new InstantType(fhirDateString));
+            location.setMeta(meta);
+        }
 
         location.setId(this.getInternalId().toString());
         location.setName(this.name);
