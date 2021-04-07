@@ -16,11 +16,11 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
+import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 
 /**
  * Created by nickrobison on 3/26/21
@@ -36,10 +36,10 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
     private String locationHash;
 
     @OneToMany(mappedBy = "entity", fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
-    private Collection<LocationIdentifier> identifiers;
+    private Set<LocationIdentifier> identifiers;
 
     @OneToMany(mappedBy = "entity", orphanRemoval = true, cascade = CascadeType.ALL)
-    private Collection<LocationTelecom> telecoms;
+    private Set<LocationTelecom> telecoms;
 
     private Point coordinates;
 
@@ -65,19 +65,19 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
         return locationHash;
     }
 
-    public Collection<LocationIdentifier> getIdentifiers() {
+    public Set<LocationIdentifier> getIdentifiers() {
         return identifiers;
     }
 
-    public void setIdentifiers(Collection<LocationIdentifier> identifiers) {
+    public void setIdentifiers(Set<LocationIdentifier> identifiers) {
         this.identifiers = identifiers;
     }
 
-    public Collection<LocationTelecom> getTelecoms() {
+    public Set<LocationTelecom> getTelecoms() {
         return telecoms;
     }
 
-    public void setTelecoms(Collection<LocationTelecom> telecoms) {
+    public void setTelecoms(Set<LocationTelecom> telecoms) {
         this.telecoms = telecoms;
     }
 
@@ -87,6 +87,25 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
 
     public void setCoordinates(Point coordinates) {
         this.coordinates = coordinates;
+    }
+
+    public void merge(LocationEntity other) {
+        this.coordinates = other.coordinates;
+        this.address = other.address;
+        this.name = other.name;
+        this.locationHash = other.locationHash;
+
+        // Merge telecoms and identifiers
+        this.telecoms.forEach(t -> t.setEntity(null));
+        this.telecoms.clear();
+        this.telecoms.addAll(other.telecoms);
+        this.telecoms.forEach(t -> t.setEntity(this));
+
+        this.identifiers.forEach(i -> i.setEntity(null));
+        this.identifiers.clear();
+        this.identifiers.addAll(other.identifiers);
+        this.identifiers.forEach(i -> i.setEntity(this));
+
     }
 
     @Override
@@ -126,14 +145,14 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
                 hash);
 
         // Identifiers
-        final List<LocationIdentifier> identifiers = resource.getIdentifier().stream()
+        final Set<LocationIdentifier> identifiers = resource.getIdentifier().stream()
                 .map(LocationIdentifier::fromFHIR)
                 .peek(i -> i.setEntity(entity))
-                .collect(Collectors.toList());
-        final List<LocationTelecom> telecoms = resource.getTelecom().stream()
+                .collect(Collectors.toSet());
+        final Set<LocationTelecom> telecoms = resource.getTelecom().stream()
                 .map(LocationTelecom::fromFHIR)
                 .peek(t -> t.setEntity(entity))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
         // We need to move the existing Id to a new identifier field
         final LocationIdentifier originalId = new LocationIdentifier(ORIGINAL_ID_SYSTEM, resource.getId());

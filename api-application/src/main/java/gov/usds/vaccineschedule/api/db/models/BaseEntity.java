@@ -38,6 +38,10 @@ public abstract class BaseEntity {
         return internalId;
     }
 
+    public void setInternalId(UUID internalId) {
+        this.internalId = internalId;
+    }
+
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }

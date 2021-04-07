@@ -18,9 +18,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
 import static gov.usds.vaccineschedule.api.repositories.ScheduleRepository.byLocation;
 import static gov.usds.vaccineschedule.api.repositories.ScheduleRepository.hasIdentifier;
+import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 
 
 /**
@@ -80,12 +80,11 @@ public class ScheduleService {
         return resources
                 .stream()
                 .map(this::addSchedule)
-                .map(ScheduleEntity::toFHIR)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public ScheduleEntity addSchedule(Schedule resource) {
+    public Schedule addSchedule(Schedule resource) {
 
         // Figure out which location we need to search for
         final String reference = resource.getActor().get(0).getReference();
@@ -93,12 +92,15 @@ public class ScheduleService {
         if (locations.isEmpty()) {
             throw new IllegalStateException("Cannot add to missing location");
         }
-        // Otherwise, grab the first one
         final ScheduleEntity entity = ScheduleEntity.fromFHIR(locations.get(0), resource);
-        return repo.save(entity);
 
-
+        final Optional<ScheduleEntity> maybeExists = this.repo.findOne(hasIdentifier(ORIGINAL_ID_SYSTEM, resource.getId()));
+        if (maybeExists.isPresent()) {
+            final ScheduleEntity exists = maybeExists.get();
+            exists.merge(entity);
+            return repo.save(exists).toFHIR();
+        } else {
+            return repo.save(entity).toFHIR();
+        }
     }
-
-
 }

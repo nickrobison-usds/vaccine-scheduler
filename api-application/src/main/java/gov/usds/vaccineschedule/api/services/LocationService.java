@@ -29,6 +29,7 @@ import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inCit
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inPostalCode;
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inState;
 import static gov.usds.vaccineschedule.api.services.ServiceHelpers.fromIterable;
+import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 import static tech.units.indriya.unit.Units.METRE;
 
 /**
@@ -49,22 +50,26 @@ public class LocationService {
     @Transactional
     public Location addLocation(Location location) {
         final LocationEntity entity = LocationEntity.fromFHIR(location);
-        return this.repo.save(entity).toFHIR();
+        final Point point = this.geocoder.geocodeLocation(entity.getAddress()).block();
+        entity.setCoordinates(point);
+        // Determine if the location already exists, by searching
+        final Optional<LocationEntity> maybeExists = this.repo.findOne(hasIdentifier(ORIGINAL_ID_SYSTEM, location.getId()));
+        if (maybeExists.isPresent()) {
+            final LocationEntity exists = maybeExists.get();
+            exists.merge(entity);
+            return this.repo.save(exists).toFHIR();
+        } else {
+            return this.repo.save(entity).toFHIR();
+        }
+
     }
 
     @Transactional
     public Collection<Location> addLocations(Collection<Location> locations) {
-
-        final List<LocationEntity> entities = locations
+        return locations
                 .stream()
-                .map(LocationEntity::fromFHIR)
-                .peek(e -> {
-                    final Point point = this.geocoder.geocodeLocation(e.getAddress()).block();
-                    e.setCoordinates(point);
-                })
+                .map(this::addLocation)
                 .collect(Collectors.toList());
-
-        return fromIterable(() -> this.repo.saveAll(entities), LocationEntity::toFHIR);
     }
 
     public Optional<Location> getLocation(IIdType id) {

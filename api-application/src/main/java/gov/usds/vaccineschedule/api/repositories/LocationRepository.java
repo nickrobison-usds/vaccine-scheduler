@@ -13,7 +13,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.criteria.CollectionJoin;
+import javax.persistence.criteria.SetJoin;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,7 +32,8 @@ public interface LocationRepository extends JpaRepository<LocationEntity, UUID>,
 
     static Specification<LocationEntity> hasIdentifier(String system, String value) {
         return (root, cq, cb) -> {
-            final CollectionJoin<LocationEntity, LocationIdentifier> idJoin = root.join(LocationEntity_.identifiers);
+
+            final SetJoin<LocationEntity, LocationIdentifier> idJoin = root.join(LocationEntity_.identifiers);
 
             return cb.and(
                     cb.equal(idJoin.get(LocationIdentifier_.system), system),

@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
+import java.util.Objects;
 
 /**
  * Created by nickrobison on 3/26/21
@@ -53,5 +54,18 @@ public class AbstractIdentifierEntity<T> extends BaseEntity {
         return new Identifier()
                 .setSystem(this.system)
                 .setValue(this.value);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractIdentifierEntity<?> that = (AbstractIdentifierEntity<?>) o;
+        return system.equals(that.system) && value.equals(that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(system, value);
     }
 }

@@ -5,7 +5,6 @@ import ca.uhn.fhir.validation.FhirValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.usds.vaccineschedule.api.BaseApplicationTest;
 import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
-import gov.usds.vaccineschedule.api.repositories.LocationRepository;
 import gov.usds.vaccineschedule.common.models.PublishResponse;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import okhttp3.mockwebserver.MockResponse;
@@ -55,7 +54,7 @@ public class FetchServiceTest extends BaseApplicationTest {
     private ObjectMapper mapper;
     @Autowired
     private FhirValidator validator;
-    private LocationRepository lRepo;
+    private LocationService lService;
     private ScheduleService scheduleService;
     private SlotService slotService;
     private SourceFetchService service;
@@ -76,16 +75,16 @@ public class FetchServiceTest extends BaseApplicationTest {
     @BeforeEach
     void setupFetchService() {
         baseUrl = String.format("http://localhost:%s", mockWebServer.getPort());
-        lRepo = Mockito.mock(LocationRepository.class);
+        lService = Mockito.mock(LocationService.class);
         scheduleService = Mockito.mock(ScheduleService.class);
         slotService = Mockito.mock(SlotService.class);
         final ScheduleSourceConfig config = new ScheduleSourceConfig(false, List.of(baseUrl), Collections.emptyList(), TimeZone.getDefault());
-        service = new SourceFetchService(ctx, config, lRepo, scheduleService, slotService, validator);
+        service = new SourceFetchService(ctx, config, lService, scheduleService, slotService, validator);
     }
 
     @AfterEach
     void restTheMocks() {
-        Mockito.reset(lRepo, scheduleService, slotService);
+        Mockito.reset(lService, scheduleService, slotService);
     }
 
     @Test
