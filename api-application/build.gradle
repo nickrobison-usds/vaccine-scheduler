@@ -1,6 +1,5 @@
 apply plugin: 'application'
 apply plugin: 'org.springframework.boot'
-apply plugin: 'com.gorylenko.gradle-git-properties'
 
 ext {
     set('springCloudVersion', '2020.0.2')
