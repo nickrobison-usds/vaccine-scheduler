@@ -5,6 +5,3 @@ spring:
       maximum-pool-size: 2
   rabbitmq:
     addresses: ${CLOUDAMQP_URL}
-    cache:
-      connection:
-        size: 2
