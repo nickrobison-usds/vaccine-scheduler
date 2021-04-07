@@ -1,4 +1,4 @@
-package gov.usds.vaccineschedule.publisher.config;
+package gov.usds.vaccineschedule.common;
 
 /**
  * Created by nickrobison on 4/6/21

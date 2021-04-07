@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import static gov.usds.vaccineschedule.publisher.config.Constants.FHIR_NDJSON;
+import static gov.usds.vaccineschedule.common.Constants.FHIR_NDJSON;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
