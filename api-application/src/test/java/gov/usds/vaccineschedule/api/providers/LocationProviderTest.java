@@ -85,7 +85,7 @@ public class LocationProviderTest extends BaseApplicationTest {
     }
 
     @Test
-    void cityStateQuery() {
+    void cityStatePostalQuery() {
         final IGenericClient client = provideFhirClient();
         // Look for all by state
 
@@ -136,5 +136,16 @@ public class LocationProviderTest extends BaseApplicationTest {
                 .execute();
 
         assertEquals(0, wrongCity.getEntry().size(), "Should have a single location");
+
+        // Search for locations by zipcode
+        final Bundle postalCode = client
+                .search()
+                .forResource(Location.class)
+                .where(Location.ADDRESS_POSTALCODE.matchesExactly().value("02740"))
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(1, postalCode.getTotal(), "Should have a single location");
     }
 }

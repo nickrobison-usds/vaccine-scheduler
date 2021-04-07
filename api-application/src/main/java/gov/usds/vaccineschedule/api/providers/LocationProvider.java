@@ -44,6 +44,7 @@ public class LocationProvider extends AbstractPaginatingProvider<Location> {
             @OptionalParam(name = Location.SP_IDENTIFIER) TokenParam identifier,
             @OptionalParam(name = Location.SP_ADDRESS_CITY) StringParam city,
             @OptionalParam(name = Location.SP_ADDRESS_STATE) StringParam state,
+            @OptionalParam(name = Location.SP_ADDRESS_POSTALCODE) StringParam postalCode,
             RequestDetails requestDetails,
             @Offset Integer pageOffset,
             @Count Integer pageSize) {
@@ -58,8 +59,8 @@ public class LocationProvider extends AbstractPaginatingProvider<Location> {
             totalCount = this.service.countByLocation(query);
             locations = this.service.findByLocation(query, pageRequest);
         } else {
-            totalCount = this.service.countLocations(identifier, city, state);
-            locations = service.findLocations(identifier, city, state, pageRequest);
+            totalCount = this.service.countLocations(identifier, city, state, postalCode);
+            locations = service.findLocations(identifier, city, state, postalCode, pageRequest);
         }
 
         return super.createBundle(requestDetails, locations, searchTime, pageRequest, totalCount);

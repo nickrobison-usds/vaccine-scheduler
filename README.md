@@ -44,6 +44,12 @@ curl --location --request GET 'http://localhost:8080/fhir/Location?address-city=
 --header 'Content-Type: application/fhir+json'
 ```
 
+Supported address search parameters are:
+
+- City
+- State
+- Postalcode
+
 or within a certain radius:
 
 ```bash
