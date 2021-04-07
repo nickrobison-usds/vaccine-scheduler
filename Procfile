@@ -1,1 +1,1 @@
-web: java -Dserver.port=$PORT -Dspring.profiles.active="heroku" -XX:+UseContainerSupport -Xmx256m -Xss512k -XX:CICompilerCount=2 -Dfile.encoding=UTF-8 $JAVA_OPTS -jar api-application/build/libs/api-application-0.0.1-SNAPSHOT.jar
+web: java -Dserver.port=$PORT -Dspring.profiles.active="heroku" -XX:+UseContainerSupport -Xmx256m -Xss512k -XX:CICompilerCount=2 -XX:+UseStringDeduplication -Dfile.encoding=UTF-8 $JAVA_OPTS -jar api-application/build/libs/api-application-0.0.1-SNAPSHOT.jar
