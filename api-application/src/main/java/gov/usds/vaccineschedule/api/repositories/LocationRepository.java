@@ -47,4 +47,8 @@ public interface LocationRepository extends JpaRepository<LocationEntity, UUID>,
     static Specification<LocationEntity> inState(String state) {
         return (root, cq, cb) -> cb.equal(root.get(LocationEntity_.address).get(AddressElement_.state), state);
     }
+
+    static Specification<LocationEntity> inPostalCode(String postalCode) {
+        return (root, cq, cb) -> cb.equal(root.get(LocationEntity_.address).get(AddressElement_.postalCode), postalCode);
+    }
 }

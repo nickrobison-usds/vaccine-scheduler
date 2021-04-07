@@ -26,6 +26,7 @@ import java.util.stream.StreamSupport;
 
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.hasIdentifier;
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inCity;
+import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inPostalCode;
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inState;
 import static gov.usds.vaccineschedule.api.services.ServiceHelpers.fromIterable;
 import static tech.units.indriya.unit.Units.METRE;
@@ -71,14 +72,14 @@ public class LocationService {
         return this.repo.findById(locID).map(LocationEntity::toFHIR);
     }
 
-    public long countLocations(@Nullable TokenParam identifier, @Nullable StringParam city, @Nullable StringParam state) {
-        final Optional<Specification<LocationEntity>> optional = buildLocationSpec(identifier, city, state);
+    public long countLocations(@Nullable TokenParam identifier, @Nullable StringParam city, @Nullable StringParam state, @Nullable StringParam postalCode) {
+        final Optional<Specification<LocationEntity>> optional = buildLocationSpec(identifier, city, state, postalCode);
         return optional.map(this.repo::count).orElseGet(this.repo::count);
     }
 
-    public List<Location> findLocations(@Nullable TokenParam identifier, @Nullable StringParam city, @Nullable StringParam state, Pageable page) {
+    public List<Location> findLocations(@Nullable TokenParam identifier, @Nullable StringParam city, @Nullable StringParam state, @Nullable StringParam postalCode, Pageable page) {
         Supplier<Iterable<LocationEntity>> supplier;
-        final Optional<Specification<LocationEntity>> optional = buildLocationSpec(identifier, city, state);
+        final Optional<Specification<LocationEntity>> optional = buildLocationSpec(identifier, city, state, postalCode);
         supplier = optional.<Supplier<Iterable<LocationEntity>>>map(specification -> () -> this.repo.findAll(specification, page)).orElseGet(() -> () -> this.repo.findAll(page));
         return StreamSupport.stream(supplier.get().spliterator(), false)
                 .map(LocationEntity::toFHIR)
@@ -97,7 +98,7 @@ public class LocationService {
         return this.repo.countLocationsWithinDistance(point.getPoint(), distance);
     }
 
-    private Optional<Specification<LocationEntity>> buildLocationSpec(@Nullable TokenParam identifier, @Nullable StringParam city, @Nullable StringParam state) {
+    private Optional<Specification<LocationEntity>> buildLocationSpec(@Nullable TokenParam identifier, @Nullable StringParam city, @Nullable StringParam state, @Nullable StringParam postalCode) {
 
         List<Specification<LocationEntity>> specifications = new ArrayList<>();
         if (identifier != null) {
@@ -108,6 +109,10 @@ public class LocationService {
         }
         if (state != null) {
             specifications.add(inState(state.getValue()));
+        }
+
+        if (postalCode != null) {
+            specifications.add(inPostalCode(postalCode.getValue()));
         }
 
         // Combine everything using where/and
