@@ -20,6 +20,7 @@ public class LocationIdentifier extends AbstractIdentifierEntity<LocationEntity>
         // Hibernate required
     }
 
+
     public static LocationIdentifier fromFHIR(Identifier resource) {
         return new LocationIdentifier(resource.getSystem(), resource.getValue());
     }

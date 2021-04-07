@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
+import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 
 /**
  * Created by nickrobison on 3/29/21
@@ -148,6 +148,20 @@ public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
         slot.setCapacity(new IntegerType(capacity));
 
         return slot;
+    }
+
+    public void merge(SlotEntity other) {
+        this.bookingPhone = other.bookingPhone;
+        this.bookingUrl = other.bookingUrl;
+        this.capacity = other.capacity;
+        this.status = other.status;
+        this.startTime = other.startTime;
+        this.endTime = other.endTime;
+
+        this.identifiers.forEach(i -> i.setEntity(null));
+        this.identifiers.clear();
+        this.identifiers.addAll(other.identifiers);
+        this.identifiers.forEach(i -> i.setEntity(this));
     }
 
     public static SlotEntity fromFHIR(ScheduleEntity schedule, VaccineSlot resource) {

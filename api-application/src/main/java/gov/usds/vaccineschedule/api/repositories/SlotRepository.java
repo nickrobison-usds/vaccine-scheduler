@@ -10,9 +10,9 @@ import gov.usds.vaccineschedule.api.db.models.ScheduleIdentifier_;
 import gov.usds.vaccineschedule.api.db.models.SlotEntity;
 import gov.usds.vaccineschedule.api.db.models.SlotEntity_;
 import gov.usds.vaccineschedule.api.db.models.SlotIdentifier;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.criteria.CollectionJoin;
@@ -29,11 +29,7 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 
 @Repository
-public interface SlotRepository extends JpaRepository<SlotEntity, UUID> {
-
-    List<SlotEntity> findAll(Specification<SlotEntity> searchSpec, Pageable p);
-
-    List<SlotEntity> findAll(Specification<SlotEntity> searchSpec);
+public interface SlotRepository extends JpaRepository<SlotEntity, UUID>, JpaSpecificationExecutor<SlotEntity> {
 
     long count(Specification<SlotEntity> searchSpec);
 

@@ -7,8 +7,6 @@ import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.collect.ImmutableList;
 import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
-import gov.usds.vaccineschedule.api.db.models.LocationEntity;
-import gov.usds.vaccineschedule.api.repositories.LocationRepository;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
 import gov.usds.vaccineschedule.common.models.PublishResponse;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
@@ -49,21 +47,21 @@ public class SourceFetchService {
     private final ScheduleSourceConfig config;
     private final NDJSONToFHIR converter;
     private final Sinks.Many<String> processor;
-    private final LocationRepository locationRepo;
+    private final LocationService locationService;
     private final ScheduleService sService;
     private final SlotService slService;
     private final FhirValidator validator;
 
     private Disposable disposable;
 
-    public SourceFetchService(FhirContext context, ScheduleSourceConfig config, LocationRepository locationRepository, ScheduleService sService, SlotService slService, FhirValidator validator) {
+    public SourceFetchService(FhirContext context, ScheduleSourceConfig config, LocationService locationService, ScheduleService sService, SlotService slService, FhirValidator validator) {
         this.ctx = context;
         this.config = config;
         this.converter = new NDJSONToFHIR(context.newJsonParser());
         this.slService = slService;
         this.validator = validator;
         this.processor = Sinks.many().unicast().onBackpressureBuffer();
-        this.locationRepo = locationRepository;
+        this.locationService = locationService;
         this.sService = sService;
     }
 
@@ -86,8 +84,7 @@ public class SourceFetchService {
 
     private void processResource(IBaseResource resource) {
         if (resource instanceof Location) {
-            final LocationEntity entity = LocationEntity.fromFHIR((Location) resource);
-            locationRepo.save(entity);
+            this.locationService.addLocation((Location) resource);
         } else if (resource instanceof Schedule) {
             this.sService.addSchedule((Schedule) resource);
         } else if (resource instanceof VaccineSlot) {

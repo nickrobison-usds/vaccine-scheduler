@@ -13,8 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
 import static gov.usds.vaccineschedule.api.utils.FhirHandlers.unwrapBundle;
+import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

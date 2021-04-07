@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
+import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 
 /**
  * Created by nickrobison on 3/26/21
@@ -65,6 +65,13 @@ public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
         schedule.addActor(new Reference("Location/" + this.location.getInternalId().toString()));
 
         return schedule;
+    }
+
+    public void merge(ScheduleEntity other) {
+        this.identifiers.forEach(i -> i.setEntity(null));
+        this.identifiers.clear();
+        this.identifiers.addAll(other.identifiers);
+        this.identifiers.forEach(i -> i.setEntity(this));
     }
 
     public static ScheduleEntity fromFHIR(LocationEntity location, Schedule resource) {

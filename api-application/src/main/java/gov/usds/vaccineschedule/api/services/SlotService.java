@@ -18,14 +18,15 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static gov.usds.vaccineschedule.api.db.models.Constants.ORIGINAL_ID_SYSTEM;
 import static gov.usds.vaccineschedule.api.repositories.SlotRepository.forLocation;
 import static gov.usds.vaccineschedule.api.repositories.SlotRepository.forLocationAndTime;
 import static gov.usds.vaccineschedule.api.repositories.SlotRepository.withIdentifier;
+import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 
 /**
  * Created by nickrobison on 3/29/21
@@ -83,12 +84,11 @@ public class SlotService {
     public Collection<Slot> addSlots(Collection<VaccineSlot> resources) {
         return resources
                 .stream().map(this::addSlot)
-                .map(SlotEntity::toFHIR)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public SlotEntity addSlot(VaccineSlot resource) {
+    public Slot addSlot(VaccineSlot resource) {
         final String scheduleRef = resource.getSchedule().getReference();
 
         final List<ScheduleEntity> schedule = new ArrayList<>(scheduleRepository.findAll(ScheduleRepository.hasIdentifier(ORIGINAL_ID_SYSTEM, scheduleRef)));
@@ -97,7 +97,16 @@ public class SlotService {
         }
 
         final SlotEntity entity = SlotEntity.fromFHIR(schedule.get(0), resource);
-        return repo.save(entity);
+
+        final Optional<SlotEntity> maybeExists = this.repo.findOne(withIdentifier(ORIGINAL_ID_SYSTEM, resource.getId()));
+        if (maybeExists.isPresent()) {
+            // Merge
+            final SlotEntity existing = maybeExists.get();
+            existing.merge(entity);
+            return repo.save(existing).toFHIR();
+        } else {
+            return repo.save(entity).toFHIR();
+        }
     }
 
     private static Specification<SlotEntity> buildLocationSearchQuery(ReferenceParam idParam, DateRangeParam dateParam) {
