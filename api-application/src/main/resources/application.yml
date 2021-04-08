@@ -29,7 +29,7 @@ vs:
     db-thread-pool-size: 5
 management.endpoints.web:
   exposure:
-    include: health, info, refresh
+    include: health, info, refresh, metrics, scheduledtasks
 spring:
   datasource:
     username: vaccine_schedule
@@ -60,3 +60,5 @@ spring:
           destination: refresh
         receiveStream-in-0:
           destination: refresh
+bucket4j:
+  enabled: false
