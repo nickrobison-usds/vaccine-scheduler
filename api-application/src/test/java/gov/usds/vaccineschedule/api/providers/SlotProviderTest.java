@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.List;
 
 import static gov.usds.vaccineschedule.api.utils.FhirHandlers.unwrapBundle;
+import static gov.usds.vaccineschedule.common.Constants.LOCATION_PROFILE;
 import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,6 +61,7 @@ public class SlotProviderTest extends BaseApplicationTest {
 
         assertEquals(1, firstLocation.getEntry().size(), "Should only have a single location");
         final Location location = (Location) firstLocation.getEntry().get(0).getResource();
+        assertEquals(LOCATION_PROFILE, location.getMeta().getProfile().get(0).getValueAsString(), "Should have asserted profile");
 
         final Bundle execute = client
                 .search()
