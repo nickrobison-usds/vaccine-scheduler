@@ -1,7 +1,21 @@
-vs.geocoder.mapbox-token: ${MAPBOX_TOKEN}
+vs:
+  geocoder.mapbox-token: ${MAPBOX_TOKEN}
+  schedule-source:
+    schedule-enabled: false
+    upload-schedule: "0 0 11 * * *" # Daily at 11:00 AM Eastern Time
+    upload-timezone: America/New_York
+    sources:
+      - "https://raw.githubusercontent.com/smart-on-fhir/smart-scheduling-links/master/examples/"
+    db-thread-pool-size: 2
 spring:
   datasource:
     hikari:
       maximum-pool-size: 2
   rabbitmq:
     addresses: ${CLOUDAMQP_URL}
+rollbar:
+  access-token: ${ROLLBAR_ACCESS_TOKEN}
+  branch: main
+  enabled: false
+  environment: heroku
+  code-version: 0.0.1

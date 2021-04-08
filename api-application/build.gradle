@@ -55,6 +55,9 @@ dependencies {
     implementation "ca.uhn.hapi.fhir:hapi-fhir-validation:${hapiVersion}"
     implementation "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:${hapiVersion}"
 
+    // Deployment
+    implementation 'com.rollbar:rollbar-spring-boot-webmvc:1.7.6'
+
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'

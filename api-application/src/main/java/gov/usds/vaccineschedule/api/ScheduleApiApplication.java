@@ -2,6 +2,7 @@ package gov.usds.vaccineschedule.api;
 
 import gov.usds.vaccineschedule.api.config.GeocoderConfig;
 import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
+import gov.usds.vaccineschedule.api.properties.RollbarConfigurationProperties;
 import gov.usds.vaccineschedule.api.services.ExampleDataService;
 import gov.usds.vaccineschedule.api.services.ScheduledTaskService;
 import gov.usds.vaccineschedule.api.services.geocoder.DBGeocoderService;
@@ -19,7 +20,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableConfigurationProperties({
         ScheduleSourceConfig.class,
-        GeocoderConfig.class
+        GeocoderConfig.class,
+        RollbarConfigurationProperties.class
 })
 @EnableScheduling
 public class ScheduleApiApplication {

@@ -1,7 +1,12 @@
 package gov.usds.vaccineschedule.api.services;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationFailureException;
+import ca.uhn.fhir.validation.ValidationOptions;
+import ca.uhn.fhir.validation.ValidationResult;
 import gov.usds.vaccineschedule.api.db.models.LocationEntity;
 import gov.usds.vaccineschedule.api.models.NearestQuery;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
@@ -41,14 +46,19 @@ public class LocationService {
 
     private final LocationRepository repo;
     private final GeocoderService geocoder;
+    private final FhirValidator validator;
+    private final FhirContext ctx;
 
-    public LocationService(LocationRepository repo, GeocoderService geocoder) {
+    public LocationService(LocationRepository repo, GeocoderService geocoder, FhirValidator validator, FhirContext ctx) {
         this.repo = repo;
         this.geocoder = geocoder;
+        this.validator = validator;
+        this.ctx = ctx;
     }
 
     @Transactional
     public Location addLocation(Location location) {
+        this.validateLocation(location);
         final LocationEntity entity = LocationEntity.fromFHIR(location);
         final Point point = this.geocoder.geocodeLocation(entity.getAddress()).block();
         entity.setCoordinates(point);
@@ -129,5 +139,15 @@ public class LocationService {
             return Optional.of(combined);
         }
         return Optional.empty();
+    }
+
+    private void validateLocation(Location location) {
+        final ValidationOptions options = new ValidationOptions();
+        options.addProfile("http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-location");
+
+        final ValidationResult result = this.validator.validateWithResult(location, options);
+        if (!result.isSuccessful()) {
+            throw new ValidationFailureException(this.ctx, result.toOperationOutcome());
+        }
     }
 }

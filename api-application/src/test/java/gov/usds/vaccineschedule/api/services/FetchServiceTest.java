@@ -1,8 +1,6 @@
 package gov.usds.vaccineschedule.api.services;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.validation.FhirValidator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.usds.vaccineschedule.api.BaseApplicationTest;
 import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
 import gov.usds.vaccineschedule.common.models.PublishResponse;
@@ -50,10 +48,6 @@ public class FetchServiceTest extends BaseApplicationTest {
 
     @Autowired
     private FhirContext ctx;
-    @Autowired
-    private ObjectMapper mapper;
-    @Autowired
-    private FhirValidator validator;
     private LocationService lService;
     private ScheduleService scheduleService;
     private SlotService slotService;
@@ -78,8 +72,8 @@ public class FetchServiceTest extends BaseApplicationTest {
         lService = Mockito.mock(LocationService.class);
         scheduleService = Mockito.mock(ScheduleService.class);
         slotService = Mockito.mock(SlotService.class);
-        final ScheduleSourceConfig config = new ScheduleSourceConfig(false, List.of(baseUrl), Collections.emptyList(), TimeZone.getDefault());
-        service = new SourceFetchService(ctx, config, lService, scheduleService, slotService, validator);
+        final ScheduleSourceConfig config = new ScheduleSourceConfig(false, List.of(baseUrl), Collections.emptyList(), TimeZone.getDefault(), 2);
+        service = new SourceFetchService(ctx, config, lService, scheduleService, slotService);
     }
 
     @AfterEach
