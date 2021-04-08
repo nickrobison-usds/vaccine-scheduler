@@ -1,8 +1,13 @@
 package gov.usds.vaccineschedule.api.services;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationFailureException;
+import ca.uhn.fhir.validation.ValidationOptions;
+import ca.uhn.fhir.validation.ValidationResult;
 import gov.usds.vaccineschedule.api.db.models.ScheduleEntity;
 import gov.usds.vaccineschedule.api.db.models.SlotEntity;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
@@ -37,11 +42,15 @@ public class SlotService {
 
     private final ScheduleRepository scheduleRepository;
     private final SlotRepository repo;
+    private final FhirContext ctx;
+    private final FhirValidator validator;
 
 
-    public SlotService(ScheduleRepository scheduleRepository, SlotRepository repo) {
+    public SlotService(ScheduleRepository scheduleRepository, SlotRepository repo, FhirContext ctx, FhirValidator validator) {
         this.scheduleRepository = scheduleRepository;
         this.repo = repo;
+        this.ctx = ctx;
+        this.validator = validator;
     }
 
 
@@ -89,6 +98,7 @@ public class SlotService {
 
     @Transactional
     public Slot addSlot(VaccineSlot resource) {
+        this.validateSlot(resource);
         final String scheduleRef = resource.getSchedule().getReference();
 
         final List<ScheduleEntity> schedule = new ArrayList<>(scheduleRepository.findAll(ScheduleRepository.hasIdentifier(ORIGINAL_ID_SYSTEM, scheduleRef)));
@@ -119,5 +129,15 @@ public class SlotService {
             searchParams = forLocationAndTime(id, dateParam);
         }
         return searchParams;
+    }
+
+    private void validateSlot(VaccineSlot slot) {
+        final ValidationOptions options = new ValidationOptions();
+        options.addProfile("http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-slot");
+
+        final ValidationResult result = this.validator.validateWithResult(slot, options);
+        if (!result.isSuccessful()) {
+            throw new ValidationFailureException(this.ctx, result.toOperationOutcome());
+        }
     }
 }

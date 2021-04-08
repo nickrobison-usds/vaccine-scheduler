@@ -1,6 +1,11 @@
 package gov.usds.vaccineschedule.api.services;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationFailureException;
+import ca.uhn.fhir.validation.ValidationOptions;
+import ca.uhn.fhir.validation.ValidationResult;
 import gov.usds.vaccineschedule.api.db.models.LocationEntity;
 import gov.usds.vaccineschedule.api.db.models.ScheduleEntity;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
@@ -32,10 +37,14 @@ public class ScheduleService {
 
     private final ScheduleRepository repo;
     private final LocationRepository lRepo;
+    private final FhirContext ctx;
+    private final FhirValidator validator;
 
-    public ScheduleService(ScheduleRepository repo, LocationRepository lRepo) {
+    public ScheduleService(ScheduleRepository repo, LocationRepository lRepo, FhirContext ctx, FhirValidator validator) {
         this.repo = repo;
         this.lRepo = lRepo;
+        this.ctx = ctx;
+        this.validator = validator;
     }
 
     public List<Schedule> getAllSchedules(Pageable pageable) {
@@ -85,7 +94,7 @@ public class ScheduleService {
 
     @Transactional
     public Schedule addSchedule(Schedule resource) {
-
+        this.validateSchedule(resource);
         // Figure out which location we need to search for
         final String reference = resource.getActor().get(0).getReference();
         final List<LocationEntity> locations = lRepo.findAll(LocationRepository.hasIdentifier(ORIGINAL_ID_SYSTEM, reference));
@@ -101,6 +110,16 @@ public class ScheduleService {
             return repo.save(exists).toFHIR();
         } else {
             return repo.save(entity).toFHIR();
+        }
+    }
+
+    private void validateSchedule(Schedule schedule) {
+        final ValidationOptions options = new ValidationOptions();
+        options.addProfile("http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-schedule");
+
+        final ValidationResult result = this.validator.validateWithResult(schedule, options);
+        if (!result.isSuccessful()) {
+            throw new ValidationFailureException(this.ctx, result.toOperationOutcome());
         }
     }
 }
