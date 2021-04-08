@@ -2,3 +2,18 @@ spring.datasource.url: jdbc:postgresql://db:${VS_DB_PORT:5432}/vs
 spring:
   rabbitmq:
     host: rabbitmq
+  cache:
+    type: redis
+  jpa:
+    properties:
+      javax.persistence.sharedCache.mode: ENABLE_SELECTIVE
+      hibernate:
+        generate_statistics: true
+        cache:
+          use_query_cache: true
+          use_second_level_cache: true
+          region:
+            factory_class: org.redisson.hibernate.RedissonRegionFactory
+          redisson:
+            fallback: true
+            config: redisson/redisson-dockerized.yml

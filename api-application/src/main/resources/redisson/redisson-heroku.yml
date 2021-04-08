@@ -1,0 +1,5 @@
+singleServerConfig:
+  address: ${REDIS_URL}
+  subscriptionConnectionPoolSize: 3
+  connectionMinimumIdleSize: 1
+  connectionPoolSize: 3

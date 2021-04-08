@@ -14,6 +14,21 @@ spring:
       maximum-pool-size: 2
   rabbitmq:
     addresses: ${CLOUDAMQP_URL}
+  cache:
+    type: redis
+  jpa:
+    properties:
+      javax.persistence.sharedCache.mode: ENABLE_SELECTIVE
+      hibernate:
+        generate_statistics: true
+        cache:
+          use_query_cache: true
+          use_second_level_cache: true
+          region:
+            factory_class: org.redisson.hibernate.RedissonRegionFactory
+          redisson:
+            fallback: true
+            config: redisson/redisson-heroku.yml
 rollbar:
   access-token: ${ROLLBAR_ACCESS_TOKEN}
   branch: main
