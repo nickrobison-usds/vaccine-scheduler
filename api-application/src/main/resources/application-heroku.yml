@@ -14,26 +14,9 @@ spring:
       maximum-pool-size: 2
   rabbitmq:
     addresses: ${CLOUDAMQP_URL}
-  cache:
-    cache-names:
-      - buckets
-    caffeine:
-      spec: maximumSize=1000,expireAfterAccess=3600s
 rollbar:
   access-token: ${ROLLBAR_ACCESS_TOKEN}
   branch: main
   enabled: false
   environment: heroku
   code-version: 0.0.1
-bucket4j:
-  enabled: false
-  filters:
-    - cache-name: buckets
-      url: .*
-      rate-limits:
-        - bandwidths:
-            - capacity: 5
-              time: 1
-              unit: minutes
-              fixed-refill-interval: 1
-              fixed-refill-interval-unit: minutes

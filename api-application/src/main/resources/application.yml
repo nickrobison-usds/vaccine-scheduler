@@ -62,5 +62,3 @@ spring:
           destination: refresh
         receiveStream-in-0:
           destination: refresh
-bucket4j:
-  enabled: false
