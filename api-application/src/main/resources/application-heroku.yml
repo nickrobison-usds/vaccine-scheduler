@@ -1,4 +1,11 @@
-vs.geocoder.mapbox-token: ${MAPBOX_TOKEN}
+vs:
+  geocoder.mapbox-token: ${MAPBOX_TOKEN}
+  schedule-source:
+    schedule-enabled: false
+    upload-schedule: "0 0 11 * * *" # Daily at 11:00 AM Eastern Time
+    upload-timezone: America/New_York
+    sources:
+      - "https://raw.githubusercontent.com/smart-on-fhir/smart-scheduling-links/master/examples/"
 spring:
   datasource:
     hikari:
