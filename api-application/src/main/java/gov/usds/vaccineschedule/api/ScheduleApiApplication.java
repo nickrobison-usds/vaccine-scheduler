@@ -15,7 +15,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -24,7 +23,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         VaccineScheduleProperties.class,
         RollbarConfigProperties.class
 })
-@EnableCaching
 @EnableScheduling
 public class ScheduleApiApplication {
 

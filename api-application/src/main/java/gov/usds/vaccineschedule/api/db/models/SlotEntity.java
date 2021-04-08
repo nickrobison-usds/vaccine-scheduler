@@ -2,6 +2,8 @@ package gov.usds.vaccineschedule.api.db.models;
 
 import gov.usds.vaccineschedule.common.Constants;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Meta;
@@ -10,6 +12,7 @@ import org.hl7.fhir.r4.model.Slot;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UrlType;
 
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,6 +36,8 @@ import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
  */
 @Entity
 @Table(name = "slots")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
 
     private static final ZoneId UTC = ZoneId.of("GMT");
@@ -42,6 +47,7 @@ public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
     private ScheduleEntity schedule;
 
     @OneToMany(mappedBy = "entity", orphanRemoval = true, cascade = CascadeType.ALL)
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Collection<SlotIdentifier> identifiers;
 
     @Column(nullable = false)

@@ -59,5 +59,4 @@ public class TestLocationService extends BaseApplicationTest {
         this.service.addLocations(locations);
         assertEquals(origCount, this.service.countLocations(null, null, null, null), "Count should not change");
     }
-
 }
