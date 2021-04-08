@@ -2,7 +2,7 @@ package gov.usds.vaccineschedule.api.services;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.usds.vaccineschedule.api.BaseApplicationTest;
-import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
+import gov.usds.vaccineschedule.api.properties.ScheduleSourceConfigProperties;
 import gov.usds.vaccineschedule.common.models.PublishResponse;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import okhttp3.mockwebserver.MockResponse;
@@ -72,7 +72,7 @@ public class FetchServiceTest extends BaseApplicationTest {
         lService = Mockito.mock(LocationService.class);
         scheduleService = Mockito.mock(ScheduleService.class);
         slotService = Mockito.mock(SlotService.class);
-        final ScheduleSourceConfig config = new ScheduleSourceConfig(false, List.of(baseUrl), Collections.emptyList(), TimeZone.getDefault(), 2);
+        final ScheduleSourceConfigProperties config = new ScheduleSourceConfigProperties(false, List.of(baseUrl), Collections.emptyList(), TimeZone.getDefault(), 2);
         service = new SourceFetchService(ctx, config, lService, scheduleService, slotService);
     }
 

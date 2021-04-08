@@ -1,8 +1,9 @@
 package gov.usds.vaccineschedule.api;
 
-import gov.usds.vaccineschedule.api.config.GeocoderConfig;
-import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
-import gov.usds.vaccineschedule.api.properties.RollbarConfigurationProperties;
+import gov.usds.vaccineschedule.api.properties.GeocoderConfigProperties;
+import gov.usds.vaccineschedule.api.properties.RollbarConfigProperties;
+import gov.usds.vaccineschedule.api.properties.ScheduleSourceConfigProperties;
+import gov.usds.vaccineschedule.api.properties.VaccineScheduleProperties;
 import gov.usds.vaccineschedule.api.services.ExampleDataService;
 import gov.usds.vaccineschedule.api.services.ScheduledTaskService;
 import gov.usds.vaccineschedule.api.services.geocoder.DBGeocoderService;
@@ -20,9 +21,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableConfigurationProperties({
-        ScheduleSourceConfig.class,
-        GeocoderConfig.class,
-        RollbarConfigurationProperties.class
+        VaccineScheduleProperties.class,
+        RollbarConfigProperties.class
 })
 @EnableCaching
 @EnableScheduling
@@ -37,13 +37,13 @@ public class ScheduleApiApplication {
      * Note: If running in a cluster, only a single node should be responsible for managing the chron jobs, otherwise, we'll get duplicate executions
      * The backend queue takes care of parallelizing the work amongst all nodes, but the actual job submission should be sequential
      *
-     * @param config    - {@link ScheduleSourceConfig} for configuring
+     * @param config    - {@link ScheduleSourceConfigProperties} for configuring
      * @param scheduler - {@link ScheduledTaskService} for scheduling
      * @return - {@link CommandLineRunner} for running
      */
     @Bean
     @ConditionalOnProperty("vs.schedule-source.schedule-enabled")
-    public CommandLineRunner scheduleSourceFetch(ScheduleSourceConfig config, ScheduledTaskService scheduler) {
+    public CommandLineRunner scheduleSourceFetch(ScheduleSourceConfigProperties config, ScheduledTaskService scheduler) {
         return args -> scheduler.scheduleFetch(config);
     }
 
@@ -61,7 +61,7 @@ public class ScheduleApiApplication {
 
     @Bean
     @ConditionalOnProperty("vs.geocoder.mapbox-token")
-    public GeocoderService provideMapboxCoder(GeocoderConfig config) {
+    public GeocoderService provideMapboxCoder(GeocoderConfigProperties config) {
         return new MapBoxGeocoderService(config);
     }
 }

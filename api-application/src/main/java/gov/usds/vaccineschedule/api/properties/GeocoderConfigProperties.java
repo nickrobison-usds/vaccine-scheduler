@@ -1,18 +1,16 @@
-package gov.usds.vaccineschedule.api.config;
+package gov.usds.vaccineschedule.api.properties;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
 /**
  * Created by nickrobison on 3/30/21
  */
-@ConfigurationProperties(prefix = "vs.geocoder")
-public class GeocoderConfig {
+public class GeocoderConfigProperties {
 
     private final String mapboxToken;
 
     @ConstructorBinding
-    public GeocoderConfig(String mapboxToken) {
+    public GeocoderConfigProperties(String mapboxToken) {
         this.mapboxToken = mapboxToken;
     }
 

@@ -1,7 +1,7 @@
 package gov.usds.vaccineschedule.api.services.geocoder;
 
-import gov.usds.vaccineschedule.api.config.GeocoderConfig;
 import gov.usds.vaccineschedule.api.db.models.AddressElement;
+import gov.usds.vaccineschedule.api.properties.GeocoderConfigProperties;
 import org.geojson.Feature;
 import org.geojson.FeatureCollection;
 import org.geojson.LngLatAlt;
@@ -20,9 +20,9 @@ import reactor.core.publisher.Mono;
 public class MapBoxGeocoderService implements GeocoderService {
     private static final Logger logger = LoggerFactory.getLogger(MapBoxGeocoderService.class);
 
-    private final GeocoderConfig config;
+    private final GeocoderConfigProperties config;
 
-    public MapBoxGeocoderService(GeocoderConfig config) {
+    public MapBoxGeocoderService(GeocoderConfigProperties config) {
         this.config = config;
     }
 

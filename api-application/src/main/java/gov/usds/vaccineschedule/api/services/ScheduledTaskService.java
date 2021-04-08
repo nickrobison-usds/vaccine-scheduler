@@ -1,6 +1,6 @@
 package gov.usds.vaccineschedule.api.services;
 
-import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
+import gov.usds.vaccineschedule.api.properties.ScheduleSourceConfigProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.TaskScheduler;
@@ -28,7 +28,7 @@ public class ScheduledTaskService {
         this.fetcher = fetchService;
     }
 
-    public Map<String, ScheduledFuture<?>> scheduleFetch(ScheduleSourceConfig config) {
+    public Map<String, ScheduledFuture<?>> scheduleFetch(ScheduleSourceConfigProperties config) {
         Map<String, ScheduledFuture<?>> futures = new HashMap<>();
         // Ideally, we should have refresh schedules per source, but that's not necessary for an MVP.
         TimeZone tz = config.getScheduleTimezone();

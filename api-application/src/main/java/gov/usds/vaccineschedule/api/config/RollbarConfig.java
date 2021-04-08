@@ -3,7 +3,7 @@ package gov.usds.vaccineschedule.api.config;
 import com.rollbar.notifier.Rollbar;
 import com.rollbar.notifier.config.Config;
 import com.rollbar.spring.webmvc.RollbarSpringConfigBuilder;
-import gov.usds.vaccineschedule.api.properties.RollbarConfigurationProperties;
+import gov.usds.vaccineschedule.api.properties.RollbarConfigProperties;
 import gov.usds.vaccineschedule.api.services.RollbarServerProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ public class RollbarConfig {
     private static final Logger logger = LoggerFactory.getLogger(RollbarConfig.class);
 
     @Bean
-    public Rollbar rollbar(RollbarConfigurationProperties properties, RollbarServerProvider provider) {
+    public Rollbar rollbar(RollbarConfigProperties properties, RollbarServerProvider provider) {
         logger.debug("Rollbar properties: {}", properties);
 
         final Config builder = RollbarSpringConfigBuilder
