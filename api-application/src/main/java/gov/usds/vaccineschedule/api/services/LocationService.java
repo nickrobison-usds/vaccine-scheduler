@@ -11,6 +11,7 @@ import gov.usds.vaccineschedule.api.db.models.LocationEntity;
 import gov.usds.vaccineschedule.api.models.NearestQuery;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
 import gov.usds.vaccineschedule.api.services.geocoder.GeocoderService;
+import gov.usds.vaccineschedule.common.Constants;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Location;
 import org.locationtech.jts.geom.Point;
@@ -161,7 +162,7 @@ public class LocationService {
 
     private void validateLocation(Location location) {
         final ValidationOptions options = new ValidationOptions();
-        options.addProfile("http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-location");
+        options.addProfile(Constants.LOCATION_PROFILE);
 
         final ValidationResult result = this.validator.validateWithResult(location, options);
         if (!result.isSuccessful()) {

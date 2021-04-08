@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static gov.usds.vaccineschedule.common.Constants.LOCATION_PROFILE;
 import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 
 /**
@@ -125,13 +126,14 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
     @Override
     public Location toFHIR() {
         final Location location = new Location();
+        final Meta meta = new Meta();
+        meta.addProfile(LOCATION_PROFILE);
 
         if (this.getUpdatedAt() != null) {
-            final Meta meta = new Meta();
             final String fhirDateString = this.getUpdatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
             meta.setLastUpdatedElement(new InstantType(fhirDateString));
-            location.setMeta(meta);
         }
+        location.setMeta(meta);
 
         location.setId(this.getInternalId().toString());
         location.setName(this.name);

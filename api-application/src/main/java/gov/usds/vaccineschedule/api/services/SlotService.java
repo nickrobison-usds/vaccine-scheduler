@@ -12,6 +12,7 @@ import gov.usds.vaccineschedule.api.db.models.ScheduleEntity;
 import gov.usds.vaccineschedule.api.db.models.SlotEntity;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
 import gov.usds.vaccineschedule.api.repositories.SlotRepository;
+import gov.usds.vaccineschedule.common.Constants;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.r4.model.Slot;
 import org.springframework.data.domain.Pageable;
@@ -133,7 +134,7 @@ public class SlotService {
 
     private void validateSlot(VaccineSlot slot) {
         final ValidationOptions options = new ValidationOptions();
-        options.addProfile("http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-slot");
+        options.addProfile(Constants.SLOT_PROFILE);
 
         final ValidationResult result = this.validator.validateWithResult(slot, options);
         if (!result.isSuccessful()) {

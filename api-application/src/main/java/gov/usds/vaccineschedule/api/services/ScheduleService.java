@@ -10,6 +10,7 @@ import gov.usds.vaccineschedule.api.db.models.LocationEntity;
 import gov.usds.vaccineschedule.api.db.models.ScheduleEntity;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
+import gov.usds.vaccineschedule.common.Constants;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Schedule;
 import org.springframework.data.domain.Pageable;
@@ -115,7 +116,7 @@ public class ScheduleService {
 
     private void validateSchedule(Schedule schedule) {
         final ValidationOptions options = new ValidationOptions();
-        options.addProfile("http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-schedule");
+        options.addProfile(Constants.SCHEDULE_PROFILE);
 
         final ValidationResult result = this.validator.validateWithResult(schedule, options);
         if (!result.isSuccessful()) {

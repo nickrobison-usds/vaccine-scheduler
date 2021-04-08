@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
+import static gov.usds.vaccineschedule.common.Constants.SLOT_PROFILE;
 
 /**
  * Created by nickrobison on 3/29/21
@@ -130,13 +131,14 @@ public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
     @Override
     public VaccineSlot toFHIR() {
         final VaccineSlot slot = new VaccineSlot();
+        final Meta meta = new Meta();
+        meta.addProfile(SLOT_PROFILE);
 
         if (this.getUpdatedAt() != null) {
-            final Meta meta = new Meta();
             final String fhirDateString = this.getUpdatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
             meta.setLastUpdatedElement(new InstantType(fhirDateString));
-            slot.setMeta(meta);
         }
+        slot.setMeta(meta);
 
         slot.setId(this.getInternalId().toString());
         this.identifiers.stream().map(SlotIdentifier::toFHIR).forEach(slot::addIdentifier);

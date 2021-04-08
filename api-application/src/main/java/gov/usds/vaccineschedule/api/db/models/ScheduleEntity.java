@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
+import static gov.usds.vaccineschedule.common.Constants.SCHEDULE_PROFILE;
 
 /**
  * Created by nickrobison on 3/26/21
@@ -59,13 +60,14 @@ public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
     @Override
     public Schedule toFHIR() {
         final Schedule schedule = new Schedule();
+        final Meta meta = new Meta();
+        meta.addProfile(SCHEDULE_PROFILE);
 
         if (this.getUpdatedAt() != null) {
-            final Meta meta = new Meta();
             final String fhirDateString = this.getUpdatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
             meta.setLastUpdatedElement(new InstantType(fhirDateString));
-            schedule.setMeta(meta);
         }
+        schedule.setMeta(meta);
 
         schedule.setId(this.getInternalId().toString());
         schedule.addIdentifier(HL7_IDENTIFIER);

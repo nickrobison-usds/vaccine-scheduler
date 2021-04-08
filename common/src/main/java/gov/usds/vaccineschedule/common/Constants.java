@@ -24,6 +24,12 @@ public class Constants {
      */
 //    public static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
     public static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSVV");
+    public static final String LOCATION_PROFILE = "http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-location";
+    public static final String SLOT_PROFILE = "http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-slot";
+    public static final String SCHEDULE_PROFILE = "http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-schedule";
 
     public static String ORIGINAL_ID_SYSTEM = "http://usds.gov/vaccine/source-identifier";
+
+    // Profiles
+
 }
