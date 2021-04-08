@@ -6,6 +6,7 @@ vs:
     upload-timezone: America/New_York
     sources:
       - "https://raw.githubusercontent.com/smart-on-fhir/smart-scheduling-links/master/examples/"
+    db-thread-pool-size: 2
 spring:
   datasource:
     hikari:

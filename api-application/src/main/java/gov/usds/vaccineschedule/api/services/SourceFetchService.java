@@ -25,8 +25,12 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -47,6 +51,7 @@ public class SourceFetchService {
     private final LocationService locationService;
     private final ScheduleService sService;
     private final SlotService slService;
+    private final Scheduler dbScheduler;
 
     private Disposable disposable;
 
@@ -57,6 +62,9 @@ public class SourceFetchService {
         this.processor = Sinks.many().unicast().onBackpressureBuffer();
         this.locationService = locationService;
         this.sService = sService;
+
+        final ExecutorService executor = Executors.newFixedThreadPool(config.getDbThreadPoolSize());
+        this.dbScheduler = Schedulers.fromExecutor(executor);
     }
 
     @Bean
@@ -99,6 +107,7 @@ public class SourceFetchService {
 
         this.disposable = buildResourceFetcher(client, publishResponseMono)
                 .doOnComplete(() -> logger.info("Finished refreshing data for {}", source))
+                .publishOn(this.dbScheduler)
                 .subscribe(resource -> {
                     logger.debug("Received resource: {}", resource);
                     this.processResource(resource);

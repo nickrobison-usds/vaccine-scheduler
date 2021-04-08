@@ -72,7 +72,7 @@ public class FetchServiceTest extends BaseApplicationTest {
         lService = Mockito.mock(LocationService.class);
         scheduleService = Mockito.mock(ScheduleService.class);
         slotService = Mockito.mock(SlotService.class);
-        final ScheduleSourceConfig config = new ScheduleSourceConfig(false, List.of(baseUrl), Collections.emptyList(), TimeZone.getDefault());
+        final ScheduleSourceConfig config = new ScheduleSourceConfig(false, List.of(baseUrl), Collections.emptyList(), TimeZone.getDefault(), 2);
         service = new SourceFetchService(ctx, config, lService, scheduleService, slotService);
     }
 

@@ -28,12 +28,15 @@ public class ScheduleSourceConfig {
      */
     private final TimeZone scheduleTimezone;
 
+    private final Integer dbThreadPoolSize;
+
     @ConstructorBinding
-    public ScheduleSourceConfig(boolean scheduleEnabled, List<String> sources, List<String> refreshSchedule, TimeZone scheduleTimezone) {
+    public ScheduleSourceConfig(boolean scheduleEnabled, List<String> sources, List<String> refreshSchedule, TimeZone scheduleTimezone, Integer dbThreadPoolSize) {
         this.scheduleEnabled = scheduleEnabled;
         this.sources = sources;
         this.refreshSchedule = refreshSchedule;
         this.scheduleTimezone = scheduleTimezone;
+        this.dbThreadPoolSize = dbThreadPoolSize;
     }
 
     public boolean getScheduleEnabled() {
@@ -50,5 +53,9 @@ public class ScheduleSourceConfig {
 
     public TimeZone getScheduleTimezone() {
         return scheduleTimezone;
+    }
+
+    public Integer getDbThreadPoolSize() {
+        return dbThreadPoolSize;
     }
 }
