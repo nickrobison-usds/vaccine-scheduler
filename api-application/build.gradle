@@ -42,6 +42,7 @@ dependencies {
     // Spatial data
     implementation 'de.grundid.opendatalab:geojson-jackson:1.14'
     implementation 'org.hibernate:hibernate-spatial'
+    implementation 'com.uber:h3:3.7.0'
 
     // Unit conversion
     implementation 'tech.units:indriya:2.1.2'

@@ -272,4 +272,24 @@ databaseChangeLog:
                   remarks: Slot capacity (defaults to 1 if not provided)
                   constraints:
                     nullable: false
+  - changeSet:
+      id: add-h3-index
+      author: nicholas.a.robison@omb.eop.gov
+      comment: Add H3 index for improving search performance
+      changes:
+        - addColumn:
+            tableName: locations
+            columns:
+              - column:
+                  name: h3_index
+                  type: bigint
+                  remarks: H3 hexagon index of location
+        - createIndex:
+            indexName: ck__locations__h3_index
+            tableName: locations
+            clustered: true
+            columns:
+              - column:
+                  name: h3_index
+
 

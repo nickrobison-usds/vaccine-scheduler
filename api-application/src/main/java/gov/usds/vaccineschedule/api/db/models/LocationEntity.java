@@ -46,6 +46,9 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
 
     private Point coordinates;
 
+    @Column(name = "h3_index")
+    private long h3Index;
+
     public LocationEntity() {
         // Hibernate required
     }
@@ -90,6 +93,14 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
 
     public void setCoordinates(Point coordinates) {
         this.coordinates = coordinates;
+    }
+
+    public long getH3Index() {
+        return h3Index;
+    }
+
+    public void setH3Index(long h3Index) {
+        this.h3Index = h3Index;
     }
 
     public void merge(LocationEntity other) {

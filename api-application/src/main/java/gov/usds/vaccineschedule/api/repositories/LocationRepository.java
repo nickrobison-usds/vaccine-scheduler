@@ -25,6 +25,7 @@ public interface LocationRepository extends JpaRepository<LocationEntity, UUID>,
     )
     List<LocationEntity> locationsWithinDistance(Point location, double distance, Pageable page);
 
+
     @Query(
             "select count(*) from LocationEntity l where distance(l.coordinates, :location) < :distance"
     )
@@ -51,5 +52,9 @@ public interface LocationRepository extends JpaRepository<LocationEntity, UUID>,
 
     static Specification<LocationEntity> inPostalCode(String postalCode) {
         return (root, cq, cb) -> cb.equal(root.get(LocationEntity_.address).get(AddressElement_.postalCode), postalCode);
+    }
+
+    static Specification<LocationEntity> inH3Indexes(List<Long> h3Indexes) {
+        return (root, cq, cb) -> root.get(LocationEntity_.h3Index).in(h3Indexes);
     }
 }

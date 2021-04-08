@@ -2,7 +2,6 @@ package gov.usds.vaccineschedule.api.services;
 
 import com.uber.h3core.H3Core;
 import com.uber.h3core.LengthUnit;
-import com.uber.h3core.exceptions.PentagonEncounteredException;
 import gov.usds.vaccineschedule.api.models.NearestQuery;
 import gov.usds.vaccineschedule.api.properties.VaccineScheduleProperties;
 import org.locationtech.jts.geom.Point;
@@ -57,18 +56,14 @@ public class H3Service {
      * Return a {@link List} of H3 indexes which are approximately within the given distance of the point
      *
      * @param query - {@link NearestQuery} to use as search point
-     * @return - {@link List} of {@link Long} H3 indexes witin the radius
+     * @return - {@link List} of {@link Long} H3 indexes within the radius
      */
     public List<Long> findNeighbors(NearestQuery query) {
         final long encodedPoint = encodePoint(query.getPoint());
-        // Convert the distance to meters
-        final double searchMeters = query.getDistanceInMeters();
-        final int radius = (int) Math.floor(searchMeters / (core.edgeLength(this.resolution, LengthUnit.m) * 2));
-        try {
-            return this.core.hexRing(encodedPoint, radius);
-        } catch (PentagonEncounteredException e) {
-            throw new RuntimeException(e);
-        }
+        // Convert the distance to meters and add 10% to try and be more inclusive
+        final double searchMeters = query.getDistanceInMeters() * 1.1;
+        final int radius = (int) Math.ceil(searchMeters / (core.edgeLength(this.resolution, LengthUnit.m) * 2));
+        return this.core.kRing(encodedPoint, radius);
     }
 
     /**

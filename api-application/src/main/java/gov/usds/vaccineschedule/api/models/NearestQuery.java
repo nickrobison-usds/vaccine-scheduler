@@ -24,7 +24,7 @@ public class NearestQuery implements Serializable {
 
 
     private static final long serialVersionUID = 42L;
-    private static final Unit<Length> KM = MetricPrefix.KILO(METRE);
+    public static final Unit<Length> KM = MetricPrefix.KILO(METRE);
     private static final String NUMBER_EXN_FORMAT = "Cannot parse: `%s` as coordinate.";
 
     private final Quantity<Length> distance;
@@ -42,6 +42,10 @@ public class NearestQuery implements Serializable {
 
     public Quantity<Length> getDistance() {
         return distance;
+    }
+
+    public double getDistanceInMeters() {
+        return this.distance.to(METRE).getValue().doubleValue();
     }
 
     public static NearestQuery fromToken(String param) {
