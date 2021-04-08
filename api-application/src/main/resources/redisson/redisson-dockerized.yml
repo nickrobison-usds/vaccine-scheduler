@@ -1,0 +1,6 @@
+singleServerConfig:
+  address: redis://redis:6379
+  subscriptionConnectionMinimumIdleSize: 5
+  subscriptionConnectionPoolSize: 12
+  connectionMinimumIdleSize: 5
+  connectionPoolSize: 12

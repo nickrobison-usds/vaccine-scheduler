@@ -1,6 +1,8 @@
 package gov.usds.vaccineschedule.api.db.models;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
@@ -11,6 +13,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -30,6 +33,8 @@ import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
  */
 @Entity
 @Table(name = "locations")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class LocationEntity extends BaseEntity implements Flammable<Location>, Identifiable {
 
     @Column(nullable = false)
@@ -39,9 +44,11 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
     private String locationHash;
 
     @OneToMany(mappedBy = "entity", fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<LocationIdentifier> identifiers;
 
     @OneToMany(mappedBy = "entity", orphanRemoval = true, cascade = CascadeType.ALL)
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Set<LocationTelecom> telecoms;
 
     private Point coordinates;

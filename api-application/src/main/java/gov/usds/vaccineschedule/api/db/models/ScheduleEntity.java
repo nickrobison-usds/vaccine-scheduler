@@ -1,11 +1,14 @@
 package gov.usds.vaccineschedule.api.db.models;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Schedule;
 
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -24,6 +27,8 @@ import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
  */
 @Entity
 @Table(name = "schedules")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
 
     public static Identifier HL7_IDENTIFIER = new Identifier().setSystem("http://terminology.hl7.org/CodeSystem/service-type").setValue("57");
@@ -34,6 +39,7 @@ public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
     private LocationEntity location;
 
     @OneToMany(mappedBy = "entity", orphanRemoval = true, cascade = CascadeType.ALL)
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     private Collection<ScheduleIdentifier> identifiers;
 
     public ScheduleEntity() {

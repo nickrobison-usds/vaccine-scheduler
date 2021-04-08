@@ -15,25 +15,25 @@ spring:
   rabbitmq:
     addresses: ${CLOUDAMQP_URL}
   cache:
-    cache-names:
-      - buckets
-    caffeine:
-      spec: maximumSize=1000,expireAfterAccess=3600s
+    type: redis
+  jpa:
+    properties:
+      javax.persistence.sharedCache.mode: ENABLE_SELECTIVE
+      hibernate:
+        generate_statistics: true
+        cache:
+          use_query_cache: true
+          use_second_level_cache: true
+          region:
+            factory_class: org.redisson.hibernate.RedissonRegionFactory
+          redisson:
+            fallback: true
+            config: redisson/redisson-heroku.yml
+  config:
+    import: classpath:application-redis-heroku.yml
 rollbar:
   access-token: ${ROLLBAR_ACCESS_TOKEN}
   branch: main
   enabled: false
   environment: heroku
   code-version: 0.0.1
-bucket4j:
-  enabled: false
-  filters:
-    - cache-name: buckets
-      url: .*
-      rate-limits:
-        - bandwidths:
-            - capacity: 5
-              time: 1
-              unit: minutes
-              fixed-refill-interval: 1
-              fixed-refill-interval-unit: minutes
