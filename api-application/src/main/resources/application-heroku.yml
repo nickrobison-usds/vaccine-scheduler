@@ -5,3 +5,9 @@ spring:
       maximum-pool-size: 2
   rabbitmq:
     addresses: ${CLOUDAMQP_URL}
+rollbar:
+  access-token: ${ROLLBAR_ACCESS_TOKEN}
+  branch: main
+  enabled: false
+  environment: heroku
+  code-version: 0.0.1
