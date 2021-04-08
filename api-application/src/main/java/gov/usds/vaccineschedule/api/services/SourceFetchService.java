@@ -106,14 +106,13 @@ public class SourceFetchService {
                 .bodyToMono(PublishResponse.class);
 
         this.disposable = buildResourceFetcher(client, publishResponseMono)
-                .doOnComplete(() -> logger.info("Finished refreshing data for {}", source))
                 .publishOn(this.dbScheduler)
                 .subscribe(resource -> {
                     logger.debug("Received resource: {}", resource);
                     this.processResource(resource);
                 }, (error) -> {
                     throw new RuntimeException(error);
-                });
+                }, () -> logger.info("Finished refreshing data for {}", source));
     }
 
     private Flux<IBaseResource> handleResource(WebClient client, String resourceType, PublishResponse response) {
