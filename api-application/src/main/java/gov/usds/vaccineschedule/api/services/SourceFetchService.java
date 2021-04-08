@@ -3,7 +3,7 @@ package gov.usds.vaccineschedule.api.services;
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import gov.usds.vaccineschedule.api.config.ScheduleSourceConfig;
+import gov.usds.vaccineschedule.api.properties.ScheduleSourceConfigProperties;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
 import gov.usds.vaccineschedule.common.models.PublishResponse;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
@@ -45,7 +45,7 @@ public class SourceFetchService {
 
     private static final List<String> resourceOrder = ImmutableList.of("Location", "Schedule", "Slot");
 
-    private final ScheduleSourceConfig config;
+    private final ScheduleSourceConfigProperties config;
     private final NDJSONToFHIR converter;
     private final Sinks.Many<String> processor;
     private final LocationService locationService;
@@ -55,7 +55,7 @@ public class SourceFetchService {
 
     private Disposable disposable;
 
-    public SourceFetchService(FhirContext context, ScheduleSourceConfig config, LocationService locationService, ScheduleService sService, SlotService slService) {
+    public SourceFetchService(FhirContext context, ScheduleSourceConfigProperties config, LocationService locationService, ScheduleService sService, SlotService slService) {
         this.config = config;
         this.converter = new NDJSONToFHIR(context.newJsonParser());
         this.slService = slService;

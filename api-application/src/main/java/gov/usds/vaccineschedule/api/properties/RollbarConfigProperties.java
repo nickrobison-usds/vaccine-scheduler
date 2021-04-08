@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConstructorBinding;
  * Created by nickrobison on 4/7/21
  */
 @ConfigurationProperties(prefix = "rollbar")
-public class RollbarConfigurationProperties {
+public class RollbarConfigProperties {
 
     private boolean enabled;
     private String accessToken;
@@ -16,7 +16,7 @@ public class RollbarConfigurationProperties {
     private String environment;
 
     @ConstructorBinding
-    public RollbarConfigurationProperties(boolean enabled, String accessToken, String branch, String codeVersion, String environment) {
+    public RollbarConfigProperties(boolean enabled, String accessToken, String branch, String codeVersion, String environment) {
         this.enabled = enabled;
         this.accessToken = accessToken;
         this.branch = branch;

@@ -20,6 +20,8 @@ logging:
     ca.uhn.fhir.jaxrs: debug
     gov.usds: debug
 vs:
+  use-h3-search: true
+  h3-resolution: 8
   schedule-source:
     schedule-enabled: false
     upload-schedule: "0 0 11 * * *" # Daily at 11:00 AM Eastern Time

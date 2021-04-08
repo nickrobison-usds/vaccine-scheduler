@@ -1,4 +1,4 @@
-package gov.usds.vaccineschedule.api.config;
+package gov.usds.vaccineschedule.api.properties;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,12 +32,12 @@ import java.util.HashMap;
         entityManagerFactoryRef = "tigerEntityManagerFactory",
         transactionManagerRef = "tigerTransactionManager"
 )
-public class GeocoderPersistenceConfiguration {
+public class GeocoderDBConfigProperties {
 
     private final Environment env;
 
 
-    public GeocoderPersistenceConfiguration(Environment environment) {
+    public GeocoderDBConfigProperties(Environment environment) {
         this.env = environment;
     }
 

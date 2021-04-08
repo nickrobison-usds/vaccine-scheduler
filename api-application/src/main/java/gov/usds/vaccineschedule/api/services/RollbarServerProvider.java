@@ -2,7 +2,7 @@ package gov.usds.vaccineschedule.api.services;
 
 import com.rollbar.api.payload.data.Server;
 import com.rollbar.notifier.provider.Provider;
-import gov.usds.vaccineschedule.api.properties.RollbarConfigurationProperties;
+import gov.usds.vaccineschedule.api.properties.RollbarConfigProperties;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -15,9 +15,9 @@ import org.springframework.stereotype.Component;
 public class RollbarServerProvider implements Provider<Server> {
 
     private final Environment env;
-    private final RollbarConfigurationProperties config;
+    private final RollbarConfigProperties config;
 
-    public RollbarServerProvider(Environment env, RollbarConfigurationProperties config) {
+    public RollbarServerProvider(Environment env, RollbarConfigProperties config) {
         this.env = env;
         this.config = config;
     }

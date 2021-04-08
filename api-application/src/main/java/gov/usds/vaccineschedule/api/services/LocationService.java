@@ -31,11 +31,11 @@ import java.util.stream.StreamSupport;
 
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.hasIdentifier;
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inCity;
+import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inH3Indexes;
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inPostalCode;
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inState;
 import static gov.usds.vaccineschedule.api.services.ServiceHelpers.fromIterable;
 import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
-import static tech.units.indriya.unit.Units.METRE;
 
 /**
  * Created by nickrobison on 3/26/21
@@ -48,20 +48,35 @@ public class LocationService {
     private final GeocoderService geocoder;
     private final FhirValidator validator;
     private final FhirContext ctx;
+    private final H3Service h3;
 
-    public LocationService(LocationRepository repo, GeocoderService geocoder, FhirValidator validator, FhirContext ctx) {
+    public LocationService(LocationRepository repo, GeocoderService geocoder, FhirValidator validator, FhirContext ctx, H3Service h3) {
         this.repo = repo;
         this.geocoder = geocoder;
         this.validator = validator;
         this.ctx = ctx;
+        this.h3 = h3;
+    }
+
+    @Transactional
+    public Collection<Location> addLocations(Collection<Location> locations) {
+        return locations
+                .stream()
+                .map(this::addLocation)
+                .collect(Collectors.toList());
     }
 
     @Transactional
     public Location addLocation(Location location) {
         this.validateLocation(location);
         final LocationEntity entity = LocationEntity.fromFHIR(location);
+        // This shouldn't run on each load, only if things change.
         final Point point = this.geocoder.geocodeLocation(entity.getAddress()).block();
-        entity.setCoordinates(point);
+        if (point != null) {
+            entity.setCoordinates(point);
+            entity.setH3Index(this.h3.encodePoint(point));
+        }
+
         // Determine if the location already exists, by searching
         final Optional<LocationEntity> maybeExists = this.repo.findOne(hasIdentifier(ORIGINAL_ID_SYSTEM, location.getId()));
         if (maybeExists.isPresent()) {
@@ -72,14 +87,6 @@ public class LocationService {
             return this.repo.save(entity).toFHIR();
         }
 
-    }
-
-    @Transactional
-    public Collection<Location> addLocations(Collection<Location> locations) {
-        return locations
-                .stream()
-                .map(this::addLocation)
-                .collect(Collectors.toList());
     }
 
     public Optional<Location> getLocation(IIdType id) {
@@ -103,13 +110,24 @@ public class LocationService {
 
     @Transactional
     public List<Location> findByLocation(NearestQuery point, Pageable pageable) {
-        final double distance = point.getDistance().to(METRE).getValue().doubleValue();
-        return fromIterable(() -> this.repo.locationsWithinDistance(point.getPoint(), distance, pageable), LocationEntity::toFHIR);
+        final Iterable<LocationEntity> locationEntities;
+        if (this.h3.useH3Search()) {
+            final List<Long> neighbors = this.h3.findNeighbors(point);
+            locationEntities = this.repo.findAll(inH3Indexes(neighbors), pageable);
+        } else {
+            final double distance = point.getDistanceInMeters();
+            locationEntities = this.repo.locationsWithinDistance(point.getPoint(), distance, pageable);
+        }
+        return fromIterable(() -> locationEntities, LocationEntity::toFHIR);
     }
 
     @Transactional
     public long countByLocation(NearestQuery point) {
-        final double distance = point.getDistance().to(METRE).getValue().doubleValue();
+        if (this.h3.useH3Search()) {
+            final List<Long> neighbors = this.h3.findNeighbors(point);
+            return this.repo.count(inH3Indexes(neighbors));
+        }
+        final double distance = point.getDistanceInMeters();
         return this.repo.countLocationsWithinDistance(point.getPoint(), distance);
     }
 
