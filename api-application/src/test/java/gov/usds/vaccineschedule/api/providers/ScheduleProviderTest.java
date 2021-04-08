@@ -41,7 +41,7 @@ public class ScheduleProviderTest extends BaseApplicationTest {
                 .encodedJson();
 
         final InvalidRequestException exn = assertThrows(InvalidRequestException.class, request::execute, "Should throw with negative page number");
-        assertEquals("HTTP 400 : Page size of : 5000 exceeds the maximum of 500", exn.getLocalizedMessage(), "Should have correct error message");
+        assertEquals("HTTP 400 Bad Request: Page size of: 5000 exceeds the maximum of 500", exn.getLocalizedMessage(), "Should have correct error message");
     }
 
     @Test
