@@ -26,7 +26,7 @@ rollbar:
   environment: heroku
   code-version: 0.0.1
 bucket4j:
-  enabled: true
+  enabled: false
   filters:
     - cache-name: buckets
       url: .*
