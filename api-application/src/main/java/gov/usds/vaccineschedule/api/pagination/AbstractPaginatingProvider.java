@@ -46,7 +46,7 @@ public abstract class AbstractPaginatingProvider<T extends IBaseResource> extend
         final int size = pageSize == null ? 50 : pageSize;
 
         if (size > MAX_PAGE_SIZE) {
-            throw new InvalidRequestException(String.format("Page size of : %d exceeds the maximum of %d", pageSize, 500));
+            throw new InvalidRequestException(String.format("Page size of: %d exceeds the maximum of %d", pageSize, 500));
         }
         return PageRequest.of(page, size);
     }

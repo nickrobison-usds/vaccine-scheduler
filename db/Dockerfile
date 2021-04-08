@@ -1,4 +1,4 @@
-FROM postgis/postgis:11-3.1-alpine
+FROM postgis/postgis:13-3.1-alpine
 
 RUN apk update && apk add wget curl unzip
 
