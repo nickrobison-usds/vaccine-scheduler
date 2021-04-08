@@ -29,6 +29,8 @@ spring:
           redisson:
             fallback: true
             config: redisson/redisson-heroku.yml
+  config:
+    import: classpath:application-redis-heroku.yml
 rollbar:
   access-token: ${ROLLBAR_ACCESS_TOKEN}
   branch: main
