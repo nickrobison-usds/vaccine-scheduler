@@ -178,7 +178,9 @@ public class LocationEntity extends BaseEntity implements Flammable<VaccineLocat
 
         // Add query distance, if it exists
         if (this.distanceFromPoint != null) {
-            final org.hl7.fhir.r4.model.Quantity fhirDistance = new org.hl7.fhir.r4.model.Quantity().setCode("km").setValue(distanceFromPoint.getValue().doubleValue());
+            final org.hl7.fhir.r4.model.Quantity fhirDistance = new org.hl7.fhir.r4.model.Quantity()
+                    .setCode(getUOMFromQuantity(distanceFromPoint))
+                    .setValue(distanceFromPoint.getValue().doubleValue());
             location.setLocationDistance(fhirDistance);
         }
         return location;
@@ -220,5 +222,15 @@ public class LocationEntity extends BaseEntity implements Flammable<VaccineLocat
             entity.setCoordinates(point);
         }
         return entity;
+    }
+
+    private static String getUOMFromQuantity(Quantity<Length> quantity) {
+        // We have to switch off the string unit value
+        // Which in some cases, is a unit conversion string from meters
+        final String s = quantity.getUnit().toString();
+        if ("(m*1609344)/1000".equals(s)) {
+            return "[mi_us]";
+        }
+        return s;
     }
 }

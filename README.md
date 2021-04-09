@@ -57,6 +57,9 @@ curl --location --request GET 'http://localhost:8080/fhir/Location?near=42.4887%
 --header 'Content-Type: application/fhir+json'
 ```
 
+> Note: Supported distance units are miles (mi), kilometers (km) and meters (m).
+> Searches default to 50km distance from the given point.
+
 You can also look for slots within a period of time:
 
 ```bash
