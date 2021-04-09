@@ -4,6 +4,7 @@ plugins {
     id 'application'
     id 'java-library'
     id 'jacoco'
+    id 'org.sonarqube' version '3.1.1'
 }
 
 ext {
@@ -50,6 +51,14 @@ task stage {
 
         delete (fileTree(dir: "common/build", exclude: "libs"))
         delete (fileTree(dir: "common/build/libs", exclude: "*.jar"))
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "nickrobison-usds_vaccine-scheduler"
+        property "sonar.organization", "nickrobison-usds"
+        property "sonar.host.url", "https://sonarcloud.io"
     }
 }
 
