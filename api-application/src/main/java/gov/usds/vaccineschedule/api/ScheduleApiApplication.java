@@ -6,10 +6,6 @@ import gov.usds.vaccineschedule.api.properties.ScheduleSourceConfigProperties;
 import gov.usds.vaccineschedule.api.properties.VaccineScheduleProperties;
 import gov.usds.vaccineschedule.api.services.ExampleDataService;
 import gov.usds.vaccineschedule.api.services.ScheduledTaskService;
-import gov.usds.vaccineschedule.api.services.geocoder.DBGeocoderService;
-import gov.usds.vaccineschedule.api.services.geocoder.GeocoderService;
-import gov.usds.vaccineschedule.api.services.geocoder.MapBoxGeocoderService;
-import gov.usds.vaccineschedule.api.services.geocoder.TigerRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,7 +18,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableConfigurationProperties({
         VaccineScheduleProperties.class,
-        RollbarConfigProperties.class
+        RollbarConfigProperties.class,
+        GeocoderConfigProperties.class
 })
 @EnableCaching
 @EnableScheduling
@@ -51,17 +48,5 @@ public class ScheduleApiApplication {
     @ConditionalOnProperty("vs.load-example-data")
     public CommandLineRunner loadExampleData(ExampleDataService service) {
         return args -> service.loadTestData();
-    }
-
-    @Bean
-    @ConditionalOnProperty("vs.geocoder.db")
-    public GeocoderService provideGeocoder(TigerRepository repo) {
-        return new DBGeocoderService(repo);
-    }
-
-    @Bean
-    @ConditionalOnProperty("vs.geocoder.mapbox-token")
-    public GeocoderService provideMapboxCoder(GeocoderConfigProperties config) {
-        return new MapBoxGeocoderService(config);
     }
 }

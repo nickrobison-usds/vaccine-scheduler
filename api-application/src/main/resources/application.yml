@@ -29,6 +29,8 @@ vs:
     sources:
       - "http://localhost:9090/"
     db-thread-pool-size: 5
+  geocoder:
+    engine: no_op
 management.endpoints.web:
   exposure:
     include: health, info, refresh, metrics, scheduledtasks

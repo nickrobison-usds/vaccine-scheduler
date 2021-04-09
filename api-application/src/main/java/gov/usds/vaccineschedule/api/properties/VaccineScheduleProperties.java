@@ -21,14 +21,12 @@ public class VaccineScheduleProperties {
     private final boolean useH3Search;
 
     private final ScheduleSourceConfigProperties scheduleSource;
-    private final GeocoderConfigProperties geocoder;
 
     @ConstructorBinding
-    public VaccineScheduleProperties(Integer h3Resolution, boolean useH3Search, ScheduleSourceConfigProperties scheduleSource, GeocoderConfigProperties geocoder) {
+    public VaccineScheduleProperties(Integer h3Resolution, boolean useH3Search, ScheduleSourceConfigProperties scheduleSource) {
         this.h3Resolution = h3Resolution;
         this.useH3Search = useH3Search;
         this.scheduleSource = scheduleSource;
-        this.geocoder = geocoder;
     }
 
     public Integer getH3Resolution() {
@@ -42,10 +40,5 @@ public class VaccineScheduleProperties {
     @Bean
     public ScheduleSourceConfigProperties getScheduleSource() {
         return scheduleSource;
-    }
-
-    @Bean
-    public GeocoderConfigProperties getGeocoder() {
-        return geocoder;
     }
 }
