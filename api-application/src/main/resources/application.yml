@@ -20,7 +20,7 @@ logging:
     ca.uhn.fhir.jaxrs: debug
     gov.usds: debug
 vs:
-  use-h3-search: true
+  use-h3-search: false
   h3-resolution: 8
   schedule-source:
     schedule-enabled: false

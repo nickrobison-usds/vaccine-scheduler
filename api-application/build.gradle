@@ -1,4 +1,3 @@
-apply plugin: 'application'
 apply plugin: 'org.springframework.boot'
 
 ext {
@@ -84,10 +83,6 @@ dependencies {
 configurations {
     // exclude Tomcat
     compile.exclude module: 'spring-boot-starter-tomcat'
-}
-
-test {
-    useJUnitPlatform()
 }
 
 processResources {
