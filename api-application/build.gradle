@@ -1,4 +1,5 @@
 apply plugin: 'org.springframework.boot'
+apply plugin: 'com.google.cloud.tools.jib'
 
 ext {
     set('springCloudVersion', '2020.0.2')
@@ -9,6 +10,14 @@ ext {
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+jib {
+    from.image = fromImage
+    to.image = "${imageRoot}/api"
+    container {
+        ports ['8080']
     }
 }
 

@@ -31,20 +31,13 @@ services:
       - 5672:5672
       - 15672:15672
   publisher:
-    build:
-      context: .
-      dockerfile: publisher-application/Dockerfile
-    image: vs-publisher
-    command: bootRun
+    image: ghcr.io/nickrobison-usds/vaccine-schedule/publisher
     environment:
       SPRING_PROFILES_ACTIVE: dockerized
     ports:
       - "${VS_PUBLISHER_PORT:-9090}:9090"
   api:
-    build:
-      context: .
-      dockerfile: api-application/Dockerfile
-    image: vs-api
+    image: ghcr.io/nickrobison-usds/vaccine-schedule/api
     command: bootRun
     depends_on:
       - db

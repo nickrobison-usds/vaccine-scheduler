@@ -5,10 +5,13 @@ plugins {
     id 'java-library'
     id 'jacoco'
     id 'org.sonarqube' version '3.1.1'
+    id 'com.google.cloud.tools.jib' version '3.0.0' apply false
 }
 
 ext {
     hapiVersion = '5.3.0'
+    fromImage = 'gcr.io/distroless/java:11'
+    imageRoot = 'ghcr.io/nickrobison-usds/vaccine-schedule'
 }
 
 allprojects {
