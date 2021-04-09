@@ -50,7 +50,6 @@ import static tech.units.indriya.unit.Units.METRE;
 @Service
 @Transactional(readOnly = true)
 public class LocationService {
-
     private final LocationRepository repo;
     private final GeocoderService geocoder;
     private final FhirValidator validator;
@@ -78,19 +77,37 @@ public class LocationService {
         this.validateLocation(location);
         final LocationEntity entity = LocationEntity.fromFHIR(location);
         // This shouldn't run on each load, only if things change.
-        final Point point = this.geocoder.geocodeLocation(entity.getAddress()).block();
-        if (point != null) {
-            entity.setCoordinates(point);
-            entity.setH3Index(this.h3.encodePoint(point));
-        }
+
 
         // Determine if the location already exists, by searching
         final Optional<LocationEntity> maybeExists = this.repo.findOne(hasIdentifier(ORIGINAL_ID_SYSTEM, location.getId()));
         if (maybeExists.isPresent()) {
             final LocationEntity exists = maybeExists.get();
-            exists.merge(entity);
+            // Determine if we need to geocode a new point
+            // For now, we'll just compare the two addresses and go from there
+            if (!entity.getAddress().equals(exists.getAddress())) {
+                exists.merge(entity);
+                final Point point = this.geocoder.geocodeLocation(entity.getAddress()).block();
+                if (point != null) {
+                    exists.setCoordinates(point);
+                    exists.setH3Index(this.h3.encodePoint(point));
+                }
+            } else {
+                exists.merge(entity);
+            }
             return this.repo.save(exists).toFHIR();
         } else {
+            // If we have a new location, we need a new point as well, if we don't already have one
+            if (entity.getCoordinates() == null) {
+                final Point point = this.geocoder.geocodeLocation(entity.getAddress()).block();
+                if (point != null) {
+                    entity.setCoordinates(point);
+                    entity.setH3Index(this.h3.encodePoint(point));
+                }
+            } else {
+                entity.setH3Index(this.h3.encodePoint(entity.getCoordinates()));
+            }
+
             return this.repo.save(entity).toFHIR();
         }
 

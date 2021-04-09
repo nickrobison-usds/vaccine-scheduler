@@ -87,8 +87,8 @@ public class AddressElement {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AddressElement address = (AddressElement) o;
-        return street.equals(address.street) && city.equals(address.city) && state.equals(address.state) && postalCode.equals(address.postalCode) && district.equals(address.district);
+        AddressElement that = (AddressElement) o;
+        return street.equals(that.street) && city.equals(that.city) && state.equals(that.state) && postalCode.equals(that.postalCode) && Objects.equals(district, that.district);
     }
 
     @Override
