@@ -12,6 +12,9 @@ import gov.usds.vaccineschedule.api.models.NearestQuery;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
 import gov.usds.vaccineschedule.api.services.geocoder.GeocoderService;
 import gov.usds.vaccineschedule.common.Constants;
+import gov.usds.vaccineschedule.common.models.VaccineLocation;
+import net.sf.geographiclib.Geodesic;
+import net.sf.geographiclib.GeodesicData;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Location;
 import org.locationtech.jts.geom.Point;
@@ -19,8 +22,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.units.indriya.quantity.Quantities;
 
 import javax.annotation.Nullable;
+import javax.measure.Quantity;
+import javax.measure.quantity.Length;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,8 +41,8 @@ import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inCit
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inH3Indexes;
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inPostalCode;
 import static gov.usds.vaccineschedule.api.repositories.LocationRepository.inState;
-import static gov.usds.vaccineschedule.api.services.ServiceHelpers.fromIterable;
 import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
+import static tech.units.indriya.unit.Units.METRE;
 
 /**
  * Created by nickrobison on 3/26/21
@@ -60,7 +66,7 @@ public class LocationService {
     }
 
     @Transactional
-    public Collection<Location> addLocations(Collection<Location> locations) {
+    public Collection<Location> addLocations(Collection<VaccineLocation> locations) {
         return locations
                 .stream()
                 .map(this::addLocation)
@@ -68,7 +74,7 @@ public class LocationService {
     }
 
     @Transactional
-    public Location addLocation(Location location) {
+    public Location addLocation(VaccineLocation location) {
         this.validateLocation(location);
         final LocationEntity entity = LocationEntity.fromFHIR(location);
         // This shouldn't run on each load, only if things change.
@@ -110,16 +116,30 @@ public class LocationService {
     }
 
     @Transactional
-    public List<Location> findByLocation(NearestQuery point, Pageable pageable) {
+    public List<Location> findByLocation(NearestQuery query, Pageable pageable) {
         final Iterable<LocationEntity> locationEntities;
+        final Point point = query.getPoint();
         if (this.h3.useH3Search()) {
-            final List<Long> neighbors = this.h3.findNeighbors(point);
+            final List<Long> neighbors = this.h3.findNeighbors(query);
             locationEntities = this.repo.findAll(inH3Indexes(neighbors), pageable);
         } else {
-            final double distance = point.getDistanceInMeters();
-            locationEntities = this.repo.locationsWithinDistance(point.getPoint(), distance, pageable);
+            final double distance = query.getDistanceInMeters();
+            locationEntities = this.repo.locationsWithinDistance(point, distance, pageable);
         }
-        return fromIterable(() -> locationEntities, LocationEntity::toFHIR);
+
+        // Once we have locations, compute the distance between the query point and each location
+        return StreamSupport.stream(locationEntities.spliterator(), false)
+                .peek(e -> {
+                    final Point coords = e.getCoordinates();
+                    // Distance is returning in meters
+                    final GeodesicData geoDistance = Geodesic.WGS84.Inverse(point.getY(), point.getX(), coords.getY(), coords.getX());
+                    final double distanceMeters = geoDistance.s12;
+                    Quantity<Length> distanceQuantity = Quantities.getQuantity(distanceMeters, METRE);
+//                    // Convert to query units
+                    e.setDistanceFromPoint(distanceQuantity.to(query.getDistance().getUnit()));
+                })
+                .map(LocationEntity::toFHIR)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -160,7 +180,7 @@ public class LocationService {
         return Optional.empty();
     }
 
-    private void validateLocation(Location location) {
+    private void validateLocation(VaccineLocation location) {
         final ValidationOptions options = new ValidationOptions();
         options.addProfile(Constants.LOCATION_PROFILE);
 

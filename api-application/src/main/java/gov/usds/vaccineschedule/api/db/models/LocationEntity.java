@@ -1,5 +1,6 @@
 package gov.usds.vaccineschedule.api.db.models;
 
+import gov.usds.vaccineschedule.common.models.VaccineLocation;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Identifier;
@@ -11,6 +12,9 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 
+import javax.annotation.Nullable;
+import javax.measure.Quantity;
+import javax.measure.quantity.Length;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -18,6 +22,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
@@ -31,7 +36,7 @@ import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
  */
 @Entity
 @Table(name = "locations")
-public class LocationEntity extends BaseEntity implements Flammable<Location>, Identifiable {
+public class LocationEntity extends BaseEntity implements Flammable<VaccineLocation>, Identifiable {
 
     @Column(nullable = false)
     private String name;
@@ -49,6 +54,13 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
 
     @Column(name = "h3_index")
     private long h3Index;
+
+    /**
+     * Temporarily holds the calculated distance of this entity from a given search point.
+     */
+    @Nullable
+    @Transient
+    private Quantity<Length> distanceFromPoint;
 
     public LocationEntity() {
         // Hibernate required
@@ -104,6 +116,15 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
         this.h3Index = h3Index;
     }
 
+    @Nullable
+    public Quantity<Length> getDistanceFromPoint() {
+        return distanceFromPoint;
+    }
+
+    public void setDistanceFromPoint(@Nullable Quantity<Length> distanceFromPoint) {
+        this.distanceFromPoint = distanceFromPoint;
+    }
+
     public void merge(LocationEntity other) {
         this.coordinates = other.coordinates;
         this.address = other.address;
@@ -124,8 +145,8 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
     }
 
     @Override
-    public Location toFHIR() {
-        final Location location = new Location();
+    public VaccineLocation toFHIR() {
+        final VaccineLocation location = new VaccineLocation();
         final Meta meta = new Meta();
         meta.addProfile(LOCATION_PROFILE);
 
@@ -154,10 +175,16 @@ public class LocationEntity extends BaseEntity implements Flammable<Location>, I
                     .setLatitude(this.coordinates.getY());
             location.setPosition(component);
         }
+
+        // Add query distance, if it exists
+        if (this.distanceFromPoint != null) {
+            final org.hl7.fhir.r4.model.Quantity fhirDistance = new org.hl7.fhir.r4.model.Quantity().setCode("km").setValue(distanceFromPoint.getValue().doubleValue());
+            location.setLocationDistance(fhirDistance);
+        }
         return location;
     }
 
-    public static LocationEntity fromFHIR(Location resource) {
+    public static LocationEntity fromFHIR(VaccineLocation resource) {
 
         final AddressElement addressElement = AddressElement.fromFHIR(resource.getAddress());
         final String hash = DigestUtils.sha1Hex(String.format("%s%s", resource.getName(), addressElement.toString()));
