@@ -14,8 +14,8 @@ dependencyManagement {
 }
 
 jib {
-    from.image = 'gcr.io/distroless/java:11'
-    to.image = 'ghcr.io/nickrobison-usds/vaccine-schedule/api'
+    from.image = fromImage
+    to.image = "${imageRoot}/api"
     container {
         ports ['8080']
     }
