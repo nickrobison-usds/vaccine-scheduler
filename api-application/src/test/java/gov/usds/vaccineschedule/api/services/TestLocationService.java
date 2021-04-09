@@ -4,6 +4,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.TokenParam;
 import gov.usds.vaccineschedule.api.BaseApplicationTest;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
+import gov.usds.vaccineschedule.common.models.VaccineLocation;
 import org.hl7.fhir.r4.model.Location;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class TestLocationService extends BaseApplicationTest {
 
         // Pull a single location out of the NDJSON file
         final InputStream is = TestLocationService.class.getClassLoader().getResourceAsStream("example-locations.ndjson");
-        final Location firstLoc = converter.inputStreamToTypedResource(Location.class, is).get(0);
+        final VaccineLocation firstLoc = converter.inputStreamToTypedResource(VaccineLocation.class, is).get(0);
 
         // Pull out the location to cache it
         final TokenParam tokenParam = new TokenParam().setSystem(ORIGINAL_ID_SYSTEM).setValue(firstLoc.getId());
@@ -55,7 +56,7 @@ public class TestLocationService extends BaseApplicationTest {
         final IParser parser = ctx.newJsonParser();
         final NDJSONToFHIR converter = new NDJSONToFHIR(parser);
         final InputStream is = TestLocationService.class.getClassLoader().getResourceAsStream("example-locations.ndjson");
-        final List<Location> locations = converter.inputStreamToTypedResource(Location.class, is);
+        final List<VaccineLocation> locations = converter.inputStreamToTypedResource(VaccineLocation.class, is);
         this.service.addLocations(locations);
         assertEquals(origCount, this.service.countLocations(null, null, null, null), "Count should not change");
     }

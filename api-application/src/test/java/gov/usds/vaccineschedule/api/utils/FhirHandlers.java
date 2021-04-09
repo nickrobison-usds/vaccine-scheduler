@@ -1,7 +1,9 @@
 package gov.usds.vaccineschedule.api.utils;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.usds.vaccineschedule.common.models.VaccineLocation;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Assertions;
@@ -15,17 +17,17 @@ import java.util.List;
  */
 public class FhirHandlers {
 
+    public static final List<Class<? extends IBaseResource>> customTypes = List.of(VaccineSlot.class, VaccineLocation.class);
+
     @SuppressWarnings("unchecked")
     public static <T extends Resource> List<T> unwrapBundle(IGenericClient client, Bundle bundle, Date searchTime) {
-        int idx = 0;
         assertBundleUpdatedBefore(bundle, searchTime);
         List<T> resources = new ArrayList<>();
         // Loop through all the pages
         bundle.getEntry().forEach(e -> resources.add((T) e.getResource()));
 
         while (bundle.getLink(Bundle.LINK_NEXT) != null) {
-            idx++;
-            bundle = client.loadPage().next(bundle).preferResponseType(VaccineSlot.class).execute();
+            bundle = client.loadPage().next(bundle).preferResponseTypes(customTypes).execute();
             assertBundleUpdatedBefore(bundle, searchTime);
             bundle.getEntry().forEach(e -> resources.add((T) e.getResource()));
         }

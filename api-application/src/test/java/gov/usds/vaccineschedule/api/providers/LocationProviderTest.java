@@ -4,11 +4,13 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.TokenParam;
 import gov.usds.vaccineschedule.api.BaseApplicationTest;
+import gov.usds.vaccineschedule.common.models.VaccineLocation;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.HashMap;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import static gov.usds.vaccineschedule.api.utils.FhirHandlers.unwrapBundle;
+import static gov.usds.vaccineschedule.api.utils.HelperAssertions.assertBDApproxEqual;
 import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,7 +47,7 @@ public class LocationProviderTest extends BaseApplicationTest {
     }
 
     @Test
-    public void testLocationSearch() {
+    public void testLocationSearchDefaultUnits() {
         final java.util.Date searchTime = Date.from(Instant.now());
         final IGenericClient client = provideFhirClient();
         Map<String, List<IQueryParameterType>> params = new HashMap<>();
@@ -52,14 +55,43 @@ public class LocationProviderTest extends BaseApplicationTest {
 
         final Bundle results = client.search()
                 .forResource(Location.class)
+                .preferResponseType(VaccineLocation.class)
                 .where(params)
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
 
-        List<Location> resources = unwrapBundle(client, results, searchTime);
+        List<VaccineLocation> resources = unwrapBundle(client, results, searchTime);
+        VaccineLocation v = resources.get(0);
 
         assertEquals(7, resources.size(), "Should equal");
+        // Verify we have the correct distance
+        assertAll(() -> assertBDApproxEqual(BigDecimal.valueOf(24.0644), v.getLocationDistance().getValue(), 0.1),
+                () -> assertEquals("km", v.getLocationDistance().getCode(), "Should have correct UOM value"));
+    }
+
+    @Test
+    public void testLocationSearchUSUnits() {
+        final java.util.Date searchTime = Date.from(Instant.now());
+        final IGenericClient client = provideFhirClient();
+        Map<String, List<IQueryParameterType>> params = new HashMap<>();
+        params.put("near", List.of(new TokenParam().setValue("42.4887|-71.2837|16|mi")));
+
+        final Bundle results = client.search()
+                .forResource(Location.class)
+                .preferResponseType(VaccineLocation.class)
+                .where(params)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        List<VaccineLocation> resources = unwrapBundle(client, results, searchTime);
+        VaccineLocation v = resources.get(0);
+
+        assertEquals(3, resources.size(), "Should equal");
+        // Verify we have the correct distance
+        assertAll(() -> assertBDApproxEqual(BigDecimal.valueOf(14.9529), v.getLocationDistance().getValue(), 0.1),
+                () -> assertEquals("[mi_us]", v.getLocationDistance().getCode(), "Should have correct UOM value"));
     }
 
     @Test
@@ -96,6 +128,7 @@ public class LocationProviderTest extends BaseApplicationTest {
         final Bundle maLocations = client
                 .search()
                 .forResource(Location.class)
+                .preferResponseType(VaccineLocation.class)
                 .where(Location.ADDRESS_STATE.matchesExactly().value("MA"))
                 .returnBundle(Bundle.class)
                 .encodedJson()

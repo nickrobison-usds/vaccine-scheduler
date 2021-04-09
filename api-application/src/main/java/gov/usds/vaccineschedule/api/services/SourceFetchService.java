@@ -6,9 +6,9 @@ import com.google.common.collect.ImmutableList;
 import gov.usds.vaccineschedule.api.properties.ScheduleSourceConfigProperties;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
 import gov.usds.vaccineschedule.common.models.PublishResponse;
+import gov.usds.vaccineschedule.common.models.VaccineLocation;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Schedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,8 +85,8 @@ public class SourceFetchService {
     }
 
     private void processResource(IBaseResource resource) {
-        if (resource instanceof Location) {
-            this.locationService.addLocation((Location) resource);
+        if (resource instanceof VaccineLocation) {
+            this.locationService.addLocation((VaccineLocation) resource);
         } else if (resource instanceof Schedule) {
             this.sService.addSchedule((Schedule) resource);
         } else if (resource instanceof VaccineSlot) {
