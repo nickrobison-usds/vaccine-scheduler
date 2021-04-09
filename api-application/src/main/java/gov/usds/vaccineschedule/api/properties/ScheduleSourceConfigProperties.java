@@ -1,5 +1,6 @@
 package gov.usds.vaccineschedule.api.properties;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.TimeZone;
 /**
  * Created by nickrobison on 3/25/21
  */
+@ConfigurationProperties(prefix = "vs.schedule-source")
 public class ScheduleSourceConfigProperties {
 
     private final boolean scheduleEnabled;
@@ -24,16 +26,16 @@ public class ScheduleSourceConfigProperties {
     /**
      * The time zone for the cron expressions in the schedule (default: GMT)
      */
-    private final TimeZone scheduleTimezone;
+    private final TimeZone refreshTimezone;
 
     private final Integer dbThreadPoolSize;
 
     @ConstructorBinding
-    public ScheduleSourceConfigProperties(boolean scheduleEnabled, List<String> sources, List<String> refreshSchedule, TimeZone scheduleTimezone, Integer dbThreadPoolSize) {
+    public ScheduleSourceConfigProperties(boolean scheduleEnabled, List<String> sources, List<String> refreshSchedule, TimeZone refreshTimezone, Integer dbThreadPoolSize) {
         this.scheduleEnabled = scheduleEnabled;
         this.sources = sources;
         this.refreshSchedule = refreshSchedule;
-        this.scheduleTimezone = scheduleTimezone;
+        this.refreshTimezone = refreshTimezone;
         this.dbThreadPoolSize = dbThreadPoolSize;
     }
 
@@ -49,8 +51,8 @@ public class ScheduleSourceConfigProperties {
         return refreshSchedule;
     }
 
-    public TimeZone getScheduleTimezone() {
-        return scheduleTimezone;
+    public TimeZone getRefreshTimezone() {
+        return refreshTimezone;
     }
 
     public Integer getDbThreadPoolSize() {

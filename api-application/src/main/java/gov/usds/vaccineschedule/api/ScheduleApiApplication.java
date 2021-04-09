@@ -19,7 +19,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableConfigurationProperties({
         VaccineScheduleProperties.class,
         RollbarConfigProperties.class,
-        GeocoderConfigProperties.class
+        GeocoderConfigProperties.class,
+        ScheduleSourceConfigProperties.class
 })
 @EnableCaching
 @EnableScheduling
