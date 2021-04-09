@@ -1,4 +1,14 @@
 apply plugin: 'org.springframework.boot'
+apply plugin: 'com.google.cloud.tools.jib'
+
+jib {
+    from.image  = 'gcr.io/distroless/java:11'
+    to.image = 'ghcr.io/nickrobison-usds/vaccine-schedule/publisher'
+
+    container {
+        ports ['9090']
+    }
+}
 
 dependencies {
     implementation project(':common')
