@@ -2,7 +2,6 @@ package gov.usds.vaccineschedule.api.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
-import org.springframework.context.annotation.Bean;
 
 /**
  * Created by nickrobison on 4/8/21
@@ -20,15 +19,10 @@ public class VaccineScheduleProperties {
      */
     private final boolean useH3Search;
 
-    private final ScheduleSourceConfigProperties scheduleSource;
-    private final GeocoderConfigProperties geocoder;
-
     @ConstructorBinding
-    public VaccineScheduleProperties(Integer h3Resolution, boolean useH3Search, ScheduleSourceConfigProperties scheduleSource, GeocoderConfigProperties geocoder) {
+    public VaccineScheduleProperties(Integer h3Resolution, boolean useH3Search) {
         this.h3Resolution = h3Resolution;
         this.useH3Search = useH3Search;
-        this.scheduleSource = scheduleSource;
-        this.geocoder = geocoder;
     }
 
     public Integer getH3Resolution() {
@@ -37,15 +31,5 @@ public class VaccineScheduleProperties {
 
     public boolean isUseH3Search() {
         return useH3Search;
-    }
-
-    @Bean
-    public ScheduleSourceConfigProperties getScheduleSource() {
-        return scheduleSource;
-    }
-
-    @Bean
-    public GeocoderConfigProperties getGeocoder() {
-        return geocoder;
     }
 }

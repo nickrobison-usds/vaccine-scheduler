@@ -24,11 +24,13 @@ vs:
   h3-resolution: 8
   schedule-source:
     schedule-enabled: false
-    upload-schedule: "0 0 11 * * *" # Daily at 11:00 AM Eastern Time
-    upload-timezone: America/New_York
     sources:
       - "http://localhost:9090/"
     db-thread-pool-size: 5
+    refresh-schedule: "0 0 11 * * *"
+    refresh-timezone: America/New_York
+  geocoder:
+    engine: no_op
 management.endpoints.web:
   exposure:
     include: health, info, refresh, metrics, scheduledtasks

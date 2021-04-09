@@ -23,6 +23,7 @@ public class MapBoxGeocoderService implements GeocoderService {
     private final GeocoderConfigProperties config;
 
     public MapBoxGeocoderService(GeocoderConfigProperties config) {
+        logger.info("Enabling Mapbox Geocoding service");
         this.config = config;
     }
 
