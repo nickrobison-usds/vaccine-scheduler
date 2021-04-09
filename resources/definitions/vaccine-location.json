@@ -8,6 +8,37 @@
   "differential": {
     "element": [
       {
+        "id": "Location",
+        "path": "Location",
+        "min": 1,
+        "max": 1
+      },
+      {
+        "id": "Location.extension",
+        "path": "Location.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "ordered": false,
+          "rules": "open"
+        }
+      },
+      {
+        "id": "Location.extension:distance-extension",
+        "path": "Location.extension",
+        "sliceName": "distance-extension",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": "http://hl7.org/fhir/StructureDefinition/location-distance"
+          }
+        ]
+      },
+      {
         "id": "Location.name",
         "path": "Location.name",
         "definition": "Location name",
@@ -71,30 +102,6 @@
         ],
         "min": 1,
         "max": "1"
-      },
-      {
-        "id": "Location.extension",
-        "path": "Location.extension",
-        "slicing": {
-          "discriminator": [
-            {
-              "type": "value",
-              "path": "url"
-            }
-          ],
-          "rules": "open"
-        }
-      },
-      {
-        "id": "Location.extension:distance-extension",
-        "path": "Location.extension",
-        "sliceName": "distance-extension",
-        "type": [
-          {
-            "code": "Extension",
-            "profile": "http://hl7.org/fhir/StructureDefinition/location-distance"
-          }
-        ]
       }
     ]
   }
