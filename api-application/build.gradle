@@ -87,7 +87,7 @@ dependencies {
         }
     }
     // This version needs to track the one provided by HAPI.
-    testImplementation 'com.squareup.okhttp3:mockwebserver:3.8.1'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.1'
 }
 
 configurations {
