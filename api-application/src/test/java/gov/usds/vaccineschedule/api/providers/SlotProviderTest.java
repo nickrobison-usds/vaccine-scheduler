@@ -1,10 +1,15 @@
 package gov.usds.vaccineschedule.api.providers;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.usds.vaccineschedule.api.BaseApplicationTest;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Schedule;
 import org.hl7.fhir.r4.model.Slot;
@@ -19,6 +24,7 @@ import static gov.usds.vaccineschedule.common.Constants.LOCATION_PROFILE;
 import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -130,5 +136,23 @@ public class SlotProviderTest extends BaseApplicationTest {
         assertAll(() -> assertEquals("https://ehr-portal.example.org/bookings?slot=1000008", single.getBookingUrl().asStringValue(), "Should have correct URL"),
                 () -> assertEquals(100, single.getCapacity().getValue(), "Should have correct value"),
                 () -> assertTrue(single.getBookingPhone().isEmpty(), "Should not have phone number"));
+    }
+
+    @Test
+    void testValidation() {
+        final Slot invalidSlot = new Slot();
+        invalidSlot.setId("test-slot");
+        final IGenericClient client = provideFhirClient();
+
+        final IOperationUntypedWithInput<MethodOutcome> validateRequest = client
+                .operation()
+                .onType(Slot.class)
+                .named("$validate")
+                .withParameter(Parameters.class, "resource", invalidSlot)
+                .returnMethodOutcome();
+
+        final UnprocessableEntityException exn = assertThrows(UnprocessableEntityException.class, validateRequest::execute, "Should fail validation");
+        final OperationOutcome outcome = (OperationOutcome) exn.getOperationOutcome();
+        assertEquals(4, outcome.getIssue().size(), "Should have the correct number of issues");
     }
 }

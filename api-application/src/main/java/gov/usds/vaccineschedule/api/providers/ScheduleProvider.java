@@ -11,8 +11,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.validation.FhirValidator;
 import gov.usds.vaccineschedule.api.helpers.BaseURLProvider;
-import gov.usds.vaccineschedule.api.pagination.AbstractPaginatingProvider;
+import gov.usds.vaccineschedule.api.pagination.AbstractPaginatingAndValidatingProvider;
 import gov.usds.vaccineschedule.api.services.ScheduleService;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -23,16 +24,18 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static gov.usds.vaccineschedule.common.Constants.SCHEDULE_PROFILE;
+
 /**
  * Created by nickrobison on 3/26/21
  */
 @Component
-public class ScheduleProvider extends AbstractPaginatingProvider<Schedule> {
+public class ScheduleProvider extends AbstractPaginatingAndValidatingProvider<Schedule> {
 
     private final ScheduleService service;
 
-    public ScheduleProvider(FhirContext ctx, ScheduleService service, BaseURLProvider provider) {
-        super(ctx, provider);
+    public ScheduleProvider(FhirContext ctx, FhirValidator validator, ScheduleService service, BaseURLProvider provider) {
+        super(ctx, validator, provider);
         this.service = service;
     }
 
@@ -71,5 +74,10 @@ public class ScheduleProvider extends AbstractPaginatingProvider<Schedule> {
     @Override
     public Class<Schedule> getResourceType() {
         return Schedule.class;
+    }
+
+    @Override
+    public String getResourceProfile() {
+        return SCHEDULE_PROFILE;
     }
 }

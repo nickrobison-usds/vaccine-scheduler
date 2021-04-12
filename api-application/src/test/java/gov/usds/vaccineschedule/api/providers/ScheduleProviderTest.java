@@ -1,12 +1,17 @@
 package gov.usds.vaccineschedule.api.providers;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.usds.vaccineschedule.api.BaseApplicationTest;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Schedule;
 import org.junit.jupiter.api.Test;
@@ -108,5 +113,24 @@ public class ScheduleProviderTest extends BaseApplicationTest {
                 .execute();
 
         assertEquals(0, execute.getEntry().size(), "Should not have any results");
+    }
+
+    @Test
+    void testValidation() {
+        final Schedule schedule = new Schedule();
+        schedule.setId("test-slot");
+        schedule.setActor(List.of(new Reference("Location/1234")));
+        final IGenericClient client = provideFhirClient();
+
+        final IOperationUntypedWithInput<MethodOutcome> validateRequest = client
+                .operation()
+                .onType(Schedule.class)
+                .named("$validate")
+                .withParameter(Parameters.class, "resource", schedule)
+                .returnMethodOutcome();
+
+        final UnprocessableEntityException exn = assertThrows(UnprocessableEntityException.class, validateRequest::execute, "Should fail validation");
+        final OperationOutcome outcome = (OperationOutcome) exn.getOperationOutcome();
+        assertEquals(1, outcome.getIssue().size(), "Should have the correct number of issues");
     }
 }
