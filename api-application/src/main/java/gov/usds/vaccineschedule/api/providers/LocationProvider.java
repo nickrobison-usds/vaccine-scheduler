@@ -11,9 +11,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.validation.FhirValidator;
 import gov.usds.vaccineschedule.api.helpers.BaseURLProvider;
 import gov.usds.vaccineschedule.api.models.NearestQuery;
-import gov.usds.vaccineschedule.api.pagination.AbstractPaginatingProvider;
+import gov.usds.vaccineschedule.api.pagination.AbstractPaginatingAndValidatingProvider;
 import gov.usds.vaccineschedule.api.services.LocationService;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -25,16 +26,18 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 
+import static gov.usds.vaccineschedule.common.Constants.LOCATION_PROFILE;
+
 /**
  * Created by nickrobison on 3/26/21
  */
 @Component
-public class LocationProvider extends AbstractPaginatingProvider<Location> {
+public class LocationProvider extends AbstractPaginatingAndValidatingProvider<Location> {
 
     private final LocationService service;
 
-    public LocationProvider(FhirContext ctx, LocationService service, BaseURLProvider provider) {
-        super(ctx, provider);
+    public LocationProvider(FhirContext ctx, FhirValidator validator, LocationService service, BaseURLProvider provider) {
+        super(ctx, validator, provider);
         this.service = service;
     }
 
@@ -75,5 +78,10 @@ public class LocationProvider extends AbstractPaginatingProvider<Location> {
     @Override
     public Class<Location> getResourceType() {
         return Location.class;
+    }
+
+    @Override
+    public String getResourceProfile() {
+        return LOCATION_PROFILE;
     }
 }
