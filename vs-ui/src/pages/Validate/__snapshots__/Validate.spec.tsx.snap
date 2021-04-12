@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Finder renders text 1`] = `
+<div>
+  <form
+    action="#"
+  >
+    <label
+      for="text"
+    >
+      Paste data here:
+    </label>
+    <textarea
+      class="usa-textarea"
+      data-testid="textarea"
+      id="text"
+      name="text"
+      placeholder="Paste data here"
+    />
+    <button
+      class="usa-button"
+      data-testid="button"
+      type="submit"
+    >
+      Validate
+    </button>
+  </form>
+</div>
+`;

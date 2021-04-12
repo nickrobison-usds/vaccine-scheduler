@@ -1,26 +1,30 @@
+import {GridContainer} from '@trussworks/react-uswds';
 import React from 'react';
-import logo from './logo.svg';
+import {BrowserRouter, Route, Switch} from 'react-router-dom';
 import './App.css';
+import {NavMenu} from "./components/NavMenu/NavMenu";
+import {Home} from "./pages/Home/Home";
+import {Validate} from "./pages/Validate/Validate";
+import {Finder} from "./pages/Finder/Finder";
 
 function App() {
-  return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo"/>
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
-          <a
-              className="App-link"
-              href="https://reactjs.org"
-              target="_blank"
-              rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-  );
+    return (
+        <BrowserRouter>
+            <div className="App">
+
+                <NavMenu/>
+                <section className="usa-section">
+                    <GridContainer>
+                        <Switch>
+                            <Route exact path="/" component={Home}/>
+                            <Route path="/validate" component={Validate}/>
+                            <Route path="/finder" component={Finder}/>
+                        </Switch>
+                    </GridContainer>
+                </section>
+            </div>
+        </BrowserRouter>
+    );
 }
 
 export default App;

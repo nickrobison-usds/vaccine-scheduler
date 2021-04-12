@@ -1,0 +1,47 @@
+@import '@trussworks/react-uswds/lib/index.css';
+
+@import '~uswds/src/stylesheets/theme/_uswds-theme-general.scss';
+@import '~uswds/src/stylesheets/theme/_uswds-theme-typography.scss';
+@import '~uswds/src/stylesheets/theme/_uswds-theme-spacing.scss';
+@import '~uswds/src/stylesheets/theme/_uswds-theme-color.scss';
+@import '~uswds/src/stylesheets/theme/_uswds-theme-utilities.scss';
+
+// Override resource paths
+
+$theme-image-path: '~uswds/src/img';
+$theme-font-path: '~uswds/src/fonts';
+$theme-hero-image: '~uswds/src/img/hero.png';
+
+@import '~uswds/src/stylesheets/packages/_required.scss';
+
+@import 'uswds'; // <-- this goes at the end, contains USWDS CSS
+
+/* Provide sufficient contrast against white background */
+a {
+    color: #0366d6;
+}
+
+code {
+    color: #E01A76;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+}
+
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
