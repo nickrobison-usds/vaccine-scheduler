@@ -16,7 +16,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jersey'
     implementation 'org.springframework.boot:spring-boot-actuator'
-    implementation group: 'io.projectreactor', name: 'reactor-core', version: '3.4.4'
+    implementation group: 'io.projectreactor', name: 'reactor-core', version: '3.4.5'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     // FHIR
