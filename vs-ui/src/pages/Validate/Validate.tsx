@@ -1,4 +1,4 @@
-import {Alert, Button, ErrorMessage, Grid, Label, Textarea} from "@trussworks/react-uswds";
+import {Alert, Button, ErrorMessage, Header, Label, Textarea} from "@trussworks/react-uswds";
 import {Field, Form, FormikBag, FormikProps, withFormik} from "formik";
 import React, {useState} from "react";
 import {useFhir} from "../../context/FhirClientContext";
@@ -6,6 +6,20 @@ import {isClientError, isFHIRResource} from "../../@types";
 
 interface FormValues {
     text: string
+}
+
+const validateText = (value: string): string | undefined => {
+    // Verify we actually have something
+    if (value === "") {
+        return "Data is required";
+    }
+    try {
+        JSON.parse(value);
+    } catch {
+        return "Data must be valid JSON";
+    }
+
+    return undefined;
 }
 
 const severityToAlertType = (severity: fhir.IssueSeverity): "error" | "warning" | "success" | "info" => {
@@ -30,13 +44,15 @@ const ValidationForm = (props: FormikProps<FormValues>) => {
         touched,
         errors,
         handleSubmit,
-        isSubmitting
+        isSubmitting,
+        isValid
     } = props;
     return (<Form onSubmit={handleSubmit} className="usa-form">
         <Label htmlFor="text">Paste text here:</Label>
-        <Field id="text" as={Textarea} name="text" placeholder="Paste data here" aria-label="validation-text"/>
+        <Field id="text" as={Textarea} validate={validateText} name="text" placeholder="Paste data here"
+               aria-label="validation-text"/>
         {touched.text && errors.text && <ErrorMessage>{errors.text}</ErrorMessage>}
-        <Button type="submit" disabled={isSubmitting}>Validate</Button>
+        <Button type="submit" disabled={!isValid || isSubmitting}>Validate</Button>
     </Form>)
 }
 
@@ -76,18 +92,18 @@ export const Validate: React.FC<{}> = () => {
     const FormikForm = withFormik({
         displayName: 'ValidationForm',
         handleSubmit: handleSubmission,
+        isInitialValid: false
     })(ValidationForm);
 
     return (
-        <Grid>
-            <Grid row={true}>
-                <FormikForm/>
-            </Grid>
-            <Grid row={true}>
-                <section className="usa-section">
-                    {validationErrors.map(issueToAlert)}
-                </section>
-            </Grid>
-        </Grid>
+        <>
+            <Header>
+                <h1 id="validate-header">Validate FHIR resources</h1>
+            </Header>
+            <FormikForm/>
+            <section className="usa-section">
+                {validationErrors.map(issueToAlert)}
+            </section>
+        </>
     )
 }

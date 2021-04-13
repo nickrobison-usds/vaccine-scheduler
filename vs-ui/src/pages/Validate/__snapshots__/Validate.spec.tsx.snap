@@ -2,103 +2,94 @@
 
 exports[`Validate displays validation errors 1`] = `
 <div>
-  <div
-    class=""
-    data-testid="grid"
+  <header
+    class="usa-header"
+    data-testid="header"
   >
-    <div
-      class="grid-row"
-      data-testid="grid"
+    <h1
+      id="validate-header"
     >
-      <form
-        action="#"
-        class="usa-form"
-      >
-        <label
-          class="usa-label"
-          data-testid="label"
-          for="text"
-        >
-          Paste text here:
-        </label>
-        <textarea
-          aria-label="validation-text"
-          class="usa-textarea"
-          data-testid="textarea"
-          id="text"
-          name="text"
-          placeholder="Paste data here"
-        >
-          {"resourceType": "Slot", "id": 1}
-        </textarea>
-        <button
-          class="usa-button"
-          data-testid="button"
-          disabled=""
-          type="submit"
-        >
-          Validate
-        </button>
-      </form>
-    </div>
-    <div
-      class="grid-row"
-      data-testid="grid"
+      Validate FHIR resources
+    </h1>
+  </header>
+  <form
+    action="#"
+    class="usa-form"
+  >
+    <label
+      class="usa-label"
+      data-testid="label"
+      for="text"
     >
-      <section
-        class="usa-section"
-      />
-    </div>
-  </div>
+      Paste text here:
+    </label>
+    <textarea
+      aria-label="validation-text"
+      class="usa-textarea"
+      data-testid="textarea"
+      id="text"
+      name="text"
+      placeholder="Paste data here"
+    >
+      {"resourceType": "Slot", "id": 1}
+    </textarea>
+    <button
+      class="usa-button"
+      data-testid="button"
+      disabled=""
+      type="submit"
+    >
+      Validate
+    </button>
+  </form>
+  <section
+    class="usa-section"
+  />
 </div>
 `;
 
 exports[`Validate renders text 1`] = `
 <div>
-  <div
-    class=""
-    data-testid="grid"
+  <header
+    class="usa-header"
+    data-testid="header"
   >
-    <div
-      class="grid-row"
-      data-testid="grid"
+    <h1
+      id="validate-header"
     >
-      <form
-        action="#"
-        class="usa-form"
-      >
-        <label
-          class="usa-label"
-          data-testid="label"
-          for="text"
-        >
-          Paste text here:
-        </label>
-        <textarea
-          aria-label="validation-text"
-          class="usa-textarea"
-          data-testid="textarea"
-          id="text"
-          name="text"
-          placeholder="Paste data here"
-        />
-        <button
-          class="usa-button"
-          data-testid="button"
-          type="submit"
-        >
-          Validate
-        </button>
-      </form>
-    </div>
-    <div
-      class="grid-row"
-      data-testid="grid"
+      Validate FHIR resources
+    </h1>
+  </header>
+  <form
+    action="#"
+    class="usa-form"
+  >
+    <label
+      class="usa-label"
+      data-testid="label"
+      for="text"
     >
-      <section
-        class="usa-section"
-      />
-    </div>
-  </div>
+      Paste text here:
+    </label>
+    <textarea
+      aria-label="validation-text"
+      class="usa-textarea"
+      data-testid="textarea"
+      id="text"
+      name="text"
+      placeholder="Paste data here"
+    />
+    <button
+      class="usa-button"
+      data-testid="button"
+      disabled=""
+      type="submit"
+    >
+      Validate
+    </button>
+  </form>
+  <section
+    class="usa-section"
+  />
 </div>
 `;

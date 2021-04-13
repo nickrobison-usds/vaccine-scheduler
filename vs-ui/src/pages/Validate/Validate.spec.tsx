@@ -3,6 +3,7 @@ import {Validate} from "./Validate";
 import {FhirClientContext} from "../../context/FhirClientContext";
 import {FhirClientError, OperationClient} from "../../@types";
 import Client from "fhir-kit-client";
+import userEvent from "@testing-library/user-event";
 
 jest.mock('fhir-kit-client');
 
@@ -55,25 +56,6 @@ const slotFailure: FhirClientError = {
 
 };
 
-// const mockClient = jest.fn();
-//
-// mockClient.mockImplementation(() => {
-//     return {
-//
-//     }
-// })
-
-// const mockClient = jest.mock("fhir-kit-client", () => {
-//     return jest.fn().mockImplementation(() => {
-//         return {
-//             operation: (params: any) => {
-//                 console.debug("Does this work?");
-//                 return Promise.reject("nope");
-//             }
-//         }
-//     })
-// })
-
 describe('Validate', () => {
     it('renders text', async () => {
         const {container} = render(<Validate/>);
@@ -95,6 +77,15 @@ describe('Validate', () => {
             fireEvent.submit(screen.getByRole("button", {name: /validate/i}));
         });
         expect(await screen.findByText("Not a fhir resource")).toBeInTheDocument();
+    });
+
+    it('requires valid json', async () => {
+        render(<Validate/>);
+        expect(await screen.getByRole("button", {name: /validate/i})).toBeDisabled();
+        await userEvent.type(screen.getByLabelText('validation-text'), 'hello');
+        await userEvent.click(screen.getByRole("button", {name: /validate/i}));
+        expect(await screen.getByRole("button", {name: /validate/i})).toBeDisabled();
+        expect(await screen.findByText("Data must be valid JSON")).toBeInTheDocument();
     })
 
     it('displays validation errors', async () => {

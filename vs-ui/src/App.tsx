@@ -1,4 +1,3 @@
-import {GridContainer} from '@trussworks/react-uswds';
 import React from 'react';
 import {BrowserRouter, Route, Switch} from 'react-router-dom';
 import './App.css';
@@ -15,13 +14,11 @@ function App() {
                 <div className="App">
                     <NavMenu/>
                     <section className="usa-section">
-                        <GridContainer>
-                            <Switch>
-                                <Route exact path="/" component={Home}/>
-                                <Route path="/validate" component={Validate}/>
-                                <Route path="/finder" component={Finder}/>
-                            </Switch>
-                        </GridContainer>
+                        <Switch>
+                            <Route exact path="/" component={Home}/>
+                            <Route path="/validate" component={Validate}/>
+                            <Route path="/finder" component={Finder}/>
+                        </Switch>
                     </section>
                 </div>
             </FhirClientProvider>
