@@ -38,7 +38,6 @@ services:
       - "${VS_PUBLISHER_PORT:-9090}:9090"
   api:
     image: ghcr.io/nickrobison-usds/vaccine-schedule/api
-    command: bootRun
     depends_on:
       - db
       - rabbitmq
