@@ -33,7 +33,7 @@ import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
  */
 @Entity
 @Table(name = "locations")
-public class LocationEntity extends BaseEntity implements Flammable<VaccineLocation>, Identifiable {
+public class LocationEntity extends UpstreamUpdateableEntity implements Flammable<VaccineLocation>, Identifiable {
 
     @Column(nullable = false)
     private String name;
@@ -127,6 +127,7 @@ public class LocationEntity extends BaseEntity implements Flammable<VaccineLocat
         this.address = other.address;
         this.name = other.name;
         this.locationHash = other.locationHash;
+        this.upstreamUpdatedAt = other.upstreamUpdatedAt;
 
         // Merge telecoms and identifiers
         this.telecoms.forEach(t -> t.setEntity(null));
@@ -144,7 +145,7 @@ public class LocationEntity extends BaseEntity implements Flammable<VaccineLocat
     @Override
     public VaccineLocation toFHIR() {
         final VaccineLocation location = new VaccineLocation();
-        location.setMeta(generateMeta());
+        location.setMeta(generateMeta(LOCATION_PROFILE));
 
         location.setId(this.getInternalId().toString());
         location.setName(this.name);
@@ -176,11 +177,6 @@ public class LocationEntity extends BaseEntity implements Flammable<VaccineLocat
         return location;
     }
 
-    @Override
-    protected String getEntityProfile() {
-        return LOCATION_PROFILE;
-    }
-
     public static LocationEntity fromFHIR(VaccineLocation resource) {
 
         final AddressElement addressElement = AddressElement.fromFHIR(resource.getAddress());
@@ -190,6 +186,7 @@ public class LocationEntity extends BaseEntity implements Flammable<VaccineLocat
                 resource.getName(),
                 addressElement,
                 hash);
+        entity.updateFromMeta(resource.getMeta());
 
         // Identifiers
         final Set<LocationIdentifier> identifiers = resource.getIdentifier().stream()

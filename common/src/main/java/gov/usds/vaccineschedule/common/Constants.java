@@ -23,13 +23,15 @@ public class Constants {
      * See: https://www.hl7.org/fhir/datatypes.html#instant
      */
 //    public static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
+
+    // Profiles
     public static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSVV");
     public static final String LOCATION_PROFILE = "http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-location";
     public static final String SLOT_PROFILE = "http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-slot";
     public static final String SCHEDULE_PROFILE = "http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-schedule";
 
+    // Extensions
     public static String ORIGINAL_ID_SYSTEM = "http://usds.gov/vaccine/source-identifier";
-
-    // Profiles
+    public static String CURRENT_AS_OF = "http://hl7.org/fhir/StructureDefinition/currentAsOf";
 
 }

@@ -22,7 +22,7 @@ import static gov.usds.vaccineschedule.common.Constants.SCHEDULE_PROFILE;
  */
 @Entity
 @Table(name = "schedules")
-public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
+public class ScheduleEntity extends UpstreamUpdateableEntity implements Flammable<Schedule> {
 
     public static Identifier HL7_IDENTIFIER = new Identifier().setSystem("http://terminology.hl7.org/CodeSystem/service-type").setValue("57");
     public static Identifier SMART_IDENTIFIER = new Identifier().setSystem("http://fhir-registry.smarthealthit.org/CodeSystem/service-type").setValue("covid19-immunization");
@@ -57,7 +57,7 @@ public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
     @Override
     public Schedule toFHIR() {
         final Schedule schedule = new Schedule();
-        schedule.setMeta(generateMeta());
+        schedule.setMeta(generateMeta(SCHEDULE_PROFILE));
 
         schedule.setId(this.getInternalId().toString());
         schedule.addIdentifier(HL7_IDENTIFIER);
@@ -70,6 +70,7 @@ public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
     }
 
     public void merge(ScheduleEntity other) {
+        this.upstreamUpdatedAt = other.upstreamUpdatedAt;
         this.identifiers.forEach(i -> i.setEntity(null));
         this.identifiers.clear();
         this.identifiers.addAll(other.identifiers);
@@ -78,6 +79,7 @@ public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
 
     public static ScheduleEntity fromFHIR(LocationEntity location, Schedule resource) {
         final ScheduleEntity entity = new ScheduleEntity();
+        entity.updateFromMeta(resource.getMeta());
 
         entity.setLocation(location);
 
@@ -89,10 +91,5 @@ public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
 
         entity.setIdentifiers(identifiers);
         return entity;
-    }
-
-    @Override
-    protected String getEntityProfile() {
-        return SCHEDULE_PROFILE;
     }
 }
