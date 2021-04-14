@@ -12,14 +12,14 @@ function App() {
         <BrowserRouter>
             <FhirClientProvider>
                 <div className="App">
-                    <NavMenu/>
-                    <section className="usa-section">
+                    <div id="main-wrapper">
+                        <NavMenu/>
                         <Switch>
                             <Route exact path="/" component={Home}/>
                             <Route path="/validate" component={Validate}/>
                             <Route path="/finder" component={Finder}/>
                         </Switch>
-                    </section>
+                    </div>
                 </div>
             </FhirClientProvider>
         </BrowserRouter>

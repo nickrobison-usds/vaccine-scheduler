@@ -1,8 +1,9 @@
-import {Alert, Button, ErrorMessage, Header, Label, Textarea} from "@trussworks/react-uswds";
+import {Alert, Button, ErrorMessage, Grid, GridContainer, Header, Label, Textarea} from "@trussworks/react-uswds";
 import {Field, Form, FormikBag, FormikProps, withFormik} from "formik";
 import React, {useState} from "react";
 import {useFhir} from "../../context/FhirClientContext";
 import {isClientError, isFHIRResource} from "../../@types";
+import './ValidatePage.scss';
 
 interface FormValues {
     text: string
@@ -96,14 +97,22 @@ export const Validate: React.FC<{}> = () => {
     })(ValidationForm);
 
     return (
-        <>
-            <Header>
-                <h1 id="validate-header">Validate FHIR resources</h1>
-            </Header>
-            <FormikForm/>
-            <section className="usa-section">
-                {validationErrors.map(issueToAlert)}
-            </section>
-        </>
+        <GridContainer>
+            <Grid>
+                <Grid row={true}>
+                    <Header className="validate-header">
+                        <h1 id="validate-header">Validate FHIR resources</h1>
+                    </Header>
+                </Grid>
+                <Grid row={true}>
+                    <FormikForm/>
+                </Grid>
+                <Grid row={true}>
+                    <section className="usa-section">
+                        {validationErrors.map(issueToAlert)}
+                    </section>
+                </Grid>
+            </Grid>
+        </GridContainer>
     )
 }
