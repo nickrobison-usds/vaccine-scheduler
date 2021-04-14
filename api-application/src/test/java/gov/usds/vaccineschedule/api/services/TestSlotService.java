@@ -6,11 +6,13 @@ import gov.usds.vaccineschedule.api.BaseApplicationTest;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Meta;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
 import java.io.InputStream;
+import java.sql.Date;
 import java.util.List;
 
 import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
@@ -34,12 +36,17 @@ public class TestSlotService extends BaseApplicationTest {
         // Pull a single location out of the NDJSON file
         final InputStream is = TestLocationService.class.getClassLoader().getResourceAsStream("example-slots.ndjson");
         final VaccineSlot firstSlot = converter.inputStreamToTypedResource(VaccineSlot.class, is).get(0);
+        // Set the upstream updated time
+        final Date updatedDate = Date.valueOf("2020-01-01");
+        final Meta m1 = new Meta().setLastUpdated(updatedDate);
+        firstSlot.setMeta(m1);
         firstSlot.setCapacity(new IntegerType(5));
         service.addSlot(firstSlot);
         final TokenParam tokenParam = new TokenParam().setSystem(ORIGINAL_ID_SYSTEM).setValue(firstSlot.getId());
         final VaccineSlot updatedSlot = (VaccineSlot) service.findSlotsWithId(tokenParam, PageRequest.of(0, 10)).get(0);
         assertAll(() -> assertTrue(firstSlot.getCapacity().equalsDeep(updatedSlot.getCapacity()), "Should have updated capacity"),
-                () -> assertTrue(firstSlot.getBookingPhone().equalsDeep(updatedSlot.getBookingPhone()), "Should have original phone number"));
+                () -> assertTrue(firstSlot.getBookingPhone().equalsDeep(updatedSlot.getBookingPhone()), "Should have original phone number"),
+                () -> assertEquals(updatedDate, updatedSlot.getMeta().getLastUpdated(), "Should have updated upstream"));
     }
 
     @Test

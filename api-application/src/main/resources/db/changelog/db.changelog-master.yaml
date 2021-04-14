@@ -291,5 +291,31 @@ databaseChangeLog:
             columns:
               - column:
                   name: h3_index
+  - changeSet:
+      id: add-upstream-update-timestamp
+      author: nicholas.a.robison@omb.eop.gov
+      comment: Add column for tracking upstream updatedAt timestamps
+      changes:
+        - addColumn:
+            tableName: locations
+            columns:
+              - column:
+                  name: upstream_updated_at
+                  type: *timestamp
+                  remarks: When the data was last updated by the upstream
+        - addColumn:
+            tableName: schedules
+            columns:
+              - column:
+                  name: upstream_updated_at
+                  type: *timestamp
+                  remarks: When the data was last updated by the upstream
+        - addColumn:
+            tableName: slots
+            columns:
+              - column:
+                  name: upstream_updated_at
+                  type: *timestamp
+                  remarks: When the data was last updated by the upstream
 
 

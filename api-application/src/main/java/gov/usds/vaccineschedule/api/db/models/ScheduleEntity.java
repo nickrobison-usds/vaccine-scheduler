@@ -1,8 +1,6 @@
 package gov.usds.vaccineschedule.api.db.models;
 
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.InstantType;
-import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Schedule;
 
@@ -12,7 +10,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,7 +22,7 @@ import static gov.usds.vaccineschedule.common.Constants.SCHEDULE_PROFILE;
  */
 @Entity
 @Table(name = "schedules")
-public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
+public class ScheduleEntity extends UpstreamUpdateableEntity implements Flammable<Schedule> {
 
     public static Identifier HL7_IDENTIFIER = new Identifier().setSystem("http://terminology.hl7.org/CodeSystem/service-type").setValue("57");
     public static Identifier SMART_IDENTIFIER = new Identifier().setSystem("http://fhir-registry.smarthealthit.org/CodeSystem/service-type").setValue("covid19-immunization");
@@ -60,14 +57,7 @@ public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
     @Override
     public Schedule toFHIR() {
         final Schedule schedule = new Schedule();
-        final Meta meta = new Meta();
-        meta.addProfile(SCHEDULE_PROFILE);
-
-        if (this.getUpdatedAt() != null) {
-            final String fhirDateString = this.getUpdatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            meta.setLastUpdatedElement(new InstantType(fhirDateString));
-        }
-        schedule.setMeta(meta);
+        schedule.setMeta(generateMeta(SCHEDULE_PROFILE));
 
         schedule.setId(this.getInternalId().toString());
         schedule.addIdentifier(HL7_IDENTIFIER);
@@ -80,6 +70,7 @@ public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
     }
 
     public void merge(ScheduleEntity other) {
+        this.upstreamUpdatedAt = other.upstreamUpdatedAt;
         this.identifiers.forEach(i -> i.setEntity(null));
         this.identifiers.clear();
         this.identifiers.addAll(other.identifiers);
@@ -88,6 +79,7 @@ public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
 
     public static ScheduleEntity fromFHIR(LocationEntity location, Schedule resource) {
         final ScheduleEntity entity = new ScheduleEntity();
+        entity.updateFromMeta(resource.getMeta());
 
         entity.setLocation(location);
 

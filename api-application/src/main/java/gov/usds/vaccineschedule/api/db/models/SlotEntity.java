@@ -4,7 +4,6 @@ import gov.usds.vaccineschedule.common.Constants;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Slot;
 import org.hl7.fhir.r4.model.StringType;
@@ -20,7 +19,6 @@ import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -34,7 +32,7 @@ import static gov.usds.vaccineschedule.common.Constants.SLOT_PROFILE;
  */
 @Entity
 @Table(name = "slots")
-public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
+public class SlotEntity extends UpstreamUpdateableEntity implements Flammable<VaccineSlot> {
 
     private static final ZoneId UTC = ZoneId.of("GMT");
 
@@ -131,14 +129,7 @@ public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
     @Override
     public VaccineSlot toFHIR() {
         final VaccineSlot slot = new VaccineSlot();
-        final Meta meta = new Meta();
-        meta.addProfile(SLOT_PROFILE);
-
-        if (this.getUpdatedAt() != null) {
-            final String fhirDateString = this.getUpdatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            meta.setLastUpdatedElement(new InstantType(fhirDateString));
-        }
-        slot.setMeta(meta);
+        slot.setMeta(generateMeta(SLOT_PROFILE));
 
         slot.setId(this.getInternalId().toString());
         this.identifiers.stream().map(SlotIdentifier::toFHIR).forEach(slot::addIdentifier);
@@ -167,6 +158,7 @@ public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
         this.status = other.status;
         this.startTime = other.startTime;
         this.endTime = other.endTime;
+        this.upstreamUpdatedAt = other.upstreamUpdatedAt;
 
         this.identifiers.forEach(i -> i.setEntity(null));
         this.identifiers.clear();
@@ -176,6 +168,7 @@ public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
 
     public static SlotEntity fromFHIR(ScheduleEntity schedule, VaccineSlot resource) {
         final SlotEntity entity = new SlotEntity();
+        entity.updateFromMeta(resource.getMeta());
 
         entity.setSchedule(schedule);
 
