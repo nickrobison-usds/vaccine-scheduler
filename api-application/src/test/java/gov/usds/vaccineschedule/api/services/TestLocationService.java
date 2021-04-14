@@ -6,12 +6,14 @@ import gov.usds.vaccineschedule.api.BaseApplicationTest;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
 import gov.usds.vaccineschedule.common.models.VaccineLocation;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Meta;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.io.InputStream;
+import java.sql.Date;
 import java.util.List;
 
 import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
@@ -40,6 +42,8 @@ public class TestLocationService extends BaseApplicationTest {
         // Pull out the location to cache it
         final TokenParam tokenParam = new TokenParam().setSystem(ORIGINAL_ID_SYSTEM).setValue(firstLoc.getId());
         final Location origLocation = this.service.findLocations(tokenParam, null, null, null, Pageable.unpaged()).get(0);
+        final Meta meta = new Meta();
+        meta.setLastUpdated(Date.valueOf("2020-01-01"));
         // Update the name and save it
         firstLoc.setName("I'm an updated name");
         service.addLocation(firstLoc);

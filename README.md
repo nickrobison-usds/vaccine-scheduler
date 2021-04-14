@@ -76,6 +76,35 @@ number of results per page.
 When returning a `Bundle` the server automatically populates the `next` and `previous` link elements, which the client
 can use to request sequential pages.
 
+### Resource IDs and timestamps
+
+Given that the API server is an intermediary between the clients and the upstream publishers, we need to have a
+consistent way of handling both resource IDs as well as update timestamps.
+
+#### Resource IDs
+
+When a resource is returned by the API, the `id` value corresponds to the unique identifier on the API service. In order
+to enable linking back to the original source system, the original ID provided by the upstream is included as an
+additional `Identifier` field. The original ID is identified by the following
+system: `http://usds.gov/vaccine/source-identifier`.
+
+#### Timestamps
+
+Resources returned by the API contain two timestamps:
+
+1. `lastUpdatedAt` in the `Meta` component indicates the update timestamp provided by the upstream server (if one
+   exists).
+1. `currentAsOf` as an extension in the `Meta` component which indicates when the resource was updated in the API
+   server (e.g. fetched from upstream). This value is always provided and is set regardless of whether or not any values
+   have changed from upstream. Users can retrieve this value via
+   the `http://hl7.org/fhir/StructureDefinition/currentAsOf` system.
+
+The means the `lastUpdatedAt` can significantly lag behind `currentAsOf` if the upstream source refreshes their data at
+a slower interval than which the API server looks for new values.
+
+When returning a `Bundle` resource, the `lastUpdatedAt` value is set to either the maximum `currentAsOf` time for the
+bundled resources, or to the transaction timestamp.
+
 ### Refreshing the data:
 
 The API service sets up some cron jobs to regularly poll a list of upstream publishers for their data. The cron jobs
