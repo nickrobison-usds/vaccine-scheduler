@@ -4,9 +4,7 @@ import gov.usds.vaccineschedule.common.models.VaccineLocation;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.Meta;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -23,7 +21,6 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -147,14 +144,7 @@ public class LocationEntity extends BaseEntity implements Flammable<VaccineLocat
     @Override
     public VaccineLocation toFHIR() {
         final VaccineLocation location = new VaccineLocation();
-        final Meta meta = new Meta();
-        meta.addProfile(LOCATION_PROFILE);
-
-        if (this.getUpdatedAt() != null) {
-            final String fhirDateString = this.getUpdatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            meta.setLastUpdatedElement(new InstantType(fhirDateString));
-        }
-        location.setMeta(meta);
+        location.setMeta(generateMeta());
 
         location.setId(this.getInternalId().toString());
         location.setName(this.name);
@@ -184,6 +174,11 @@ public class LocationEntity extends BaseEntity implements Flammable<VaccineLocat
             location.setLocationDistance(fhirDistance);
         }
         return location;
+    }
+
+    @Override
+    protected String getEntityProfile() {
+        return LOCATION_PROFILE;
     }
 
     public static LocationEntity fromFHIR(VaccineLocation resource) {

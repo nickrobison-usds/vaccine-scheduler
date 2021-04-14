@@ -203,4 +203,9 @@ public class SlotEntity extends BaseEntity implements Flammable<VaccineSlot> {
         entity.setIdentifiers(identifiers);
         return entity;
     }
+
+    @Override
+    protected String getEntityProfile() {
+        return SLOT_PROFILE;
+    }
 }

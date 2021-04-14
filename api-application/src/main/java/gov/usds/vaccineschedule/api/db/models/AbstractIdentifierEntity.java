@@ -68,4 +68,9 @@ public class AbstractIdentifierEntity<T> extends BaseEntity {
     public int hashCode() {
         return Objects.hash(system, value);
     }
+
+    @Override
+    protected String getEntityProfile() {
+        return "";
+    }
 }

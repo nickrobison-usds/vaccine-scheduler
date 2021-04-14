@@ -54,4 +54,9 @@ public class AbstractTelecomEntity<T> extends BaseEntity {
     public ContactPoint toFHIR() {
         return new ContactPoint().setSystem(this.system).setValue(this.value);
     }
+
+    @Override
+    protected String getEntityProfile() {
+        return "";
+    }
 }

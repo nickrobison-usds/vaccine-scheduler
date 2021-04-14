@@ -1,8 +1,6 @@
 package gov.usds.vaccineschedule.api.db.models;
 
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.InstantType;
-import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Schedule;
 
@@ -12,7 +10,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,14 +57,7 @@ public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
     @Override
     public Schedule toFHIR() {
         final Schedule schedule = new Schedule();
-        final Meta meta = new Meta();
-        meta.addProfile(SCHEDULE_PROFILE);
-
-        if (this.getUpdatedAt() != null) {
-            final String fhirDateString = this.getUpdatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            meta.setLastUpdatedElement(new InstantType(fhirDateString));
-        }
-        schedule.setMeta(meta);
+        schedule.setMeta(generateMeta());
 
         schedule.setId(this.getInternalId().toString());
         schedule.addIdentifier(HL7_IDENTIFIER);
@@ -99,5 +89,10 @@ public class ScheduleEntity extends BaseEntity implements Flammable<Schedule> {
 
         entity.setIdentifiers(identifiers);
         return entity;
+    }
+
+    @Override
+    protected String getEntityProfile() {
+        return SCHEDULE_PROFILE;
     }
 }
