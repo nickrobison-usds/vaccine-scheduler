@@ -1,6 +1,7 @@
 import {Alert, Button, ErrorMessage, Grid, GridContainer, Header, Label, Textarea} from "@trussworks/react-uswds";
 import {Field, Form, FormikBag, FormikProps, withFormik} from "formik";
 import React, {useState} from "react";
+
 import {useFhir} from "../../context/FhirClientContext";
 import {isClientError, isFHIRResource} from "../../@types";
 import './ValidatePage.scss';
@@ -57,7 +58,7 @@ const ValidationForm = (props: FormikProps<FormValues>) => {
     </Form>)
 }
 
-export const Validate: React.FC<{}> = () => {
+export const Validate: React.FC = () => {
     const {client} = useFhir();
     const [validationErrors, setValidationErrors] = useState<fhir.OperationOutcomeIssue[]>([]);
 

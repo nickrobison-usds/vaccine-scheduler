@@ -1,7 +1,8 @@
-import {NavMenu} from "./NavMenu";
 import {render, screen} from "@testing-library/react";
 import React from "react";
 import {MemoryRouter} from "react-router-dom";
+
+import {NavMenu} from "./NavMenu";
 
 const TestContainer: React.FC = ({children}) => (
     <MemoryRouter>

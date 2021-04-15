@@ -1,12 +1,13 @@
 import {CardGroup, Grid, GridContainer, Search} from "@trussworks/react-uswds";
 import React, {FormEvent, useEffect, useState} from "react";
+
 import {Map} from "../../components/Map/Map";
 import {useFhir} from "../../context/FhirClientContext";
 import {isBundle} from "../../@types";
 import {LocationCard} from "../../components/LocationCard/LocationCard";
 import './Finder.scss'
 
-export const Finder: React.FC<{}> = () => {
+export const Finder: React.FC = () => {
 
     const {client} = useFhir();
     const [locations, setLocations] = useState<fhir.Location[]>([]);
@@ -29,8 +30,9 @@ export const Finder: React.FC<{}> = () => {
                 }
             }
         };
+        // noinspection JSIgnoredPromiseFromCall
         fetchData();
-    }, []);
+    });
 
     return (
         <GridContainer>

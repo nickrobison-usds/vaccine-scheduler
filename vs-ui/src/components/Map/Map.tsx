@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
 import mapboxgl from "mapbox-gl";
+
 import './Map.scss';
 import "mapbox-gl/dist/mapbox-gl.css";
 import {usePosition} from "./utils";
@@ -7,7 +8,7 @@ import {usePosition} from "./utils";
 console.debug("Token: ", process.env.REACT_APP_MAPBOX_TOKEN);
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN!;
 
-export const Map: React.FC<{}> = () => {
+export const Map: React.FC = () => {
 
     let map: mapboxgl.Map;
 
@@ -28,6 +29,7 @@ export const Map: React.FC<{}> = () => {
             lng: coords.longitude,
             lat: coords.latitude
         });
+        // eslint-disable-next-line
     }, [coords])
 
     useEffect(() => {

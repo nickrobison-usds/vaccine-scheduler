@@ -29,13 +29,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "eject": "react-scripts eject",
+    "lint": "eslint 'src/**/*.{js,ts,jsx,tsx}'"
   },
   "browserslist": {
     "production": [
@@ -57,5 +52,27 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/react-router-dom": "^5.1.7"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest",
+      "plugin:import/errors",
+      "plugin:import/warnings"
+    ],
+    "plugins": [
+    ],
+    "rules": {
+      "import/no-unresolved": 0,
+      "import/first": 1,
+      "import/order": [
+        1,
+        {
+          "newlines-between": "always"
+        }
+      ],
+      "import/newline-after-import": 1,
+      "import/no-commonjs": 0
+    }
   }
 }
