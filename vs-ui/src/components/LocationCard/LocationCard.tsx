@@ -33,7 +33,7 @@ export const LocationCard: React.FC<LocationCardProps> = ({ location }) => {
           {location.name ? location.name : ""}
         </h3>
         <CardBody>{address && <LocationAddress address={address} />}</CardBody>
-        <CardFooter className="location-card__footer">
+        <CardFooter className="location-card--footer">
           <FontAwesomeIcon icon={faExclamationTriangle} />
           <span />
           100 slots available
