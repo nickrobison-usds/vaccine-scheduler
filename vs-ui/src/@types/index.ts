@@ -31,3 +31,7 @@ export function isClientError(err: any): err is FhirClientError {
 export function isFHIRResource(json: any): json is fhir.DomainResource {
     return (json as fhir.DomainResource).resourceType !== undefined;
 }
+
+export function isBundle(bundle: any): bundle is fhir.Bundle {
+    return (bundle as fhir.Bundle).type !== undefined;
+}
