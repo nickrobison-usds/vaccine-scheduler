@@ -10,8 +10,8 @@ import { useFhir } from "../../context/FhirClientContext";
 import { isBundle } from "../../@types";
 import { LocationCard } from "../../components/LocationCard/LocationCard";
 import "./Finder.scss";
-import { VSMap } from "../../components/Map/Map";
-import { notEmpty } from "../../components/Map/utils";
+import { VSMap } from "../../components/VSMap/VSMap";
+import { notEmpty } from "../../components/VSMap/utils";
 
 export const Finder: React.FC = () => {
   const { client } = useFhir();
@@ -40,7 +40,7 @@ export const Finder: React.FC = () => {
     };
     // noinspection JSIgnoredPromiseFromCall
     fetchData();
-  }, []);
+  });
 
   return (
     <GridContainer>
