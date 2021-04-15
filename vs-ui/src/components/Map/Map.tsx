@@ -1,54 +1,59 @@
-import React, { useEffect, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
+import React from "react";
 
-import "./Map.scss";
+import * as Geo from "geojson";
+import ReactMapboxGl, { Feature, Layer } from "react-mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { usePosition } from "./utils";
 
-console.debug("Token: ", process.env.REACT_APP_MAPBOX_TOKEN);
-mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN!;
+export interface MapFeature {
+  lng: number;
+  lat: number;
+  id: string;
+  title: string;
+}
 
-export const Map: React.FC = () => {
-  let map: mapboxgl.Map;
+export interface MapProps {
+  features: MapFeature[];
+}
 
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const [lng, setLng] = useState(-70.9);
-  const [lat, setLat] = useState(42.35);
-  const [zoom, setZoom] = useState(9);
+const transformFeature = (feature: MapFeature): Geo.Feature => {
+  return {
+    type: "Feature",
+    id: feature.id,
+    geometry: {
+      type: "Point",
+      coordinates: [feature.lng, feature.lat],
+    },
+    properties: {
+      title: feature.title,
+    },
+  };
+};
 
-  const { coords, error } = usePosition();
+export const VSMap: React.FC<MapProps> = (props) => {
+  const { features } = props;
 
-  useEffect(() => {
-    console.debug("I have a change", coords, error);
-    if (!coords) {
-      return;
-    }
-    console.debug("Setting new position", coords);
-    map.setCenter({
-      lng: coords.longitude,
-      lat: coords.latitude,
-    });
-    // eslint-disable-next-line
-  }, [coords]);
+  const Map = ReactMapboxGl({
+    accessToken: process.env.REACT_APP_MAPBOX_TOKN!,
+  });
 
-  useEffect(() => {
-    map = new mapboxgl.Map({
-      container: mapContainer.current!,
-      style: "mapbox://styles/mapbox/streets-v11",
-      center: [lng, lat],
-      zoom: zoom,
-    });
+  console.debug("Map, render, ", features);
 
-    map.on("move", () => {
-      setLng(Number.parseFloat(map.getCenter().lng.toFixed(4)));
-      setLat(Number.parseFloat(map.getCenter().lat.toFixed(4)));
-      setZoom(Number.parseFloat(map.getZoom().toFixed(2)));
-    });
-    return () => map.remove();
-  }, []); // This violates exhaustive deps check, can we work around it?
   return (
-    <div>
-      <div className="map-container" ref={mapContainer} />
-    </div>
+    <Map
+      style="mapbox://styles/mapbox/streets-v9"
+      center={[-0.09, 51.505]}
+      containerStyle={{
+        height: "100vh",
+        width: "50w",
+      }}
+    >
+      <Layer
+        type="symbol"
+        id="marker"
+        layout={{ "icon-image": "marker-15", "icon-size": 100 }}
+      >
+        <Feature coordinates={[-0.09, 51.505]} />
+      </Layer>
+    </Map>
   );
 };

@@ -6,11 +6,12 @@ import {
 } from "@trussworks/react-uswds";
 import React, { FormEvent, useEffect, useState } from "react";
 
-import { Map } from "../../components/Map/Map";
 import { useFhir } from "../../context/FhirClientContext";
 import { isBundle } from "../../@types";
 import { LocationCard } from "../../components/LocationCard/LocationCard";
 import "./Finder.scss";
+import { VSMap } from "../../components/Map/Map";
+import { notEmpty } from "../../components/Map/utils";
 
 export const Finder: React.FC = () => {
   const { client } = useFhir();
@@ -28,6 +29,7 @@ export const Finder: React.FC = () => {
       });
 
       if (isBundle(response)) {
+        console.debug("Response: ", response);
         const locations = response.entry?.map((entry) => {
           return entry.resource as fhir.Location;
         });
@@ -38,7 +40,7 @@ export const Finder: React.FC = () => {
     };
     // noinspection JSIgnoredPromiseFromCall
     fetchData();
-  });
+  }, []);
 
   return (
     <GridContainer>
@@ -49,12 +51,26 @@ export const Finder: React.FC = () => {
         <Grid col={5}>
           <CardGroup>
             {locations.map((loc) => {
-              return <LocationCard location={loc} />;
+              return <LocationCard location={loc} key={loc.id} />;
             })}
           </CardGroup>
         </Grid>
         <Grid col={7}>
-          <Map />
+          <VSMap
+            features={locations
+              .map((l) => {
+                if (l.position) {
+                  return {
+                    lng: l.position.longitude,
+                    lat: l.position.latitude,
+                    id: l.id!,
+                    title: l.name!,
+                  };
+                }
+                return null;
+              })
+              .filter(notEmpty)}
+          />
         </Grid>
       </Grid>
     </GridContainer>
