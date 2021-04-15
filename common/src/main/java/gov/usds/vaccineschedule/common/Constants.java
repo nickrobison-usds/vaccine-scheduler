@@ -32,6 +32,6 @@ public class Constants {
 
     // Extensions
     public static String ORIGINAL_ID_SYSTEM = "http://usds.gov/vaccine/source-identifier";
-    public static String CURRENT_AS_OF = "http://hl7.org/fhir/StructureDefinition/currentAsOf";
+    public static String CURRENT_AS_OF = "http://usds.gov/vaccine/currentAsOf";
 
 }
