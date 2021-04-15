@@ -97,7 +97,7 @@ Resources returned by the API contain two timestamps:
 1. `currentAsOf` as an extension in the `Meta` component which indicates when the resource was updated in the API
    server (e.g. fetched from upstream). This value is always provided and is set regardless of whether or not any values
    have changed from upstream. Users can retrieve this value via
-   the `http://hl7.org/fhir/StructureDefinition/currentAsOf` system.
+   the `http://usds.gov/vaccine/currentAsOf` system.
 
 The means the `lastUpdatedAt` can significantly lag behind `currentAsOf` if the upstream source refreshes their data at
 a slower interval than which the API server looks for new values.
