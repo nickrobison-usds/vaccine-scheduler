@@ -31,13 +31,19 @@ services:
       - 5672:5672
       - 15672:15672
   publisher:
-    image: ghcr.io/nickrobison-usds/vaccine-schedule/publisher
+    image: nickrobisonusds/vs-publisher
     environment:
       SPRING_PROFILES_ACTIVE: dockerized
     ports:
       - "${VS_PUBLISHER_PORT:-9090}:9090"
+  wa-publisher:
+    image: nickrobisonusds/wa-publisher
+    environment:
+      SPRING_PROFILES_ACTIVE: dockerized
+    ports:
+      - "${WA_PUBLISHER_PORT:-9091}:9091"
   api:
-    image: ghcr.io/nickrobison-usds/vaccine-schedule/api
+    image: nickrobisonusds/vs-api
     depends_on:
       - db
       - rabbitmq

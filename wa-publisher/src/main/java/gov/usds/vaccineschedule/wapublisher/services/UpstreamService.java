@@ -1,11 +1,10 @@
 package gov.usds.vaccineschedule.wapublisher.services;
 
-import ca.uhn.fhir.context.FhirContext;
 import gov.usds.vaccineschedule.common.models.VaccineLocation;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import gov.usds.vaccineschedule.wapublisher.models.BundledAvailability;
+import gov.usds.vaccineschedule.wapublisher.models.LocationResponse;
 import gov.usds.vaccineschedule.wapublisher.models.WALocation;
-import gov.usds.vaccineschedule.wapublisher.models.WAQLResponse;
 import graphql.kickstart.spring.webclient.boot.GraphQLRequest;
 import graphql.kickstart.spring.webclient.boot.GraphQLWebClient;
 import org.hl7.fhir.r4.model.Address;
@@ -18,10 +17,14 @@ import org.hl7.fhir.r4.model.Schedule;
 import org.hl7.fhir.r4.model.Slot;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UrlType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.Nullable;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -38,7 +41,9 @@ import static gov.usds.vaccineschedule.common.Constants.SMART_SYSTEM;
  * Created by nickrobison on 4/16/21
  */
 @Service
-public class LocationService {
+public class UpstreamService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UpstreamService.class);
 
     private static final String QUERY = "query {\n" +
             "  searchLocations(searchInput: {\n" +
@@ -49,36 +54,53 @@ public class LocationService {
             "    }\n" +
             "  }) {\n" +
             "    locations {\n" +
-
+            "      locationId\n" +
             "      locationName\n" +
             "      locationType\n" +
+            "      addressLine1\n" +
+            "      addressLine2\n" +
+            "      city\n" +
+            "      state\n" +
+            "      zipcode\n" +
+            "      latitude\n" +
+            "      longitude\n" +
+            "      phone\n" +
+            "      email\n" +
+            "      schedulingLink\n" +
+            "      vaccineTypes\n" +
             "      vaccineAvailability\n" +
+            "      updatedAt\n" +
             "      }\n" +
             "    }\n" +
             "  }";
 
     private final GraphQLWebClient client;
-    private final FhirContext ctx;
 
-    public LocationService(GraphQLWebClient client, FhirContext ctx) {
+    public UpstreamService(GraphQLWebClient client) {
         this.client = client;
-        this.ctx = ctx;
     }
 
 
-    public Flux<BundledAvailability> getLocations() {
+    public Flux<BundledAvailability> getUpstreamAvailability() {
+        final Instant start = Instant.now();
+        logger.info("Performing fetch from upstream");
         final GraphQLRequest request = GraphQLRequest.builder().query(QUERY).build();
 
         return client.post(request)
-                .map(response -> response.get("searchLocations", WAQLResponse.LocationResponse.class))
-                .flatMapMany(locationResponse -> Flux.fromIterable(locationResponse.getLocations()).map(this::availabilityFromLocation));
+                .map(response -> response.get("searchLocations", LocationResponse.class))
+                .flatMapMany(locationResponse -> Flux.fromIterable(locationResponse.getLocations()).map(this::availabilityFromLocation))
+                .doOnComplete(() -> {
+                    final Instant end = Instant.now();
+                    final Duration duration = Duration.between(start, end);
+                    logger.info("Fetch completed in {}ms", duration.toMillis());
+                });
 
     }
 
     private BundledAvailability availabilityFromLocation(WALocation waLoc) {
         final VaccineLocation location = new VaccineLocation();
         location.setName(waLoc.getLocationName());
-        location.setId(waLoc.getLocationID());
+        location.setId(waLoc.getLocationId());
 
         // Address
         final Address address = new Address();
@@ -127,6 +149,7 @@ public class LocationService {
     }
 
     private List<VaccineSlot> slotsFromLocation(WALocation location) {
+        logger.debug("Translating location {}", location.getLocationId());
 
         final VaccineSlot slot = new VaccineSlot();
         if (location.getSchedulingLink() != null) {
@@ -143,14 +166,14 @@ public class LocationService {
         slot.setStart(Date.from(start.toInstant(ZoneOffset.UTC)));
         slot.setEnd(Date.from(start.plusDays(1).toInstant(ZoneOffset.UTC)));
 
-        slot.setSchedule(new Reference(new IdType("Schedule", location.getLocationID())));
+        slot.setSchedule(new Reference(new IdType("Schedule", location.getLocationId())));
         return Collections.singletonList(slot);
     }
 
     private List<Schedule> schedulesFromLocation(WALocation location) {
         final Schedule schedule = new Schedule();
-        schedule.setId(location.getLocationID());
-        schedule.addActor(new Reference(new IdType("Location", location.getLocationID())));
+        schedule.setId(location.getLocationId());
+        schedule.addActor(new Reference(new IdType("Location", location.getLocationId())));
         final CodeableConcept concept = new CodeableConcept();
         concept.addCoding().setSystem(HL7_SYSTEM).setCode("57").setDisplay("Immunization");
         concept.addCoding().setSystem(SMART_SYSTEM).setCode("covid19-immunization").setDisplay("COVID-19 Immunization Appointment");

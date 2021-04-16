@@ -8,7 +8,7 @@ import java.time.OffsetDateTime;
  */
 public class WALocation {
 
-    private String locationID;
+    private String locationId;
     private String locationName;
     @Nullable
     private String locationType;
@@ -36,8 +36,8 @@ public class WALocation {
         // Jackson required
     }
 
-    public String getLocationID() {
-        return locationID;
+    public String getLocationId() {
+        return locationId;
     }
 
     public String getLocationName() {
