@@ -1,6 +1,7 @@
 package gov.usds.vaccineschedule.common;
 
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 
 import java.time.format.DateTimeFormatter;
@@ -34,4 +35,10 @@ public class Constants {
     public static String ORIGINAL_ID_SYSTEM = "http://usds.gov/vaccine/source-identifier";
     public static String CURRENT_AS_OF = "http://usds.gov/vaccine/currentAsOf";
 
+    public static final String HL7_SYSTEM = "http://terminology.hl7.org/CodeSystem/service-type";
+    public static final String SMART_SYSTEM = "http://fhir-registry.smarthealthit.org/CodeSystem/service-type";
+    // Schedule Identifiers
+    public static Identifier HL7_IDENTIFIER = new Identifier().setSystem(HL7_SYSTEM).setValue("57");
+
+    public static Identifier SMART_IDENTIFIER = new Identifier().setSystem(SMART_SYSTEM).setValue("covid19-immunization");
 }

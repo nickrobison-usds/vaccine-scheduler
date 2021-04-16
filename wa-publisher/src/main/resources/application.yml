@@ -5,3 +5,6 @@ logging:
     ca.uhn.fhir.jaxrs: debug
 publisher:
   base-url: http://localhost:${server.port}
+graphql:
+  client:
+    url: https://apim-vaccs-dev.azure-api.net/open/graphql

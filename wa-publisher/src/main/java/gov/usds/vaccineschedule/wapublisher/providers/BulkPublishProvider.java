@@ -25,9 +25,9 @@ public class BulkPublishProvider {
     public PublishResponse publish() {
         // Create some dummy data for each resource type
         final List<PublishResponse.OutputEntry> output = List.of(
-                new PublishResponse.OutputEntry("Schedule", buildURL("/test-schedule.ndjson")),
-                new PublishResponse.OutputEntry("Location", buildURL("/test-location.ndjson")),
-                new PublishResponse.OutputEntry("Slot", buildURL("/test-slot.ndjson"))
+                new PublishResponse.OutputEntry("Schedule", buildURL("/schedule.ndjson")),
+                new PublishResponse.OutputEntry("Location", buildURL("/location.ndjson")),
+                new PublishResponse.OutputEntry("Slot", buildURL("/slot.ndjson"))
         );
 
         final PublishResponse publishResponse = new PublishResponse();
