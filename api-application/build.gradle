@@ -15,7 +15,7 @@ dependencyManagement {
 
 jib {
     from.image = fromImage
-    to.image = "${imageRoot}/api"
+    to.image = "${imageRoot}/vs-api"
     container {
         ports ['8080']
     }

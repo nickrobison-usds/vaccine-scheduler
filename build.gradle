@@ -11,7 +11,7 @@ plugins {
 ext {
     hapiVersion = '5.3.2'
     fromImage = 'gcr.io/distroless/java:11'
-    imageRoot = 'ghcr.io/nickrobison-usds/vaccine-schedule'
+    imageRoot = 'nickrobisonusds'
 }
 
 allprojects {
