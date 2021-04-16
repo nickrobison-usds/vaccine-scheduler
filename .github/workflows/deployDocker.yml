@@ -5,8 +5,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - .github/workflows/deployDocker.yml
 
 jobs:
   deploy:
@@ -26,7 +24,7 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-build-${{ hashFiles('*.gradle') }}
       - name: Docker Login
-        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u nickrobisonusds --password-stdin
       - name: Build and Push Docker
         run: ./gradlew jib
 
