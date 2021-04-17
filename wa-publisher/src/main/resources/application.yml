@@ -1,0 +1,10 @@
+server:
+  port: 9091
+logging:
+  level:
+    ca.uhn.fhir.jaxrs: debug
+publisher:
+  base-url: http://localhost:${server.port}
+graphql:
+  client:
+    url: https://apim-vaccs-dev.azure-api.net/open/graphql

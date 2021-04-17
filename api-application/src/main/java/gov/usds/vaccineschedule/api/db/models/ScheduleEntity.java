@@ -1,6 +1,6 @@
 package gov.usds.vaccineschedule.api.db.models;
 
-import org.hl7.fhir.r4.model.Identifier;
+import gov.usds.vaccineschedule.common.Constants;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Schedule;
 
@@ -23,9 +23,6 @@ import static gov.usds.vaccineschedule.common.Constants.SCHEDULE_PROFILE;
 @Entity
 @Table(name = "schedules")
 public class ScheduleEntity extends UpstreamUpdateableEntity implements Flammable<Schedule> {
-
-    public static Identifier HL7_IDENTIFIER = new Identifier().setSystem("http://terminology.hl7.org/CodeSystem/service-type").setValue("57");
-    public static Identifier SMART_IDENTIFIER = new Identifier().setSystem("http://fhir-registry.smarthealthit.org/CodeSystem/service-type").setValue("covid19-immunization");
 
     @ManyToOne
     @JoinColumn(name = "location_id")
@@ -60,8 +57,8 @@ public class ScheduleEntity extends UpstreamUpdateableEntity implements Flammabl
         schedule.setMeta(generateMeta(SCHEDULE_PROFILE));
 
         schedule.setId(this.getInternalId().toString());
-        schedule.addIdentifier(HL7_IDENTIFIER);
-        schedule.addIdentifier(SMART_IDENTIFIER);
+        schedule.addIdentifier(Constants.HL7_IDENTIFIER);
+        schedule.addIdentifier(Constants.SMART_IDENTIFIER);
         this.identifiers.stream().map(ScheduleIdentifier::toFHIR).forEach(schedule::addIdentifier);
 
         schedule.addActor(new Reference("Location/" + this.location.getInternalId().toString()));

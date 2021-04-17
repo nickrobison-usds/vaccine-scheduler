@@ -1,0 +1,39 @@
+apply plugin: 'org.springframework.boot'
+apply plugin: 'com.google.cloud.tools.jib'
+
+jib {
+    from.image  = fromImage
+    to.image = "${imageRoot}/wa-publisher"
+
+    container {
+        ports ['9091']
+    }
+}
+
+dependencies {
+    implementation project(':common')
+    // Core
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-jersey'
+    implementation 'org.springframework.boot:spring-boot-actuator'
+    implementation group: 'io.projectreactor', name: 'reactor-core', version: '3.4.5'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // FHIR
+//    implementation "ca.uhn.hapi.fhir:hapi-fhir-spring-boot-starter:${hapiVersion}"
+//    implementation "ca.uhn.hapi.fhir:hapi-fhir-jaxrsserver-base:${hapiVersion}"
+    implementation "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:${hapiVersion}"
+    implementation "ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${hapiVersion}"
+
+    // GraphQL
+    implementation "com.graphql-java-kickstart:graphql-webclient-spring-boot-starter:1.0.0"
+
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+}
+
+processResources {
+    from("$rootDir/examples")
+}

@@ -3,4 +3,5 @@ rootProject.name = 'scheduler'
 include 'api-application'
 include 'publisher-application'
 include 'common'
+include 'wa-publisher'
 
