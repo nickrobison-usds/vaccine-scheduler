@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Schedule;
 import org.hl7.fhir.r4.model.Slot;
@@ -35,7 +36,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static gov.usds.vaccineschedule.common.Constants.HL7_SYSTEM;
+import static gov.usds.vaccineschedule.common.Constants.SCHEDULE_PROFILE;
 import static gov.usds.vaccineschedule.common.Constants.SMART_SYSTEM;
+import static gov.usds.vaccineschedule.common.helpers.DateUtils.offsetDateTimeToDate;
 
 /**
  * Created by nickrobison on 4/16/21
@@ -99,6 +102,10 @@ public class UpstreamService {
 
     private BundledAvailability availabilityFromLocation(WALocation waLoc) {
         final VaccineLocation location = new VaccineLocation();
+        // Add Meta
+        final Meta meta = new Meta();
+        meta.setLastUpdated(offsetDateTimeToDate(waLoc.getUpdatedAt()));
+        location.setMeta(meta);
         location.setName(waLoc.getLocationName());
         location.setId(waLoc.getLocationId());
 
@@ -152,6 +159,10 @@ public class UpstreamService {
         logger.debug("Translating location {}", location.getLocationId());
 
         final VaccineSlot slot = new VaccineSlot();
+        // Add Meta
+        final Meta meta = new Meta();
+        meta.setLastUpdated(offsetDateTimeToDate(location.getUpdatedAt()));
+        slot.setMeta(meta);
         if (location.getSchedulingLink() != null) {
             slot.setBookingUrl(new UrlType(location.getSchedulingLink()));
         }
@@ -172,6 +183,13 @@ public class UpstreamService {
 
     private List<Schedule> schedulesFromLocation(WALocation location) {
         final Schedule schedule = new Schedule();
+
+        // Add Meta
+        final Meta meta = new Meta();
+        meta.addProfile(SCHEDULE_PROFILE);
+        meta.setLastUpdated(offsetDateTimeToDate(location.getUpdatedAt()));
+        schedule.setMeta(meta);
+
         schedule.setId(location.getLocationId());
         schedule.addActor(new Reference(new IdType("Location", location.getLocationId())));
         final CodeableConcept concept = new CodeableConcept();

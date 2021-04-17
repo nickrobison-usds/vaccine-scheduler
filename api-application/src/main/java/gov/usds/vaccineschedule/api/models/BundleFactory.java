@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static gov.usds.vaccineschedule.common.Constants.CURRENT_AS_OF;
+import static gov.usds.vaccineschedule.common.helpers.DateUtils.offsetDateTimeToDate;
 
 /**
  * Created by nickrobison on 4/5/21
@@ -68,7 +69,7 @@ public class BundleFactory {
             final Extension extension = ((Meta) r.getMeta()).getExtensionByUrl(CURRENT_AS_OF);
             final InstantType instantType = extension.getValue().castToInstant(extension.getValue());
             final OffsetDateTime offsetDateTime = OffsetDateTime.parse(instantType.getValueAsString(), Constants.FHIR_FORMATTER);
-            return new Date(offsetDateTime.toInstant().toEpochMilli());
+            return offsetDateTimeToDate(offsetDateTime);
         }
         return null;
     }
