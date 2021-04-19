@@ -230,7 +230,7 @@ public class UpstreamService {
     Integer maybeNextPage(LocationResponse.Pagination pagination) {
         final int pageSize = pagination.getPageSize();
         final int pageNum = pagination.getPageNum();
-        final int seenSoFar = (pageSize * pageNum) + pageSize;
+        final int seenSoFar = (pageSize * pageNum);
 
         if (seenSoFar < pagination.getTotal()) {
             return pageNum + 1;

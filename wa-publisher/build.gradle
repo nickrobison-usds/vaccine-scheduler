@@ -16,8 +16,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jersey'
     implementation 'org.springframework.boot:spring-boot-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-cache'
-    implementation 'com.github.ben-manes.caffeine:caffeine'
     implementation group: 'io.projectreactor', name: 'reactor-core', version: '3.4.5'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
@@ -27,6 +25,11 @@ dependencies {
 
     // GraphQL
     implementation "com.graphql-java-kickstart:graphql-webclient-spring-boot-starter:1.0.0"
+
+    // Caching
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+    implementation 'io.projectreactor.addons:reactor-extra:3.4.3'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
