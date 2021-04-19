@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UrlType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -84,6 +85,7 @@ public class UpstreamService {
     }
 
 
+    @Cacheable(value = "availability")
     public Flux<BundledAvailability> getUpstreamAvailability() {
         final Instant start = Instant.now();
         logger.info("Performing fetch from upstream");
@@ -96,7 +98,7 @@ public class UpstreamService {
                     final Instant end = Instant.now();
                     final Duration duration = Duration.between(start, end);
                     logger.info("Fetch completed in {}ms", duration.toMillis());
-                });
+                }).cache();
 
     }
 

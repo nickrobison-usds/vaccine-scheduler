@@ -16,12 +16,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jersey'
     implementation 'org.springframework.boot:spring-boot-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
     implementation group: 'io.projectreactor', name: 'reactor-core', version: '3.4.5'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     // FHIR
-//    implementation "ca.uhn.hapi.fhir:hapi-fhir-spring-boot-starter:${hapiVersion}"
-//    implementation "ca.uhn.hapi.fhir:hapi-fhir-jaxrsserver-base:${hapiVersion}"
     implementation "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:${hapiVersion}"
     implementation "ca.uhn.hapi.fhir:hapi-fhir-structures-r4:${hapiVersion}"
 
