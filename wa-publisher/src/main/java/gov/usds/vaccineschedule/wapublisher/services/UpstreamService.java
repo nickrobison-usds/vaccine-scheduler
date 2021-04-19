@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
 import java.time.Duration;
@@ -52,8 +53,8 @@ public class UpstreamService {
             "  searchLocations(searchInput: {\n" +
             "    state: \"WA\",\n" +
             "    paging: {\n" +
-            "      pageNum: 1,\n" +
-            "      pageSize: 50\n" +
+            "      pageNum: %d,\n" +
+            "      pageSize: %d\n" +
             "    }\n" +
             "  }) {\n" +
             "    locations {\n" +
@@ -74,6 +75,11 @@ public class UpstreamService {
             "      vaccineAvailability\n" +
             "      updatedAt\n" +
             "      }\n" +
+            "    paging {\n" +
+            "      pageNum\n" +
+            "      pageSize\n" +
+            "      total\n" +
+            "    }\n" +
             "    }\n" +
             "  }";
 
@@ -83,21 +89,28 @@ public class UpstreamService {
         this.client = client;
     }
 
-
     public Flux<BundledAvailability> getUpstreamAvailability() {
         final Instant start = Instant.now();
         logger.info("Performing fetch from upstream");
-        final GraphQLRequest request = GraphQLRequest.builder().query(QUERY).build();
 
-        return client.post(request)
-                .map(response -> response.get("searchLocations", LocationResponse.class))
-                .flatMapMany(locationResponse -> Flux.fromIterable(locationResponse.getLocations()).map(this::availabilityFromLocation))
+        return requestPage(1, 50)
+                .expand(it -> Mono
+                        .justOrEmpty(maybeNextPage(it.getPaging()))
+                        .flatMap(nextPage -> requestPage(nextPage, 50)))
+                .flatMap(locationResponse -> Flux.fromIterable(locationResponse.getLocations()).map(this::availabilityFromLocation))
                 .doOnComplete(() -> {
                     final Instant end = Instant.now();
                     final Duration duration = Duration.between(start, end);
                     logger.info("Fetch completed in {}ms", duration.toMillis());
                 });
 
+    }
+
+    private Mono<LocationResponse> requestPage(int pageNum, int pageSize) {
+        logger.info("Requesting page: {}", pageNum);
+        final GraphQLRequest request = GraphQLRequest.builder().query(String.format(QUERY, pageNum, pageSize)).build();
+        return client.post(request)
+                .map(response -> response.get("searchLocations", LocationResponse.class));
     }
 
     private BundledAvailability availabilityFromLocation(WALocation waLoc) {
@@ -211,5 +224,17 @@ public class UpstreamService {
             return Slot.SlotStatus.FREE;
         }
         return Slot.SlotStatus.BUSY;
+    }
+
+    private static @Nullable
+    Integer maybeNextPage(LocationResponse.Pagination pagination) {
+        final int pageSize = pagination.getPageSize();
+        final int pageNum = pagination.getPageNum();
+        final int seenSoFar = (pageSize * pageNum);
+
+        if (seenSoFar < pagination.getTotal()) {
+            return pageNum + 1;
+        }
+        return null;
     }
 }
