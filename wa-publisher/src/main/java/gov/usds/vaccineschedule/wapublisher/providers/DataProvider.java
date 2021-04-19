@@ -11,12 +11,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.cache.CacheFlux;
 import reactor.cache.CacheMono;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Signal;
 
 import javax.ws.rs.NotFoundException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -32,12 +34,14 @@ public class DataProvider {
     private final IParser parser;
 
     private final UpstreamService service;
-    private final Cache cache;
+    private final Cache availCache;
+    private final Cache upstreamCache;
 
     public DataProvider(FhirContext ctx, UpstreamService service, CacheManager cacheManager) {
         this.parser = ctx.newJsonParser();
         this.service = service;
-        this.cache = Objects.requireNonNull(cacheManager.getCache("availability"));
+        this.availCache = Objects.requireNonNull(cacheManager.getCache("availability"));
+        this.upstreamCache = Objects.requireNonNull(cacheManager.getCache("upstream"));
     }
 
     @GetMapping(value = "/{id}.ndjson", produces = FHIR_NDJSON)
@@ -58,26 +62,43 @@ public class DataProvider {
                 throw new NotFoundException(String.format("Unknown resource type: %s", id));
         }
 
-        return CacheMono.lookup(this::readFromCache, id)
+
+        return CacheMono.lookup(this::readFromAvailCache, id)
                 .onCacheMissResume(() -> fetchFromService(supplier))
-                .andWriteWith(this::writeToCache);
+                .andWriteWith(this::writeToAvailCache);
     }
 
     private Mono<String> fetchFromService(Function<BundledAvailability, Flux<IBaseResource>> supplier) {
-        return service.getUpstreamAvailability()
+        return this.fetchFromUpstream("WA")
                 .flatMap(supplier)
                 .map(this.parser::encodeResourceToString)
                 .collectList()
                 .map(resources -> String.join("\n", resources));
     }
 
+    private Flux<BundledAvailability> fetchFromUpstream(String state) {
+        return CacheFlux.lookup(this::readFromUpstreamCache, state)
+                .onCacheMissResume(this.service::getUpstreamAvailability)
+                .andWriteWith(this::writeToUpstreamCache);
+    }
+
     @SuppressWarnings("unchecked")
-    private Mono<Signal<? extends String>> readFromCache(String key) {
-        final Optional<Signal<? extends String>> maybeValue = Optional.ofNullable(this.cache.get(key)).map(val -> (Signal<String>) val.get());
+    private Mono<Signal<? extends String>> readFromAvailCache(String key) {
+        final Optional<Signal<? extends String>> maybeValue = Optional.ofNullable(this.availCache.get(key)).map(val -> (Signal<String>) val.get());
         return Mono.justOrEmpty(maybeValue);
     }
 
-    private Mono<Void> writeToCache(String key, Signal<? extends String> value) {
-        return Mono.fromRunnable(() -> this.cache.put(key, value));
+    private Mono<Void> writeToAvailCache(String key, Signal<? extends String> value) {
+        return Mono.fromRunnable(() -> this.availCache.put(key, value));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Mono<List<Signal<BundledAvailability>>> readFromUpstreamCache(String key) {
+        final Optional<List<Signal<BundledAvailability>>> maybeValue = Optional.ofNullable(this.upstreamCache.get(key)).map(val -> (List<Signal<BundledAvailability>>) val.get());
+        return Mono.justOrEmpty(maybeValue);
+    }
+
+    private Mono<Void> writeToUpstreamCache(String key, List<Signal<BundledAvailability>> value) {
+        return Mono.fromRunnable(() -> this.upstreamCache.put(key, value));
     }
 }
