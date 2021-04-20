@@ -18,7 +18,7 @@ import java.io.InputStream;
 import java.sql.Date;
 import java.util.List;
 
-import static gov.usds.vaccineschedule.common.Constants.CURRENT_AS_OF;
+import static gov.usds.vaccineschedule.common.Constants.LAST_SOURCE_SYNC;
 import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,7 +70,7 @@ public class TestLocationService extends BaseApplicationTest {
     }
 
     private static InstantType getCurrentTimestamp(Location location) {
-        final Type value = location.getMeta().getExtensionByUrl(CURRENT_AS_OF).getValue();
+        final Type value = location.getMeta().getExtensionByUrl(LAST_SOURCE_SYNC).getValue();
         return value.castToInstant(value);
     }
 
