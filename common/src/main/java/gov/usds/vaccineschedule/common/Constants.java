@@ -32,13 +32,13 @@ public class Constants {
     public static final String SCHEDULE_PROFILE = "http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-schedule";
 
     // Extensions
-    public static String ORIGINAL_ID_SYSTEM = "http://usds.gov/vaccine/source-identifier";
-    public static String LAST_SOURCE_SYNC = "http://hl7.org/fhir/StructureDefinition/lastSourceSync";
+    public static final String ORIGINAL_ID_SYSTEM = "http://usds.gov/vaccine/source-identifier";
+    public static final String LAST_SOURCE_SYNC = "http://hl7.org/fhir/StructureDefinition/lastSourceSync";
 
     public static final String HL7_SYSTEM = "http://terminology.hl7.org/CodeSystem/service-type";
     public static final String SMART_SYSTEM = "http://fhir-registry.smarthealthit.org/CodeSystem/service-type";
     // Schedule Identifiers
-    public static Identifier HL7_IDENTIFIER = new Identifier().setSystem(HL7_SYSTEM).setValue("57");
+    public static final Identifier HL7_IDENTIFIER = new Identifier().setSystem(HL7_SYSTEM).setValue("57");
 
-    public static Identifier SMART_IDENTIFIER = new Identifier().setSystem(SMART_SYSTEM).setValue("covid19-immunization");
+    public static final Identifier SMART_IDENTIFIER = new Identifier().setSystem(SMART_SYSTEM).setValue("covid19-immunization");
 }
