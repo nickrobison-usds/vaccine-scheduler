@@ -18,7 +18,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static gov.usds.vaccineschedule.common.Constants.CURRENT_AS_OF;
+import static gov.usds.vaccineschedule.common.Constants.LAST_SOURCE_SYNC;
 import static gov.usds.vaccineschedule.common.helpers.DateUtils.offsetDateTimeToDate;
 
 /**
@@ -66,7 +66,7 @@ public class BundleFactory {
     private static @Nullable
     Date getCurrentDate(IBaseResource r) {
         if (r.getMeta() instanceof Meta) {
-            final Extension extension = ((Meta) r.getMeta()).getExtensionByUrl(CURRENT_AS_OF);
+            final Extension extension = ((Meta) r.getMeta()).getExtensionByUrl(LAST_SOURCE_SYNC);
             final InstantType instantType = extension.getValue().castToInstant(extension.getValue());
             final OffsetDateTime offsetDateTime = OffsetDateTime.parse(instantType.getValueAsString(), Constants.FHIR_FORMATTER);
             return offsetDateTimeToDate(offsetDateTime);

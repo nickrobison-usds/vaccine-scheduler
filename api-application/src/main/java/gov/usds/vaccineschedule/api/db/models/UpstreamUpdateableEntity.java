@@ -9,8 +9,8 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import java.time.OffsetDateTime;
 
-import static gov.usds.vaccineschedule.common.Constants.CURRENT_AS_OF;
 import static gov.usds.vaccineschedule.common.Constants.FHIR_FORMATTER;
+import static gov.usds.vaccineschedule.common.Constants.LAST_SOURCE_SYNC;
 
 /**
  * Created by nickrobison on 4/14/21
@@ -37,7 +37,7 @@ public abstract class UpstreamUpdateableEntity extends BaseEntity {
         if (this.getUpdatedAt() != null) {
             final String fhirDateString = this.getUpdatedAt().format(FHIR_FORMATTER);
             final InstantType currentTimestamp = new InstantType(fhirDateString);
-            meta.addExtension(new Extension(CURRENT_AS_OF, currentTimestamp));
+            meta.addExtension(new Extension(LAST_SOURCE_SYNC, currentTimestamp));
         }
 
         return meta;
