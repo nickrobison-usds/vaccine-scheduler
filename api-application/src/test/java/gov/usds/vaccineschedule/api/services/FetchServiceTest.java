@@ -4,13 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import gov.usds.vaccineschedule.api.BaseApplicationTest;
 import gov.usds.vaccineschedule.api.properties.ScheduleSourceConfigProperties;
 import gov.usds.vaccineschedule.common.models.PublishResponse;
+import gov.usds.vaccineschedule.common.models.VaccineLocation;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Schedule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -132,12 +132,12 @@ public class FetchServiceTest extends BaseApplicationTest {
         assertEquals(90, resources.size(), "Should have resources");
 
         // Verify the order is correct
-        final Optional<IBaseResource> nonLocations = resources.subList(0, 10).stream().filter(r -> !r.getClass().equals(Location.class)).findAny();
-        assertTrue(nonLocations.isEmpty(), "Should not have locations");
+        final Optional<IBaseResource> nonLocations = resources.subList(0, 10).stream().filter(r -> !r.getClass().equals(VaccineLocation.class)).findAny();
+        assertTrue(nonLocations.isEmpty(), "Should only have locations");
         final Optional<IBaseResource> nonSchedules = resources.subList(10, 20).stream().filter(r -> !r.getClass().equals(Schedule.class)).findAny();
-        assertTrue(nonSchedules.isEmpty(), "Should not have schedules");
+        assertTrue(nonSchedules.isEmpty(), "Should only have schedules");
         final Optional<IBaseResource> nonSlots = resources.subList(20, 90).stream().filter(r -> !r.getClass().equals(VaccineSlot.class)).findAny();
-        assertTrue(nonSlots.isEmpty(), "Should not have slots");
+        assertTrue(nonSlots.isEmpty(), "Should only have slots");
 
 
         // First, locations

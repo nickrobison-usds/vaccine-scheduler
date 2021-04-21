@@ -32,7 +32,7 @@ public class BulkPublishProvider {
 
         final PublishResponse publishResponse = new PublishResponse();
         publishResponse.setTransactionTime(OffsetDateTime.now());
-        publishResponse.setRequest("/$bulk-publish");
+        publishResponse.setRequest(String.format("%s/$bulk-publish", this.properties.getBaseURL()));
         publishResponse.setOutput(output);
 
         return publishResponse;
