@@ -129,6 +129,7 @@ public class UpstreamService {
         addIfNotNull(address::setCity, waLoc::getCity);
         addIfNotNull(address::setState, waLoc::getState);
         addIfNotNull(address::setPostalCode, waLoc::getZipcode);
+        location.setAddress(address);
 
         // Position
         final Location.LocationPositionComponent position = new Location.LocationPositionComponent()
@@ -176,6 +177,7 @@ public class UpstreamService {
         final Meta meta = new Meta();
         meta.setLastUpdated(offsetDateTimeToDate(location.getUpdatedAt()));
         slot.setMeta(meta);
+        slot.setId(location.getLocationId());
         if (location.getSchedulingLink() != null) {
             slot.setBookingUrl(new UrlType(location.getSchedulingLink()));
         }
