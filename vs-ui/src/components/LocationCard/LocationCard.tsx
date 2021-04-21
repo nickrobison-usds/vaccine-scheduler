@@ -47,13 +47,16 @@ const LocationFooter: React.FC<LocationCardProps> = ({ location }) => {
   const buildCapacityLabel = () => {
     if (capacity !== undefined) {
       switch (capacity) {
-        case 0: return "No slots available";
-        case 1: return "1 slot available";
-        default: return `${capacity} slots available`;
+        case 0:
+          return "No slots available";
+        case 1:
+          return "1 slot available";
+        default:
+          return `${capacity} slots available`;
       }
     }
     return "Unknown availability";
-  }
+  };
 
   return (
     <CardFooter className="location-card--footer">

@@ -45,7 +45,7 @@ const slotFailure: FhirClientError = {
           diagnostics:
             "Slot.end: minimum required = 1, but only found 0 (from http://fhir-registry.smarthealthit.org/StructureDefinition/vaccine-slot)",
           location: ["Slot", "Line 1, Col 35"],
-        }
+        },
       ],
     },
   },
