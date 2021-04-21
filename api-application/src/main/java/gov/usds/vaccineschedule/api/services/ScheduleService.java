@@ -8,10 +8,13 @@ import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.usds.vaccineschedule.api.db.models.LocationEntity;
 import gov.usds.vaccineschedule.api.db.models.ScheduleEntity;
+import gov.usds.vaccineschedule.api.exceptions.MissingUpstreamResource;
 import gov.usds.vaccineschedule.api.repositories.LocationRepository;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
 import gov.usds.vaccineschedule.common.Constants;
+import gov.usds.vaccineschedule.common.models.VaccineLocation;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Schedule;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -100,7 +103,7 @@ public class ScheduleService {
         final String reference = resource.getActor().get(0).getReference();
         final List<LocationEntity> locations = lRepo.findAll(LocationRepository.hasIdentifier(ORIGINAL_ID_SYSTEM, reference));
         if (locations.isEmpty()) {
-            throw new IllegalStateException("Cannot add to missing location");
+            throw new MissingUpstreamResource(VaccineLocation.class, new Identifier().setSystem(ORIGINAL_ID_SYSTEM).setValue(reference));
         }
         final ScheduleEntity entity = ScheduleEntity.fromFHIR(locations.get(0), resource);
 

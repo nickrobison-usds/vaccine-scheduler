@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.ValidationFailureException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import gov.usds.vaccineschedule.api.exceptions.MissingUpstreamResource;
 import gov.usds.vaccineschedule.api.properties.ScheduleSourceConfigProperties;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
 import gov.usds.vaccineschedule.common.models.PublishResponse;
@@ -45,6 +46,8 @@ public class SourceFetchService {
     private static final Logger logger = LoggerFactory.getLogger(SourceFetchService.class);
 
     private static final List<String> resourceOrder = ImmutableList.of("Location", "Schedule", "Slot");
+    // Increase the maximum memory buffer size to account for potentially huge payloads
+    private static final int MEMORY_SIZE = 1024 * 1024 * 1024;
 
     private final ScheduleSourceConfigProperties config;
     private final NDJSONToFHIR converter;
@@ -114,6 +117,8 @@ public class SourceFetchService {
                         this.processResource(resource);
                     } catch (ValidationFailureException e) {
                         logger.error("Resource failed validation. continuing", e);
+                    } catch (MissingUpstreamResource e) {
+                        logger.error("Unable to find required upstream resource. continuing", e);
                     }
                 }, (error) -> {
                     throw new RuntimeException(error);
@@ -158,8 +163,8 @@ public class SourceFetchService {
 
                     Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(objectMapper, MediaType.TEXT_PLAIN);
                     // Bump up the maximum data size to 1 MB
-                    decoder.setMaxInMemorySize(1024 * 1024 * 1024);
-                    configurer.defaultCodecs().maxInMemorySize(1024 * 1024 * 1024);
+                    decoder.setMaxInMemorySize(MEMORY_SIZE);
+                    configurer.defaultCodecs().maxInMemorySize(MEMORY_SIZE);
                     configurer.customCodecs().registerWithDefaultConfig(decoder);
                     // Increase memory size to allow for big payloads
                 })
