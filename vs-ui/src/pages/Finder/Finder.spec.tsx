@@ -4,7 +4,8 @@ import { Finder } from "./Finder";
 
 describe("Finder", () => {
   it("renders text", async () => {
-    render(<Finder />);
-    expect(screen.getByText(/finder page/i)).toBeInTheDocument();
+    const { container } = render(<Finder />);
+    expect(screen.getByTestId("dropdown")).toBeInTheDocument();
+    expect(container).toMatchSnapshot();
   });
 });
