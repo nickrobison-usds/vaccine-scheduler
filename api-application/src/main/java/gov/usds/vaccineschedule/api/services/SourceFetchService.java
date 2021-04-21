@@ -1,8 +1,10 @@
 package gov.usds.vaccineschedule.api.services;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.validation.ValidationFailureException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import gov.usds.vaccineschedule.api.exceptions.MissingUpstreamResource;
 import gov.usds.vaccineschedule.api.properties.ScheduleSourceConfigProperties;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
 import gov.usds.vaccineschedule.common.models.PublishResponse;
@@ -44,6 +46,8 @@ public class SourceFetchService {
     private static final Logger logger = LoggerFactory.getLogger(SourceFetchService.class);
 
     private static final List<String> resourceOrder = ImmutableList.of("Location", "Schedule", "Slot");
+    // Increase the maximum memory buffer size to account for potentially huge payloads
+    private static final int MEMORY_SIZE = 1024 * 1024 * 1024;
 
     private final ScheduleSourceConfigProperties config;
     private final NDJSONToFHIR converter;
@@ -109,7 +113,13 @@ public class SourceFetchService {
                 .publishOn(this.dbScheduler)
                 .subscribe(resource -> {
                     logger.debug("Received resource: {}", resource);
-                    this.processResource(resource);
+                    try {
+                        this.processResource(resource);
+                    } catch (ValidationFailureException e) {
+                        logger.error("Resource failed validation. continuing", e);
+                    } catch (MissingUpstreamResource e) {
+                        logger.error("Unable to find required upstream resource. continuing", e);
+                    }
                 }, (error) -> {
                     throw new RuntimeException(error);
                 }, () -> logger.info("Finished refreshing data for {}", source));
@@ -141,9 +151,8 @@ public class SourceFetchService {
                 .baseUrl(baseURL)
                 // Configure Jackson to handle text/plain content types as well, such as what we get from Github
                 .codecs(configurer -> {
-                    // This API returns JSON with content type text/plain, so need to register a custom
+                    // An API may return JSON with content type text/plain, so need to register a custom
                     // decoder to deserialize this response via Jackson
-
                     // Get existing decoder's ObjectMapper if available, or create new one
                     ObjectMapper objectMapper = configurer.getReaders().stream()
                             .filter(reader -> reader instanceof Jackson2JsonDecoder)
@@ -153,7 +162,11 @@ public class SourceFetchService {
                             .orElseGet(() -> Jackson2ObjectMapperBuilder.json().build());
 
                     Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(objectMapper, MediaType.TEXT_PLAIN);
+                    // Bump up the maximum data size to 1 MB
+                    decoder.setMaxInMemorySize(MEMORY_SIZE);
+                    configurer.defaultCodecs().maxInMemorySize(MEMORY_SIZE);
                     configurer.customCodecs().registerWithDefaultConfig(decoder);
+                    // Increase memory size to allow for big payloads
                 })
                 .build();
     }

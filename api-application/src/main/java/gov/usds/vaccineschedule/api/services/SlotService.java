@@ -10,10 +10,13 @@ import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.usds.vaccineschedule.api.db.models.ScheduleEntity;
 import gov.usds.vaccineschedule.api.db.models.SlotEntity;
+import gov.usds.vaccineschedule.api.exceptions.MissingUpstreamResource;
 import gov.usds.vaccineschedule.api.repositories.ScheduleRepository;
 import gov.usds.vaccineschedule.api.repositories.SlotRepository;
 import gov.usds.vaccineschedule.common.Constants;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Schedule;
 import org.hl7.fhir.r4.model.Slot;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -104,7 +107,7 @@ public class SlotService {
 
         final List<ScheduleEntity> schedule = new ArrayList<>(scheduleRepository.findAll(ScheduleRepository.hasIdentifier(ORIGINAL_ID_SYSTEM, scheduleRef)));
         if (schedule.isEmpty()) {
-            throw new IllegalStateException("Cannot add to missing schedule");
+            throw new MissingUpstreamResource(Schedule.class, new Identifier().setSystem(ORIGINAL_ID_SYSTEM).setValue(scheduleRef));
         }
 
         final SlotEntity entity = SlotEntity.fromFHIR(schedule.get(0), resource);

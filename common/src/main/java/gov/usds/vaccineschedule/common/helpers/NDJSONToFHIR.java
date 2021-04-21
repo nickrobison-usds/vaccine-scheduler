@@ -1,6 +1,7 @@
 package gov.usds.vaccineschedule.common.helpers;
 
 import ca.uhn.fhir.parser.IParser;
+import gov.usds.vaccineschedule.common.models.VaccineLocation;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -11,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +26,7 @@ public class NDJSONToFHIR {
 
     public NDJSONToFHIR(IParser parser) {
         this.parser = parser;
-        this.parser.setPreferTypes(Collections.singletonList(VaccineSlot.class));
+        this.parser.setPreferTypes(List.of(VaccineLocation.class, VaccineSlot.class));
     }
 
     /**
