@@ -1,7 +1,12 @@
-import React from "react";
-import GoogleMapReact, { Coords } from "google-map-react";
+import React, { useEffect, useState } from "react";
+import GoogleMapReact, {
+  Coords,
+  fitBounds,
+  NESWBounds,
+} from "google-map-react";
 import { faMapMarker } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import bbox from "@turf/bbox";
 
 export interface MapFeature {
   lng: number;
@@ -24,15 +29,61 @@ const LocationPin: React.FC<Coords & { text: string }> = ({ text }) => (
 export const VSMap: React.FC<MapProps> = (props) => {
   const { features } = props;
 
+  const [center, setCenter] = useState<Coords | undefined>(undefined);
+  const [zoom, setZoom] = useState<number>(11);
+
+  useEffect(() => {
+    if (features.length === 0) {
+      return;
+    }
+
+    const geoFeatures = features
+      .map((feature) => ({
+        type: "Point",
+        coordinates: [feature.lng, feature.lat],
+      }))
+      .map((point) => ({
+        type: "Feature",
+        geometry: point,
+      }));
+
+    const box = bbox({
+      type: "FeatureCollection",
+      features: geoFeatures,
+    });
+
+    const mapBounds: NESWBounds = {
+      ne: {
+        lat: box[3],
+        lng: box[2],
+      },
+      sw: {
+        lat: box[1],
+        lng: box[0],
+      },
+    };
+    // This is a hack, what's the actual size?
+    const size = {
+      width: 640,
+      height: 380,
+    };
+
+    const { center, zoom } = fitBounds(mapBounds, size);
+    setCenter(center);
+    setZoom(zoom);
+  }, [features]);
+
   return (
     <div style={{ height: "100vh", width: "100%" }}>
       <GoogleMapReact
         bootstrapURLKeys={{ key: process.env.REACT_APP_GOOGLE_TOKEN! }}
-        center={{
+        defaultCenter={{
           lat: 42.35,
           lng: -70.9,
         }}
-        zoom={11}
+        defaultZoom={11}
+        center={center}
+        zoom={zoom}
       >
         {features &&
           features.map((feature) => {

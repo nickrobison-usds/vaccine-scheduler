@@ -112,7 +112,8 @@ export const Finder: React.FC = () => {
       <Grid row className="finder-row">
         <Dropdown id="state" name="state" onChange={handleSelectChange}>
           <option> - Select -</option>
-          <option value="WA">Washington</option>
+          {/*Yet another hack to work around lack of normalized addresses. Probably something we can push into the WA publisher*/}
+          <option value="Washington">Washington</option>
           <option value="NJ">New Jersey</option>
           <option value="MA">Massachusetts</option>
         </Dropdown>
