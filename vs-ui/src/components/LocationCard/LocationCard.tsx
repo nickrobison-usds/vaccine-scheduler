@@ -1,4 +1,8 @@
-import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBan,
+  faCheckCircle,
+  faExclamationCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Card,
@@ -7,10 +11,12 @@ import {
   CardHeader,
 } from "@trussworks/react-uswds";
 import React from "react";
+
 import "./LocationCard.scss";
+import { CapitatedLocation } from "../../@types";
 
 export interface LocationCardProps {
-  location: fhir.Location;
+  location: CapitatedLocation;
 }
 
 const LocationAddress: React.FC<{ address: fhir.Address }> = ({ address }) => {
@@ -23,6 +29,30 @@ const LocationAddress: React.FC<{ address: fhir.Address }> = ({ address }) => {
   );
 };
 
+const LocationFooter: React.FC<LocationCardProps> = ({ location }) => {
+  const { capacity, link } = location;
+  const buildIcon = (capacity: number | undefined) => {
+    if (capacity) {
+      switch (capacity) {
+        case 0:
+          return faBan;
+        default:
+          return faCheckCircle;
+      }
+    } else {
+      return faExclamationCircle;
+    }
+  };
+
+  return (
+    <CardFooter className="location-card--footer">
+      <FontAwesomeIcon icon={buildIcon(capacity)} />
+      {capacity ? `${capacity} slots available` : "Unknown availability"}
+      {link && <div>Book here</div>}
+    </CardFooter>
+  );
+};
+
 export const LocationCard: React.FC<LocationCardProps> = ({ location }) => {
   const address = location.address;
 
@@ -32,13 +62,9 @@ export const LocationCard: React.FC<LocationCardProps> = ({ location }) => {
         <h3 className="usa-card__heading">
           {location.name ? location.name : ""}
         </h3>
-        <CardBody>{address && <LocationAddress address={address} />}</CardBody>
-        <CardFooter className="location-card--footer">
-          <FontAwesomeIcon icon={faExclamationTriangle} />
-          <span />
-          100 slots available
-        </CardFooter>
       </CardHeader>
+      <CardBody>{address && <LocationAddress address={address} />}</CardBody>
+      <LocationFooter location={location} />
     </Card>
   );
 };

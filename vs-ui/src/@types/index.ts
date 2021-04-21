@@ -24,6 +24,11 @@ export interface OperationClient extends Client {
   ): Promise<fhir.OperationOutcome>;
 }
 
+export interface CapitatedLocation extends fhir.Location {
+  capacity?: number;
+  link?: string;
+}
+
 // Guards
 
 export function isClientError(err: any): err is FhirClientError {
