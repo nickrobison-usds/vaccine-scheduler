@@ -129,3 +129,96 @@ curl http://localhost:8080/fhir/Slot
 ```
 
 Tada!!!!
+
+## Deploying
+
+Currently, the application only supports deployment into a Heroku environment. Eventually, we'd like to be more
+flexible, but so far, we haven't had the time to actually test and deploy.
+
+### Heroku
+
+The application features two deployable services: the `api` and the `wa-publisher`.
+
+Each of these need to be deployed into separate Heroku apps as both need to handle HTTP traffic. The `api` application
+is really too large to run in the Heroku hobby tier, so we compensate by using OpenJ9 instead of Hotpsot, which has a
+smaller memory footprint.
+
+> I know, gross
+
+#### API Service
+
+1. Create the application via `heroku create`
+1. Rename the origin to `api` to avoid conflicts with other services:
+   ```bash
+   git remote rename heroku api
+   ```
+1. Install the required services:
+   ```bash
+   heroku addons:create --remote api cloudamqp:lemur
+   heroku addons:create --remote api heroku-postgresql
+   ```
+1. Connect to the Heroku database and setup Postgis
+   ```bash
+   heroku pg:psql --remote api
+   CREATE EXTENSION postgis;
+   ```
+1. Configure the Java runtime options to handle the small memory space
+   ```bash
+   heroku config:set --remote api JAVA_OPTS="-XX:+UseContainerSupport -Xmx300m -Xss512k -XX:CICompilerCount=2 -XX:+UseStringDeduplication -Dfile.encoding=UTF-8"
+   ```
+1. Add the required buildpacks in the following order:
+   ```bash
+   heroku buildpacks:set --remote api heroku-community/multi-procfile
+   heroku buildpacks:add --remote api https://github.com/maatuss/openj9-buildpack.git
+   heroku buildpacks:add --remote api heroku/gradle
+   ```
+   > Note: You'll need to make sure you don't have any other buildpacks enabled by default for the application.
+1. Configure the `PROCFILE` variable to point to the correct location
+   ```bash
+   heroku config:set --remote api PROCFILE=api-application/Procfile
+   ```
+1. You may want to disable Liquibase migration by default, and only run it when you need to make changes
+   ```bash
+   heroku config:set --remote api SPRING_LIQUIBASE_ENABLED=false
+   ```
+1. If you're using the Mapbox Geocoder, you'll need to set the secret correctly.
+   ```bash
+   heroku config:set --remote api MAPBOX_TOKEN={your secret token}
+   ```
+1. Deploy!
+   ```bash
+   git push api
+   ```
+1. Watch it deploy
+   ```bash
+   heroku logs --remote api --tail
+   ```
+
+#### WA Publisher
+
+After the nightmare that is the API application, the WA publisher is much more straightforward
+
+1. Create the application via `heroku create`
+1. Rename the origin to `wa-publish` to avoid conflicts with other services:
+   ```bash
+   git remote rename heroku wa-publish
+   ```
+1. Add the required buildpacks in the following order:
+   ```bash
+   heroku buildpacks:set --remote wa-publish heroku-community/multi-procfile
+   heroku buildpacks:add --remote wa-publish https://github.com/maatuss/openj9-buildpack.git
+   heroku buildpacks:add --remote wa-publish heroku/gradle
+   ```
+   > Note: You'll need to make sure you don't have any other buildpacks enabled by default for the application.
+1. Configure the `PROCFILE` variable to point to the correct location
+   ```bash
+   heroku config:set --remote wa-publish PROCFILE=wa-publisher/Procfile
+   ```
+1. Deploy!
+   ```bash
+   git push wa-publish
+   ```
+1. Watch it deploy
+   ```bash
+   heroku logs --remote wa-publish --tail
+   ```

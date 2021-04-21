@@ -37,6 +37,6 @@ dependencies {
     }
 }
 
-processResources {
-    from("$rootDir/examples")
+springBoot {
+    buildInfo()
 }
