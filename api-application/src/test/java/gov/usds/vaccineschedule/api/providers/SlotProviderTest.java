@@ -72,7 +72,7 @@ public class SlotProviderTest extends BaseApplicationTest {
         final Bundle execute = client
                 .search()
                 .forResource(Slot.class)
-                .where(Slot.SCHEDULE.hasChainedProperty(Schedule.ACTOR.hasId(location.getIdElement().getIdPart())))
+                .where(Slot.SCHEDULE.hasChainedProperty(Schedule.ACTOR.hasAnyOfIds(location.getIdElement().getIdPart())))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();

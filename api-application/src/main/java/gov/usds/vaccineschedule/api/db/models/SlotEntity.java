@@ -2,6 +2,7 @@ package gov.usds.vaccineschedule.api.db.models;
 
 import gov.usds.vaccineschedule.common.Constants;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Reference;
@@ -24,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static gov.usds.vaccineschedule.common.Constants.FOR_LOCATION;
 import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 import static gov.usds.vaccineschedule.common.Constants.SLOT_PROFILE;
 
@@ -126,8 +128,8 @@ public class SlotEntity extends UpstreamUpdateableEntity implements Flammable<Va
         this.capacity = capacity;
     }
 
-    @Override
-    public VaccineSlot toFHIR() {
+
+    public VaccineSlot toFHIR(boolean includeSchedule) {
         final VaccineSlot slot = new VaccineSlot();
         slot.setMeta(generateMeta(SLOT_PROFILE));
 
@@ -147,8 +149,19 @@ public class SlotEntity extends UpstreamUpdateableEntity implements Flammable<Va
             slot.setBookingPhone(new StringType(bookingPhone));
         }
         slot.setCapacity(new IntegerType(capacity));
+        // This is a nasty hack to get things moving along
+        if (includeSchedule) {
+//            slot.getSchedule().setResource(schedule.toFHIR());
+            final IdType locationId = new IdType("Location", this.schedule.getLocation().getInternalId().toString());
+            slot.addExtension().setUrl(FOR_LOCATION).setValue(locationId);
+        }
 
         return slot;
+    }
+
+    @Override
+    public VaccineSlot toFHIR() {
+        return toFHIR(false);
     }
 
     public void merge(SlotEntity other) {

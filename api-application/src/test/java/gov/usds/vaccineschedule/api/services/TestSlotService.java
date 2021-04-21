@@ -15,9 +15,11 @@ import java.io.InputStream;
 import java.sql.Date;
 import java.util.List;
 
+import static gov.usds.vaccineschedule.common.Constants.FOR_LOCATION;
 import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -43,10 +45,11 @@ public class TestSlotService extends BaseApplicationTest {
         firstSlot.setCapacity(new IntegerType(5));
         service.addSlot(firstSlot);
         final TokenParam tokenParam = new TokenParam().setSystem(ORIGINAL_ID_SYSTEM).setValue(firstSlot.getId());
-        final VaccineSlot updatedSlot = (VaccineSlot) service.findSlotsWithId(tokenParam, PageRequest.of(0, 10)).get(0);
+        final VaccineSlot updatedSlot = (VaccineSlot) service.findSlotsWithId(tokenParam, PageRequest.of(0, 10), true).get(0);
         assertAll(() -> assertTrue(firstSlot.getCapacity().equalsDeep(updatedSlot.getCapacity()), "Should have updated capacity"),
                 () -> assertTrue(firstSlot.getBookingPhone().equalsDeep(updatedSlot.getBookingPhone()), "Should have original phone number"),
-                () -> assertEquals(updatedDate, updatedSlot.getMeta().getLastUpdated(), "Should have updated upstream"));
+                () -> assertEquals(updatedDate, updatedSlot.getMeta().getLastUpdated(), "Should have updated upstream"),
+                () -> assertNotNull(updatedSlot.getExtensionByUrl(FOR_LOCATION), "Should have location extension"));
     }
 
     @Test
