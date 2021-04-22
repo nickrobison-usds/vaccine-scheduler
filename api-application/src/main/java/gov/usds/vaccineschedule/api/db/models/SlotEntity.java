@@ -152,9 +152,9 @@ public class SlotEntity extends UpstreamUpdateableEntity implements Flammable<Va
         // This is a nasty hack to get things moving along
         if (includeSchedule) {
 //            slot.getSchedule().setResource(schedule.toFHIR());
-            final IdType locationId = new IdType("Location", this.schedule.getLocation().getInternalId().toString());
-            slot.addExtension().setUrl(FOR_LOCATION).setValue(locationId);
         }
+        final IdType locationId = new IdType("Location", this.schedule.getLocation().getInternalId().toString());
+        slot.addExtension().setUrl(FOR_LOCATION).setValue(locationId);
 
         return slot;
     }
