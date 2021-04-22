@@ -116,6 +116,9 @@ export const Finder: React.FC = () => {
           <option value="Washington">Washington</option>
           <option value="NJ">New Jersey</option>
           <option value="MA">Massachusetts</option>
+          <option value="CA">California</option>
+          <option value="PA">Pennsylvania</option>
+          <option value="DC">District of Columbia</option>
         </Dropdown>
       </Grid>
       <Grid row className="finder-row">

@@ -34,6 +34,21 @@ exports[`Finder renders text 1`] = `
         >
           Massachusetts
         </option>
+        <option
+          value="CA"
+        >
+          California
+        </option>
+        <option
+          value="PA"
+        >
+          Pennsylvania
+        </option>
+        <option
+          value="DC"
+        >
+          District of Columbia
+        </option>
       </select>
     </div>
     <div
