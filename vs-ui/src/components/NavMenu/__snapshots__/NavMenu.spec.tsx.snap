@@ -58,18 +58,27 @@ exports[`NavMenu renders correctly 1`] = `
             class="usa-nav__primary-item"
           >
             <a
-              href="/validate"
+              href="/finder"
             >
-              Validate
+              Finder
             </a>
           </li>
           <li
             class="usa-nav__primary-item"
           >
             <a
-              href="/finder"
+              href="/sources"
             >
-              Finder
+              Sources
+            </a>
+          </li>
+          <li
+            class="usa-nav__primary-item"
+          >
+            <a
+              href="/validate"
+            >
+              Validate
             </a>
           </li>
         </ul>
