@@ -27,7 +27,7 @@ export const Sources: React.FC = () => {
     };
     // noinspection JSIgnoredPromiseFromCall
     fetchData();
-  });
+  }, [client]);
 
   return (
     <GridContainer>
