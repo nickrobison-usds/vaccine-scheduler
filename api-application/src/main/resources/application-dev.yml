@@ -11,7 +11,7 @@ vs:
     schedule-enabled: false
     sources:
       - "https://midnight-contender-wa-publish.herokuapp.com"
-      - "http://getmyvax.org/smart-scheduling"
+      - "https://getmyvax.org/smart-scheduling"
 logging:
   level:
     ca.uhn.fhir.jaxrs: debug
