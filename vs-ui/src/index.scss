@@ -1,0 +1,33 @@
+@import '~@trussworks/react-uswds/lib/index';
+
+@import '~uswds/src/stylesheets/theme/uswds-theme-general';
+@import '~uswds/src/stylesheets/theme/uswds-theme-typography';
+@import '~uswds/src/stylesheets/theme/uswds-theme-spacing';
+@import '~uswds/src/stylesheets/theme/uswds-theme-color';
+@import '~uswds/src/stylesheets/theme/uswds-theme-utilities';
+
+// Override resource paths
+
+$theme-image-path: '~uswds/src/img';
+$theme-font-path: '~uswds/src/fonts';
+$theme-hero-image: '~uswds/src/img/hero.png';
+
+@import '~uswds/src/stylesheets/packages/required';
+
+@import '~uswds'; // <-- this goes at the end, contains USWDS CSS
+
+/* Provide sufficient contrast against white background */
+a {
+  color: #0366d6;
+}
+
+code {
+  color: #e01a76;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+.btn-primary {
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+  color: #fff;
+}

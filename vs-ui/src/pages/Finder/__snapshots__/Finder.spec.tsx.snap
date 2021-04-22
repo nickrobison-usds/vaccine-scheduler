@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Finder renders text 1`] = `
+<div>
+  <div
+    class="grid-container"
+    data-testid="gridContainer"
+  >
+    <div
+      class="grid-row finder-row"
+      data-testid="grid"
+    >
+      <select
+        class="usa-select"
+        data-testid="dropdown"
+        id="state"
+        name="state"
+      >
+        <option>
+           - Select -
+        </option>
+        <option
+          value="Washington"
+        >
+          Washington
+        </option>
+        <option
+          value="NJ"
+        >
+          New Jersey
+        </option>
+        <option
+          value="MA"
+        >
+          Massachusetts
+        </option>
+      </select>
+    </div>
+    <div
+      class="grid-row finder-row"
+      data-testid="grid"
+    >
+      <div
+        class="grid-col-5"
+        data-testid="grid"
+      >
+        <ul
+          class="usa-card-group"
+          data-testid="CardGroup"
+        />
+      </div>
+      <div
+        class="grid-col-7"
+        data-testid="grid"
+      >
+        <div
+          style="height: 100vh; width: 100%;"
+        >
+          <div
+            style="width: 100%; height: 100%; margin: 0px; padding: 0px; position: relative;"
+          >
+            <div
+              style="width: 100%; height: 100%; left: 0px; top: 0px; margin: 0px; padding: 0px; position: absolute;"
+            />
+            <div
+              style="width: 50%; height: 50%; left: 50%; top: 50%; margin: 0px; padding: 0px; position: absolute;"
+            >
+              <div
+                style="width: 100%; height: 100%; left: 0px; top: 0px; margin: 0px; padding: 0px; position: absolute;"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

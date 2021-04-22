@@ -33,13 +33,12 @@ public interface SlotRepository extends JpaRepository<SlotEntity, UUID>, JpaSpec
 
     long count(Specification<SlotEntity> searchSpec);
 
-    static Specification<SlotEntity> forLocation(UUID locationId) {
+    static Specification<SlotEntity> forLocation(List<UUID> locationIds) {
         return (root, cq, cb) -> {
             final Join<SlotEntity, ScheduleEntity> scheduleJoin = root.join(SlotEntity_.schedule);
 
             final Join<ScheduleEntity, LocationEntity> locationJoin = scheduleJoin.join(ScheduleEntity_.location);
-
-            return cb.equal(locationJoin.get(LocationEntity_.internalId), locationId);
+            return locationJoin.get(LocationEntity_.internalId).in(locationIds);
         };
     }
 
@@ -74,8 +73,8 @@ public interface SlotRepository extends JpaRepository<SlotEntity, UUID>, JpaSpec
         };
     }
 
-    static Specification<SlotEntity> forLocationAndTime(UUID locationID, DateRangeParam dateRange) {
-        return Specification.where(forLocation(locationID)).and(withinTimeRange(dateRange));
+    static Specification<SlotEntity> forLocationAndTime(List<UUID> locationIDs, DateRangeParam dateRange) {
+        return Specification.where(forLocation(locationIDs)).and(withinTimeRange(dateRange));
     }
 
     private static <Y extends Comparable<? super Y>> BiFunction<Expression<? extends Y>, Y, Predicate> buildPredicate(Class<Y> clazz, CriteriaBuilder cb, ParamPrefixEnum value) {

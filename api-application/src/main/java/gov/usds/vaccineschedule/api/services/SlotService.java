@@ -62,16 +62,16 @@ public class SlotService {
         return this.repo.count(withIdentifier(identifier.getSystem(), identifier.getValue()));
     }
 
-    public List<Slot> findSlotsWithId(TokenParam identifier, Pageable pageable) {
+    public List<Slot> findSlotsWithId(TokenParam identifier, Pageable pageable, boolean includeSchedule) {
         return this.repo.findAll(withIdentifier(identifier.getSystem(), identifier.getValue()), pageable)
-                .stream().map(SlotEntity::toFHIR)
+                .stream().map(e -> e.toFHIR(includeSchedule))
                 .collect(Collectors.toList());
     }
 
-    public List<Slot> getSlots(Pageable pageable) {
+    public List<Slot> getSlots(Pageable pageable, boolean includeSchedule) {
         return StreamSupport
                 .stream(this.repo.findAll(pageable).spliterator(), false)
-                .map(SlotEntity::toFHIR)
+                .map(e -> e.toFHIR(includeSchedule))
                 .collect(Collectors.toList());
     }
 
@@ -79,17 +79,17 @@ public class SlotService {
         return this.repo.count();
     }
 
-    public long countSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam) {
+    public long countSlotsForLocations(List<ReferenceParam> idParam, @Nullable DateRangeParam dateParam) {
         final Specification<SlotEntity> query = buildLocationSearchQuery(idParam, dateParam);
         return this.repo.count(query);
     }
 
-    public List<Slot> getSlotsForLocation(ReferenceParam idParam, @Nullable DateRangeParam dateParam, Pageable pageable) {
+    public List<Slot> getSlotsForLocations(List<ReferenceParam> idParam, @Nullable DateRangeParam dateParam, Pageable pageable, boolean includeSchedule) {
         final Specification<SlotEntity> searchParams = buildLocationSearchQuery(idParam, dateParam);
 
         return this.repo.findAll(searchParams, pageable)
                 .stream()
-                .map(SlotEntity::toFHIR)
+                .map(e -> e.toFHIR(includeSchedule))
                 .collect(Collectors.toList());
     }
 
@@ -123,8 +123,8 @@ public class SlotService {
         }
     }
 
-    private static Specification<SlotEntity> buildLocationSearchQuery(ReferenceParam idParam, DateRangeParam dateParam) {
-        final UUID id = UUID.fromString(idParam.getIdPart());
+    private static Specification<SlotEntity> buildLocationSearchQuery(List<ReferenceParam> idParams, DateRangeParam dateParam) {
+        final List<UUID> id = idParams.stream().map(param -> UUID.fromString(param.getIdPart())).collect(Collectors.toList());
 
         final Specification<SlotEntity> searchParams;
         if (dateParam == null) {

@@ -1,0 +1,145 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Validate displays validation errors 1`] = `
+<div>
+  <div
+    class="grid-container"
+    data-testid="gridContainer"
+  >
+    <div
+      class=""
+      data-testid="grid"
+    >
+      <div
+        class="grid-row"
+        data-testid="grid"
+      >
+        <header
+          class="usa-header validate-header"
+          data-testid="header"
+        >
+          <h1
+            id="validate-header"
+          >
+            Validate FHIR resources
+          </h1>
+        </header>
+      </div>
+      <div
+        class="grid-row"
+        data-testid="grid"
+      >
+        <form
+          action="#"
+          class="usa-form"
+        >
+          <label
+            class="usa-label"
+            data-testid="label"
+            for="text"
+          >
+            Paste text here:
+          </label>
+          <textarea
+            aria-label="validation-text"
+            class="usa-textarea"
+            data-testid="textarea"
+            id="text"
+            name="text"
+            placeholder="Paste data here"
+          >
+            {"resourceType": "Slot", "id": 1}
+          </textarea>
+          <button
+            class="usa-button"
+            data-testid="button"
+            disabled=""
+            type="submit"
+          >
+            Validate
+          </button>
+        </form>
+      </div>
+      <div
+        class="grid-row"
+        data-testid="grid"
+      >
+        <section
+          class="usa-section"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Validate renders text 1`] = `
+<div>
+  <div
+    class="grid-container"
+    data-testid="gridContainer"
+  >
+    <div
+      class=""
+      data-testid="grid"
+    >
+      <div
+        class="grid-row"
+        data-testid="grid"
+      >
+        <header
+          class="usa-header validate-header"
+          data-testid="header"
+        >
+          <h1
+            id="validate-header"
+          >
+            Validate FHIR resources
+          </h1>
+        </header>
+      </div>
+      <div
+        class="grid-row"
+        data-testid="grid"
+      >
+        <form
+          action="#"
+          class="usa-form"
+        >
+          <label
+            class="usa-label"
+            data-testid="label"
+            for="text"
+          >
+            Paste text here:
+          </label>
+          <textarea
+            aria-label="validation-text"
+            class="usa-textarea"
+            data-testid="textarea"
+            id="text"
+            name="text"
+            placeholder="Paste data here"
+          />
+          <button
+            class="usa-button"
+            data-testid="button"
+            disabled=""
+            type="submit"
+          >
+            Validate
+          </button>
+        </form>
+      </div>
+      <div
+        class="grid-row"
+        data-testid="grid"
+      >
+        <section
+          class="usa-section"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;

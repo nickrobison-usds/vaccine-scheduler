@@ -1,27 +1,21 @@
-package gov.usds.vaccineschedule.api.utils;
+package gov.usds.vaccineschedule.api.config;
 
-import gov.usds.vaccineschedule.api.services.geocoder.GeocoderService;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Arrays;
 
 /**
- * Created by nickrobison on 3/31/21
+ * Created by nickrobison on 4/12/21
  */
-@TestConfiguration
-public class TestApplicationConfiguration {
+@Profile({"dev", "dockerized"})
+@Configuration
+public class DevCorsConfiguration {
 
     @Bean
-    @Primary
-    public GeocoderService testGeocoder() {
-        return new StaticTestGeocoder();
-    }
-
-    @Bean
-    public CorsConfiguration provideTestCors() {
+    public CorsConfiguration provideDevCors() {
         // Define your CORS configuration. This is an example
         // showing a typical setup. You should customize this
         // to your specific needs

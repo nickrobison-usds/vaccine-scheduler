@@ -2,11 +2,13 @@ package gov.usds.vaccineschedule.api.providers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Count;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Offset;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -39,8 +41,9 @@ public class SlotProvider extends AbstractPaginatingAndValidatingProvider<Slot> 
 
     @Search
     public Bundle findSlots(@OptionalParam(name = Slot.SP_IDENTIFIER) TokenParam slotIdentifier,
-                            @OptionalParam(name = Slot.SP_SCHEDULE + '.' + Schedule.SP_ACTOR) ReferenceParam locationID,
+                            @OptionalParam(name = Slot.SP_SCHEDULE + '.' + Schedule.SP_ACTOR) ReferenceOrListParam locationIDs,
                             @OptionalParam(name = Slot.SP_START) DateRangeParam dateRange,
+                            @IncludeParam(allow = {"Slot:schedule"}) String include,
                             RequestDetails requestDetails,
                             @Offset Integer pageOffset,
                             @Count Integer pageSize) {
@@ -49,15 +52,16 @@ public class SlotProvider extends AbstractPaginatingAndValidatingProvider<Slot> 
         final InstantType searchTime = InstantType.now();
         final long totalCount;
         List<Slot> slots;
-        if (locationID != null) {
-            totalCount = this.service.countSlotsForLocation(locationID, dateRange);
-            slots = this.service.getSlotsForLocation(locationID, dateRange, pageRequest);
+        if (locationIDs != null) {
+            final List<ReferenceParam> idParams = locationIDs.getValuesAsQueryTokens();
+            totalCount = this.service.countSlotsForLocations(idParams, dateRange);
+            slots = this.service.getSlotsForLocations(idParams, dateRange, pageRequest, "Slot:schedule".equals(include));
         } else if (slotIdentifier != null) {
             totalCount = service.countSlotsWithId(slotIdentifier);
-            slots = this.service.findSlotsWithId(slotIdentifier, pageRequest);
+            slots = this.service.findSlotsWithId(slotIdentifier, pageRequest, "Slot:schedule".equals(include));
         } else {
             totalCount = service.countSlots();
-            slots = service.getSlots(pageRequest);
+            slots = service.getSlots(pageRequest, "Slot:schedule".equals(include));
         }
 
         return super.createBundle(requestDetails, slots, searchTime, pageRequest, totalCount);

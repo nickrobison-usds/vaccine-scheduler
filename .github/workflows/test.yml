@@ -11,9 +11,10 @@ on:
       - main
 env:
   JAVA_VERSION: 15
+  NODE_VERSION: 14
 
 jobs:
-  test:
+  backend:
     runs-on: ubuntu-latest
     services:
       test-db:
@@ -64,4 +65,30 @@ jobs:
           name: test-report
           path: api-application/build/test-results/test
           retention-days: 7
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{env.NODE_VERSION}}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{env.NODE_VERSION}}
+      - name: Cache npm local files
+        uses: actions/cache@v2
+        with:
+          path: |
+            ./vs-ui/node_modules
+          key: npm-${{env.NODE_VERSION}}-${{ hashFiles('vs-ui/yarn.lock', 'vs-ui/package.json') }}
+      - name: Node setup
+        working-directory: ./vs-ui
+        run: yarn
+      - name: Lint front-end
+        working-directory: ./vs-ui
+        run: yarn lint
+      - name: Frontend tests
+        working-directory: ./vs-ui
+        run: yarn test
+      - name: Build release
+        working-directory: ./vs-ui
+        run: yarn build
 

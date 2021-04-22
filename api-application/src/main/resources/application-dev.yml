@@ -1,8 +1,14 @@
 vs:
-  load-example-data: true
+  load-example-data: false
   geocoder:
     db:
       schema: tiger
       username: postgres
       password: this_is_not_safe
       url: jdbc:postgresql://localhost:${VS_DB_PORT:5432}/geocoder
+    engine: mapbox
+  schedule-source:
+    schedule-enabled: false
+    sources:
+      - "https://midnight-contender-wa-publish.herokuapp.com"
+      - "http://getmyvax.org/smart-scheduling"
