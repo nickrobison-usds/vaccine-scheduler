@@ -15,10 +15,6 @@ hapi:
     validation:
       enabled: true
       request-only: true
-logging:
-  level:
-    ca.uhn.fhir.jaxrs: debug
-    gov.usds: debug
 vs:
   use-h3-search: false
   h3-resolution: 8

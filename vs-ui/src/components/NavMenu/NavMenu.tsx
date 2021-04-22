@@ -7,11 +7,14 @@ export const NavMenu: React.FC<{}> = () => {
     <NavLink key="home" to="/">
       Home
     </NavLink>,
-    <NavLink key="validate" to="/validate">
-      Validate
-    </NavLink>,
     <NavLink key="finder" to="/finder">
       Finder
+    </NavLink>,
+    <NavLink key="sources" to="/sources">
+      Sources
+    </NavLink>,
+    <NavLink key="validate" to="/validate">
+      Validate
     </NavLink>,
   ];
 

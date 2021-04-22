@@ -10,6 +10,11 @@ vs:
     db-thread-pool-size: 2
   baseUrl: https://midnight-contender.herokuapp.com
 spring:
+  jpa:
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
   datasource:
     hikari:
       maximum-pool-size: 2

@@ -26,7 +26,8 @@ public class ProdCorsConfiguration {
         config.addAllowedHeader("X-Requested-With");
         config.addAllowedHeader("Content-Type");
 
-        config.addAllowedOrigin("https://trusting-lamarr-0ec82b.netlify.app");
+        config.addAllowedOrigin("https://midnight-contender.netlify.app");
+        config.addAllowedOrigin("https://midnight-contender.nickrobison.com");
 
         config.addExposedHeader("Location");
         config.addExposedHeader("Content-Location");

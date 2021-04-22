@@ -7,6 +7,7 @@ import { Home } from "./pages/Home/Home";
 import { Validate } from "./pages/Validate/Validate";
 import { Finder } from "./pages/Finder/Finder";
 import { FhirClientProvider } from "./providers/FhirClientProvider";
+import { Sources } from "./pages/Sources/Sources";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
               <Route exact path="/" component={Home} />
               <Route path="/validate" component={Validate} />
               <Route path="/finder" component={Finder} />
+              <Route path="/sources" component={Sources} />
             </Switch>
           </div>
         </div>
