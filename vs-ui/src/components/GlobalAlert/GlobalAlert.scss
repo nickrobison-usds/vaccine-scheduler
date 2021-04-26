@@ -1,11 +1,11 @@
 .vs-alert {
-  position: absolute;
-  top: 0;
-  right: 0;
   display: flex;
   justify-content: space-around;
-  margin-top: 1vh;
   margin-right: 1vh;
+  margin-top: 1vh;
+  position: absolute;
+  right: 0;
+  top: 0;
   width: 40vh;
   z-index: 10;
 }

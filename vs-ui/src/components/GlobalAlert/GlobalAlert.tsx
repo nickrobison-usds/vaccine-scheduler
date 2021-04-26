@@ -15,5 +15,5 @@ export const GlobalAlert: React.FC<AlertProps> = (props) => {
     <Alert type={props.typ} noIcon={!props.icon} className="vs-alert">
       {props.text}
     </Alert>
-  )
-}
+  );
+};
