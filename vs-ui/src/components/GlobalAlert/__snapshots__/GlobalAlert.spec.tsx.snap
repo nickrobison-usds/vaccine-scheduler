@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GlobalAlert renders with icon 1`] = `
+<div>
+  <div
+    class="usa-alert usa-alert--warning vs-alert"
+    data-testid="alert"
+  >
+    <div
+      class="usa-alert__body"
+    >
+      <p
+        class="usa-alert__text"
+      >
+        icon
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`GlobalAlert renders without an icon 1`] = `
+<div>
+  <div
+    class="usa-alert usa-alert--warning usa-alert--no-icon vs-alert"
+    data-testid="alert"
+  >
+    <div
+      class="usa-alert__body"
+    >
+      <p
+        class="usa-alert__text"
+      >
+        no icon
+      </p>
+    </div>
+  </div>
+</div>
+`;
