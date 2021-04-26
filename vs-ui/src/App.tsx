@@ -1,13 +1,14 @@
 import React from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 
-import "./App.css";
 import { NavMenu } from "./components/NavMenu/NavMenu";
 import { Home } from "./pages/Home/Home";
 import { Validate } from "./pages/Validate/Validate";
 import { Finder } from "./pages/Finder/Finder";
 import { FhirClientProvider } from "./providers/FhirClientProvider";
 import { Sources } from "./pages/Sources/Sources";
+
+import "./App.css";
 
 function App() {
   return (
