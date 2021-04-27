@@ -9,7 +9,7 @@ plugins {
 }
 
 ext {
-    hapiVersion = '5.3.2'
+    hapiVersion = '5.3.3'
     fromImage = 'gcr.io/distroless/java:11'
     imageRoot = 'nickrobisonusds'
 }
