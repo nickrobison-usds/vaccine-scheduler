@@ -70,6 +70,9 @@ dependencies {
     implementation 'net.logstash.logback:logstash-logback-encoder:6.6'
     implementation 'ch.qos.logback:logback-classic'
 
+    // Formatting
+    implementation 'com.googlecode.libphonenumber:libphonenumber:8.12.20'
+
     // Deployment
     implementation 'com.rollbar:rollbar-spring-boot-webmvc:1.7.6'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
