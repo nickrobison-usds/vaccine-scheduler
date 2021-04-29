@@ -5,6 +5,7 @@ import ca.uhn.fhir.validation.ValidationFailureException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import gov.usds.vaccineschedule.api.exceptions.MissingUpstreamResource;
+import gov.usds.vaccineschedule.api.helpers.LoggingReactorFactory;
 import gov.usds.vaccineschedule.api.models.SyncRequest;
 import gov.usds.vaccineschedule.api.properties.ScheduleSourceConfigProperties;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
@@ -32,6 +33,7 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -104,16 +106,28 @@ public class SourceFetchService {
     }
 
     private void handleRefresh(SyncRequest source) {
+        final LoggingReactorFactory factory = new LoggingReactorFactory((ctx) -> {
+            return Map.of("test-id", "1");
+        });
+
         final WebClient client = buildClient(source.getUrl());
         // Each upstream publisher is independent from the others, so we can process them in parallel
         final Mono<PublishResponse> publishResponseMono = client.get()
                 .uri("/$bulk-publish")
                 .accept(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN)
                 .retrieve()
-                .bodyToMono(PublishResponse.class);
+                .bodyToMono(PublishResponse.class)
+                .doOnEach(factory.logOnNext(r -> {
+                    logger.debug("Receive things from fetcher");
+                    logger.debug("Logging should works");
+                }));
 
         this.disposable = buildResourceFetcher(client, publishResponseMono)
                 .publishOn(this.dbScheduler)
+                .doOnEach(factory.logOnNext(r -> {
+                    logger.debug("Resource Received");
+                    logger.debug("Logging should work again as well");
+                }))
                 .subscribe(resource -> {
                     logger.debug("Received resource: {}", resource);
                     try {
