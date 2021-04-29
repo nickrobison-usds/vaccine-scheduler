@@ -7,6 +7,7 @@ import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -43,12 +44,14 @@ public class TestSlotService extends BaseApplicationTest {
         final Meta m1 = new Meta().setLastUpdated(updatedDate);
         firstSlot.setMeta(m1);
         firstSlot.setCapacity(new IntegerType(5));
+        firstSlot.setBookingPhone(new StringType("5550000000"));
         service.addSlot(firstSlot);
         final TokenParam tokenParam = new TokenParam().setSystem(ORIGINAL_ID_SYSTEM).setValue(firstSlot.getId());
         final VaccineSlot updatedSlot = (VaccineSlot) service.findSlotsWithId(tokenParam, PageRequest.of(0, 10), true).get(0);
         assertAll(() -> assertTrue(firstSlot.getCapacity().equalsDeep(updatedSlot.getCapacity()), "Should have updated capacity"),
-                () -> assertTrue(firstSlot.getBookingPhone().equalsDeep(updatedSlot.getBookingPhone()), "Should have original phone number"),
+                () -> assertTrue(firstSlot.getBookingUrl().equalsDeep(updatedSlot.getBookingUrl()), "Should have original url"),
                 () -> assertEquals(updatedDate, updatedSlot.getMeta().getLastUpdated(), "Should have updated upstream"),
+                () -> assertEquals("(555) 000-0000", updatedSlot.getBookingPhone().getValue(), "Should have updated phone number"),
                 () -> assertNotNull(updatedSlot.getExtensionByUrl(FOR_LOCATION), "Should have location extension"));
     }
 

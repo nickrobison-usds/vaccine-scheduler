@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import gov.usds.vaccineschedule.api.BaseApplicationTest;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
 import gov.usds.vaccineschedule.common.models.VaccineLocation;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Meta;
@@ -18,6 +19,7 @@ import java.io.InputStream;
 import java.sql.Date;
 import java.util.List;
 
+import static gov.usds.vaccineschedule.api.utils.FhirHandlers.getPhoneNumber;
 import static gov.usds.vaccineschedule.common.Constants.LAST_SOURCE_SYNC;
 import static gov.usds.vaccineschedule.common.Constants.ORIGINAL_ID_SYSTEM;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -34,7 +36,6 @@ public class TestLocationService extends BaseApplicationTest {
 
     @Test
     void testLocationUpdate() {
-
         final IParser parser = ctx.newJsonParser();
         final NDJSONToFHIR converter = new NDJSONToFHIR(parser);
 
@@ -50,12 +51,15 @@ public class TestLocationService extends BaseApplicationTest {
         firstLoc.setMeta(meta);
         // Update the name and save it
         firstLoc.setName("I'm an updated name");
+        // Update the phone number as well, because libphonenumber can't handle 000 area codes
+        firstLoc.setTelecom(List.of(new ContactPoint().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-000-0000"), new ContactPoint().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue("test@test.com")));
         service.addLocation(firstLoc);
         // Now, find it and pull back out
 
         final Location updatedLocation = service.findLocations(tokenParam, null, null, null, PageRequest.of(0, 10)).get(0);
         assertAll(() -> assertEquals(firstLoc.getName(), updatedLocation.getName(), "Should have updated name"),
-                () -> assertFalse(getCurrentTimestamp(origLocation).equalsDeep(getCurrentTimestamp(updatedLocation)), "Update timestamp should be different"));
+                () -> assertFalse(getCurrentTimestamp(origLocation).equalsDeep(getCurrentTimestamp(updatedLocation)), "Update timestamp should be different"),
+                () -> assertEquals("(555) 000-0000", getPhoneNumber(updatedLocation), "Phone number should be formatted correctly"));
     }
 
     @Test
@@ -73,5 +77,4 @@ public class TestLocationService extends BaseApplicationTest {
         final Type value = location.getMeta().getExtensionByUrl(LAST_SOURCE_SYNC).getValue();
         return value.castToInstant(value);
     }
-
 }

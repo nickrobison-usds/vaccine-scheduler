@@ -1,5 +1,6 @@
 package gov.usds.vaccineschedule.api.db.models;
 
+import gov.usds.vaccineschedule.api.formatters.PhoneFormatter;
 import gov.usds.vaccineschedule.common.Constants;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.r4.model.IdType;
@@ -200,7 +201,7 @@ public class SlotEntity extends UpstreamUpdateableEntity implements Flammable<Va
             entity.setBookingUrl(resource.getBookingUrl().asStringValue());
         }
         if (!resource.getBookingPhone().isEmpty()) {
-            entity.setBookingPhone(resource.getBookingPhone().getValueAsString());
+            entity.setBookingPhone(PhoneFormatter.formatPhoneNumber(resource.getBookingPhone().getValueAsString()));
         }
         if (!resource.getCapacity().isEmpty()) {
             entity.setCapacity(resource.getCapacity().getValue());

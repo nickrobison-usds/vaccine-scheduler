@@ -1,5 +1,6 @@
 package gov.usds.vaccineschedule.api.db.models;
 
+import gov.usds.vaccineschedule.api.formatters.PhoneFormatter;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -32,7 +33,12 @@ public class AbstractTelecomEntity<T> extends BaseEntity {
 
     protected AbstractTelecomEntity(ContactPoint.ContactPointSystem system, String value) {
         this.system = system;
-        this.value = value;
+        // If we're provided a phone number like value, format it.
+        if (shouldNormalizePhone(system)) {
+            this.value = PhoneFormatter.formatPhoneNumber(value);
+        } else {
+            this.value = value;
+        }
     }
 
     public ContactPoint.ContactPointSystem getSystem() {
@@ -53,5 +59,12 @@ public class AbstractTelecomEntity<T> extends BaseEntity {
 
     public ContactPoint toFHIR() {
         return new ContactPoint().setSystem(this.system).setValue(this.value);
+    }
+
+    private static boolean shouldNormalizePhone(ContactPoint.ContactPointSystem system) {
+        return system.equals(ContactPoint.ContactPointSystem.PHONE)
+                || system.equals(ContactPoint.ContactPointSystem.FAX)
+                || system.equals(ContactPoint.ContactPointSystem.PAGER)
+                || system.equals(ContactPoint.ContactPointSystem.SMS);
     }
 }
