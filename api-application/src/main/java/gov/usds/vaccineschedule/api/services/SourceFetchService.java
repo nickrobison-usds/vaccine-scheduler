@@ -5,6 +5,7 @@ import ca.uhn.fhir.validation.ValidationFailureException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import gov.usds.vaccineschedule.api.exceptions.MissingUpstreamResource;
+import gov.usds.vaccineschedule.api.models.SyncRequest;
 import gov.usds.vaccineschedule.api.properties.ScheduleSourceConfigProperties;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
 import gov.usds.vaccineschedule.common.models.PublishResponse;
@@ -31,6 +32,7 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -51,7 +53,7 @@ public class SourceFetchService {
 
     private final ScheduleSourceConfigProperties config;
     private final NDJSONToFHIR converter;
-    private final Sinks.Many<String> processor;
+    private final Sinks.Many<SyncRequest> processor;
     private final LocationService locationService;
     private final ScheduleService sService;
     private final SlotService slService;
@@ -72,12 +74,12 @@ public class SourceFetchService {
     }
 
     @Bean
-    public Supplier<Flux<String>> supplyStream() {
+    public Supplier<Flux<SyncRequest>> supplyStream() {
         return () -> this.processor.asFlux().log();
     }
 
     @Bean
-    public Consumer<Flux<String>> receiveStream() {
+    public Consumer<Flux<SyncRequest>> receiveStream() {
         return (stream) -> stream.log().subscribe(this::handleRefresh);
     }
 
@@ -85,7 +87,8 @@ public class SourceFetchService {
      * Submit the sources to the job queue for processing asynchronously by the workers
      */
     public void refreshSources() {
-        this.config.getSources().forEach(source -> this.processor.emitNext(source, Sinks.EmitFailureHandler.FAIL_FAST));
+        final UUID uuid = UUID.randomUUID();
+        this.config.getSources().forEach(source -> this.processor.emitNext(new SyncRequest(uuid, source), Sinks.EmitFailureHandler.FAIL_FAST));
     }
 
     private void processResource(IBaseResource resource) {
@@ -100,8 +103,8 @@ public class SourceFetchService {
         }
     }
 
-    private void handleRefresh(String source) {
-        final WebClient client = buildClient(source);
+    private void handleRefresh(SyncRequest source) {
+        final WebClient client = buildClient(source.getUrl());
         // Each upstream publisher is independent from the others, so we can process them in parallel
         final Mono<PublishResponse> publishResponseMono = client.get()
                 .uri("/$bulk-publish")
