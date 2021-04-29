@@ -4,7 +4,7 @@
         <include resource="org/springframework/boot/logging/logback/base.xml"/>
     </springProfile>
     <springProfile name="heroku">
-        <appender name="json"
+        <appender name="stdout"
                   class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                 <providers>
