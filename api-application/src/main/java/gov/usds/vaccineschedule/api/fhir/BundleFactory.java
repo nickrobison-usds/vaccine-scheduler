@@ -1,4 +1,4 @@
-package gov.usds.vaccineschedule.api.models;
+package gov.usds.vaccineschedule.api.fhir;
 
 import gov.usds.vaccineschedule.common.Constants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
