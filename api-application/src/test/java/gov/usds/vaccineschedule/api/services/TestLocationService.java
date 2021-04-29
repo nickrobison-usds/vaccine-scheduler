@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.io.InputStream;
 import java.sql.Date;
-import java.util.Collections;
 import java.util.List;
 
 import static gov.usds.vaccineschedule.api.utils.FhirHandlers.getPhoneNumber;
@@ -37,7 +36,6 @@ public class TestLocationService extends BaseApplicationTest {
 
     @Test
     void testLocationUpdate() {
-
         final IParser parser = ctx.newJsonParser();
         final NDJSONToFHIR converter = new NDJSONToFHIR(parser);
 
@@ -54,7 +52,7 @@ public class TestLocationService extends BaseApplicationTest {
         // Update the name and save it
         firstLoc.setName("I'm an updated name");
         // Update the phone number as well, because libphonenumber can't handle 000 area codes
-        firstLoc.setTelecom(Collections.singletonList(new ContactPoint().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-000-0000")));
+        firstLoc.setTelecom(List.of(new ContactPoint().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-000-0000"), new ContactPoint().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue("test@test.com")));
         service.addLocation(firstLoc);
         // Now, find it and pull back out
 
