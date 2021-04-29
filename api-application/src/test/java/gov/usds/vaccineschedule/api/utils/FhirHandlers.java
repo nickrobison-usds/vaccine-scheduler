@@ -5,6 +5,8 @@ import gov.usds.vaccineschedule.common.models.VaccineLocation;
 import gov.usds.vaccineschedule.common.models.VaccineSlot;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.ContactPoint;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Assertions;
 
@@ -35,10 +37,17 @@ public class FhirHandlers {
         return resources;
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    public static String getPhoneNumber(Location location) {
+        return location.getTelecom().stream()
+                .filter(t -> t.getSystem().equals(ContactPoint.ContactPointSystem.PHONE))
+                .map(ContactPoint::getValue).findAny()
+                .get();
+    }
+
     private static void assertBundleUpdatedBefore(Bundle bundle, Date searchTime) {
         if (!bundle.getEntry().isEmpty()) {
             Assertions.assertTrue(bundle.getMeta().getLastUpdatedElement().before(searchTime), "Updated value should be before search time");
         }
-
     }
 }
