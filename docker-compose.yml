@@ -49,7 +49,7 @@ services:
       - rabbitmq
     environment:
       SPRING_PROFILES_ACTIVE: dockerized,logstash
-      SPRING_LIQUIBASE_ENABLED: true
+      SPRING_LIQUIBASE_ENABLED: "true"
     ports:
       - "${VS_API_PORT:-8080}:8080"
 
