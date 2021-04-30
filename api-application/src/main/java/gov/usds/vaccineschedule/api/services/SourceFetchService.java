@@ -44,6 +44,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static gov.usds.vaccineschedule.api.helpers.MDCConstants.IMPORT_COMPLETION;
+import static gov.usds.vaccineschedule.api.helpers.MDCConstants.RESOURCE_ID;
 import static gov.usds.vaccineschedule.api.helpers.MDCConstants.RESOURCE_TYPE;
 import static gov.usds.vaccineschedule.api.helpers.MDCConstants.SYNC_SESSION;
 import static gov.usds.vaccineschedule.api.helpers.MDCConstants.UPSTREAM_URL;
@@ -68,6 +69,7 @@ public class SourceFetchService {
     private final SlotService slService;
     private final Scheduler dbScheduler;
 
+    @SuppressWarnings("FieldCanBeLocal") // Keeping this here because we need to keep the disposable from going out of scope before the sync finishes
     private Disposable disposable;
 
     public SourceFetchService(FhirContext context, ScheduleSourceConfigProperties config, LocationService locationService, ScheduleService sService, SlotService slService) {
@@ -121,48 +123,43 @@ public class SourceFetchService {
                 .uri("/$bulk-publish")
                 .accept(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN)
                 .retrieve()
-                .bodyToMono(PublishResponse.class)
-                .doOnEach(factory.logOnNext(r -> {
-                    logger.debug("Receive things from fetcher");
-                    logger.debug("Logging should works");
-                }));
+                .bodyToMono(PublishResponse.class);
 
         this.disposable = buildResourceFetcher(client, publishResponseMono)
                 .publishOn(this.dbScheduler)
-                .doOnEach(factory.logWithSubscriber(resource -> {
-                    logger.debug("Received resource: {}", resource);
-                    try {
-                        this.processResource(resource);
-                        try (MDC.MDCCloseable ignored = MDC.putCloseable(IMPORT_COMPLETION, MDCConstants.ImportStatus.SUCCESS.toString())) {
-                            logger.info("{}", resource.getIdElement().getValue());
-                        }
-                    } catch (ValidationFailureException e) {
-                        try (MDC.MDCCloseable ignored = MDC.putCloseable(IMPORT_COMPLETION, MDCConstants.ImportStatus.VALIDATION.toString())) {
-                            logger.error("Resource failed validation. continuing", e);
-                        }
-                    } catch (MissingUpstreamResource e) {
-                        try (MDC.MDCCloseable ignored = MDC.putCloseable(IMPORT_COMPLETION, MDCConstants.ImportStatus.SYSTEM.toString())) {
-                            logger.error("Unable to find required upstream resource. continuing", e);
-                        }
-                    }
-                }, (error) -> {
+                .doOnEach(factory.logWithSubscriber(this::loadSingleResource, (error) -> {
                     throw new RuntimeException(error);
-                }, () -> logger.info("Finished refreshing data for {}", source.getSyncSessionID())))
+                }, () -> logger.info("Finished refreshing data")))
                 .contextWrite(ctx -> ctx.put(SYNC_SESSION, source.getSyncSessionID())
                         .put(UPSTREAM_URL, source.getUrl()))
                 .subscribe();
     }
 
-    private Flux<IBaseResource> handleResource(WebClient client, String resourceType, PublishResponse response) {
+    private void loadSingleResource(IBaseResource resource) {
+        try (MDC.MDCCloseable ignored1 = MDC.putCloseable(RESOURCE_ID, resource.getIdElement().getValue())) {
+            this.processResource(resource);
+            try (MDC.MDCCloseable ignored = MDC.putCloseable(IMPORT_COMPLETION, MDCConstants.ImportStatus.SUCCESS.toString())) {
+                logger.info("Import complete");
+            }
+        } catch (ValidationFailureException e) {
+            try (MDC.MDCCloseable ignored = MDC.putCloseable(IMPORT_COMPLETION, MDCConstants.ImportStatus.VALIDATION.toString())) {
+                logger.error("Resource failed validation. continuing", e);
+            }
+        } catch (MissingUpstreamResource e) {
+            try (MDC.MDCCloseable ignored = MDC.putCloseable(IMPORT_COMPLETION, MDCConstants.ImportStatus.SYSTEM.toString())) {
+                logger.error("Unable to find required upstream resource. continuing", e);
+            }
+        }
+    }
+
+    private Flux<IBaseResource> handleResourceType(WebClient client, String resourceType, PublishResponse response) {
         final LoggingReactorFactory factory = new LoggingReactorFactory((ctx) -> {
             final Map<String, String> base = new java.util.HashMap<>(baseContextBuilder(ctx));
             base.put(RESOURCE_TYPE, ctx.get(RESOURCE_TYPE));
             return base;
         });
         return Flux.fromIterable(response.getOutput())
-                .doOnEach(factory.logOnNext(o -> {
-                    logger.debug("Fetching resource of type: {} from: {}", o.getType(), o.getUrl());
-                }))
+                .doOnEach(factory.logOnNext(o -> logger.debug("Fetching resource of type: {} from: {}", o.getType(), o.getUrl())))
                 .flatMap(output -> client.get().uri(output.getUrl()).accept(MediaType.parseMediaType(FHIR_NDJSON)).retrieve().bodyToMono(DataBuffer.class))
                 .flatMap(body -> Flux.fromIterable(converter.inputStreamToResource(body.asInputStream(true))))
                 .contextWrite(ctx -> ctx.put(RESOURCE_TYPE, resourceType));
@@ -174,7 +171,7 @@ public class SourceFetchService {
                 .flatMapMany(response -> Flux.fromArray(resourceOrder.toArray(new String[]{}))
                         // Process the responses in the following order: Location -> Schedule -> Slot
                         // It seems to me that we should be able to use a flatMapSequential, but this is the safer, albeit more pessimistic solution.
-                        .concatMap(resourceType -> handleResource(client, resourceType, response)))
+                        .concatMap(resourceType -> handleResourceType(client, resourceType, response)))
                 .onErrorContinue((error) -> error instanceof WebClientException,
                         (throwable, o) -> { // If we throw an exception
                             logger.error("Cannot process resource: {}", o, throwable);
