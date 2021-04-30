@@ -149,6 +149,10 @@ public class SourceFetchService {
             try (MDC.MDCCloseable ignored = MDC.putCloseable(IMPORT_COMPLETION, MDCConstants.ImportStatus.SYSTEM.toString())) {
                 logger.error("Unable to find required upstream resource. continuing", e);
             }
+        }  catch (Exception e) {
+            try (MDC.MDCCloseable ignored = MDC.putCloseable(IMPORT_COMPLETION, MDCConstants.ImportStatus.SYSTEM.toString())) {
+                logger.error("Unknown error", e);
+            }
         }
     }
 

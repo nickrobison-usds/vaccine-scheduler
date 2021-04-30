@@ -38,4 +38,19 @@
             <appender-ref ref="stdout"/>
         </root>
     </springProfile>
+    <springProfile name="logstash">
+        <appender name="gelf" class="biz.paluch.logging.gelf.logback.GelfLogbackAppender">
+            <host>udp:localhost</host>
+            <port>5000</port>
+            <extractStackTrace>true</extractStackTrace>
+            <filterStackTrace>true</filterStackTrace>
+            <includeFullMdc>true</includeFullMdc>
+            <includeLocation>false</includeLocation>
+            <additionalFields>application=api</additionalFields>
+            <additionalFieldTypes>application=String</additionalFieldTypes>
+        </appender>
+        <root level="info">
+            <appender-ref ref="gelf"/>
+        </root>
+    </springProfile>
 </configuration>

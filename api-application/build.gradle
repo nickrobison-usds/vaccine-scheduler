@@ -68,6 +68,7 @@ dependencies {
 
     // Logging
     implementation 'net.logstash.logback:logstash-logback-encoder:6.6'
+    implementation 'biz.paluch.logging:logstash-gelf:1.14.0'
     implementation 'ch.qos.logback:logback-classic'
 
     // Formatting
