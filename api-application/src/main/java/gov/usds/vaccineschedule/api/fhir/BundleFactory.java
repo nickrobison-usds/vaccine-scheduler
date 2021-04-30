@@ -1,4 +1,4 @@
-package gov.usds.vaccineschedule.api.models;
+package gov.usds.vaccineschedule.api.fhir;
 
 import gov.usds.vaccineschedule.common.Constants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -50,7 +50,7 @@ public class BundleFactory {
         // Search time
 
         bundle.setTimestampElement(searchTime);
-        // Also set the last updated time to the newest element in the bundle using currentAsOf
+        // Also set the last updated time to the newest element in the bundle using lastSourceSync
         // This is what BFD does, seems like a good idea.
         final Meta meta = new Meta();
         resources
@@ -58,7 +58,7 @@ public class BundleFactory {
                 .map(BundleFactory::getCurrentDate)
                 .filter(Objects::nonNull)
                 .max(Date::compareTo)
-                .map(meta::setLastUpdated);
+                .ifPresent(meta::setLastUpdated);
         bundle.setMeta(meta);
         return bundle;
     }

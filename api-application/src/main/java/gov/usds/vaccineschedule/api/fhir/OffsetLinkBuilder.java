@@ -1,4 +1,4 @@
-package gov.usds.vaccineschedule.api.models;
+package gov.usds.vaccineschedule.api.fhir;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;

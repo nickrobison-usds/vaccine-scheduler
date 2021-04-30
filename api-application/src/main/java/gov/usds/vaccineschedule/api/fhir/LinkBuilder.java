@@ -1,4 +1,4 @@
-package gov.usds.vaccineschedule.api.models;
+package gov.usds.vaccineschedule.api.fhir;
 
 import org.hl7.fhir.r4.model.Bundle;
 
