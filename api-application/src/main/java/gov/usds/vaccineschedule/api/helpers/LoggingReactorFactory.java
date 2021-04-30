@@ -5,6 +5,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Signal;
 import reactor.util.context.ContextView;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -15,10 +16,6 @@ import java.util.function.Function;
 public class LoggingReactorFactory {
 
     private final Function<ContextView, Map<String, String>> contextMapper;
-
-    public interface ContextCloser extends AutoCloseable {
-        void close();
-    }
 
     public LoggingReactorFactory(Function<ContextView, Map<String, String>> contextMapper) {
         this.contextMapper = contextMapper;
@@ -38,7 +35,21 @@ public class LoggingReactorFactory {
         return signal -> {
             if (signal.isOnNext()) {
                 try (ContextCloser ignored = withLoggingContext(this.contextMapper.apply(signal.getContextView()))) {
-                action.accept(signal.get());
+                    action.accept(signal.get());
+                }
+            }
+        };
+    }
+
+    public <T> Consumer<Signal<T>> logWithSubscriber(@Nullable Consumer<? super T> consumer, @Nullable Consumer<? super Throwable> errorConsumer, @Nullable Runnable completeConsumer) {
+        return signal -> {
+            try (ContextCloser ignored = withLoggingContext(this.contextMapper.apply(signal.getContextView()))) {
+                if (signal.isOnNext() && consumer != null) {
+                    consumer.accept(signal.get());
+                } else if (signal.isOnError() && errorConsumer != null) {
+                    errorConsumer.accept(signal.getThrowable());
+                } else if (signal.isOnComplete() && completeConsumer != null) {
+                    completeConsumer.run();
                 }
             }
         };

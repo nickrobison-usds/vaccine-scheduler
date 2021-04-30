@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import gov.usds.vaccineschedule.api.exceptions.MissingUpstreamResource;
 import gov.usds.vaccineschedule.api.helpers.LoggingReactorFactory;
+import gov.usds.vaccineschedule.api.helpers.MDCConstants;
 import gov.usds.vaccineschedule.api.models.SyncRequest;
 import gov.usds.vaccineschedule.api.properties.ScheduleSourceConfigProperties;
 import gov.usds.vaccineschedule.common.helpers.NDJSONToFHIR;
@@ -16,6 +17,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Schedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
@@ -31,6 +33,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.context.ContextView;
 
 import java.util.List;
 import java.util.Map;
@@ -40,6 +43,10 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static gov.usds.vaccineschedule.api.helpers.MDCConstants.IMPORT_COMPLETION;
+import static gov.usds.vaccineschedule.api.helpers.MDCConstants.RESOURCE_TYPE;
+import static gov.usds.vaccineschedule.api.helpers.MDCConstants.SYNC_SESSION;
+import static gov.usds.vaccineschedule.api.helpers.MDCConstants.UPSTREAM_URL;
 import static gov.usds.vaccineschedule.common.Constants.FHIR_NDJSON;
 
 /**
@@ -82,7 +89,7 @@ public class SourceFetchService {
 
     @Bean
     public Consumer<Flux<SyncRequest>> receiveStream() {
-        return (stream) -> stream.log().subscribe(this::handleRefresh);
+        return (stream) -> stream.log().subscribe(this::syncUpstream);
     }
 
     /**
@@ -105,10 +112,8 @@ public class SourceFetchService {
         }
     }
 
-    private void handleRefresh(SyncRequest source) {
-        final LoggingReactorFactory factory = new LoggingReactorFactory((ctx) -> {
-            return Map.of("test-id", "1");
-        });
+    private void syncUpstream(SyncRequest source) {
+        final LoggingReactorFactory factory = new LoggingReactorFactory(this::baseContextBuilder);
 
         final WebClient client = buildClient(source.getUrl());
         // Each upstream publisher is independent from the others, so we can process them in parallel
@@ -124,34 +129,47 @@ public class SourceFetchService {
 
         this.disposable = buildResourceFetcher(client, publishResponseMono)
                 .publishOn(this.dbScheduler)
-                .doOnEach(factory.logOnNext(r -> {
-                    logger.debug("Resource Received");
-                    logger.debug("Logging should work again as well");
-                }))
-                .subscribe(resource -> {
+                .doOnEach(factory.logWithSubscriber(resource -> {
                     logger.debug("Received resource: {}", resource);
                     try {
                         this.processResource(resource);
+                        try (MDC.MDCCloseable ignored = MDC.putCloseable(IMPORT_COMPLETION, MDCConstants.ImportStatus.SUCCESS.toString())) {
+                            logger.info("{}", resource.getIdElement().getValue());
+                        }
                     } catch (ValidationFailureException e) {
-                        logger.error("Resource failed validation. continuing", e);
+                        try (MDC.MDCCloseable ignored = MDC.putCloseable(IMPORT_COMPLETION, MDCConstants.ImportStatus.VALIDATION.toString())) {
+                            logger.error("Resource failed validation. continuing", e);
+                        }
                     } catch (MissingUpstreamResource e) {
-                        logger.error("Unable to find required upstream resource. continuing", e);
+                        try (MDC.MDCCloseable ignored = MDC.putCloseable(IMPORT_COMPLETION, MDCConstants.ImportStatus.SYSTEM.toString())) {
+                            logger.error("Unable to find required upstream resource. continuing", e);
+                        }
                     }
                 }, (error) -> {
                     throw new RuntimeException(error);
-                }, () -> logger.info("Finished refreshing data for {}", source));
+                }, () -> logger.info("Finished refreshing data for {}", source.getSyncSessionID())))
+                .contextWrite(ctx -> ctx.put(SYNC_SESSION, source.getSyncSessionID())
+                        .put(UPSTREAM_URL, source.getUrl()))
+                .subscribe();
     }
 
     private Flux<IBaseResource> handleResource(WebClient client, String resourceType, PublishResponse response) {
+        final LoggingReactorFactory factory = new LoggingReactorFactory((ctx) -> {
+            final Map<String, String> base = new java.util.HashMap<>(baseContextBuilder(ctx));
+            base.put(RESOURCE_TYPE, ctx.get(RESOURCE_TYPE));
+            return base;
+        });
         return Flux.fromIterable(response.getOutput())
-                .filter(o -> o.getType().equals(resourceType))
-                .doOnNext(o -> logger.debug("Fetching resource of type: {} from: {}", o.getType(), o.getUrl()))
+                .doOnEach(factory.logOnNext(o -> {
+                    logger.debug("Fetching resource of type: {} from: {}", o.getType(), o.getUrl());
+                }))
                 .flatMap(output -> client.get().uri(output.getUrl()).accept(MediaType.parseMediaType(FHIR_NDJSON)).retrieve().bodyToMono(DataBuffer.class))
-                .flatMap(body -> Flux.fromIterable(converter.inputStreamToResource(body.asInputStream(true))));
+                .flatMap(body -> Flux.fromIterable(converter.inputStreamToResource(body.asInputStream(true))))
+                .contextWrite(ctx -> ctx.put(RESOURCE_TYPE, resourceType));
     }
 
-
     Flux<IBaseResource> buildResourceFetcher(WebClient client, Mono<PublishResponse> provider) {
+
         return provider
                 .flatMapMany(response -> Flux.fromArray(resourceOrder.toArray(new String[]{}))
                         // Process the responses in the following order: Location -> Schedule -> Slot
@@ -183,8 +201,12 @@ public class SourceFetchService {
                     decoder.setMaxInMemorySize(MEMORY_SIZE);
                     configurer.defaultCodecs().maxInMemorySize(MEMORY_SIZE);
                     configurer.customCodecs().registerWithDefaultConfig(decoder);
-                    // Increase memory size to allow for big payloads
                 })
                 .build();
+    }
+
+    private Map<String, String> baseContextBuilder(ContextView ctx) {
+        return Map.of(SYNC_SESSION, ctx.get(SYNC_SESSION).toString(),
+                UPSTREAM_URL, ctx.get(UPSTREAM_URL));
     }
 }
