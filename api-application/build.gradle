@@ -75,7 +75,7 @@ dependencies {
     implementation 'com.googlecode.libphonenumber:libphonenumber:8.12.23'
 
     // Deployment
-    implementation 'com.rollbar:rollbar-spring-boot-webmvc:1.7.6'
+    implementation 'com.rollbar:rollbar-spring-boot-webmvc:1.7.8'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'com.giffing.bucket4j.spring.boot.starter:bucket4j-spring-boot-starter:0.4.0'
     implementation 'javax.cache:cache-api'
