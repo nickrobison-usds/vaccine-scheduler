@@ -40,13 +40,13 @@ jobs:
           java-version: ${{env.JAVA_VERSION}}
           distribution: 'zulu'
       - name: Cache Sonar Dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
       - name: Cache Java Dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches
@@ -74,7 +74,7 @@ jobs:
         with:
           node-version: ${{env.NODE_VERSION}}
       - name: Cache npm local files
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ./vs-ui/node_modules
