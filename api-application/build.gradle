@@ -72,7 +72,7 @@ dependencies {
     implementation 'ch.qos.logback:logback-classic'
 
     // Formatting
-    implementation 'com.googlecode.libphonenumber:libphonenumber:8.12.23'
+    implementation 'com.googlecode.libphonenumber:libphonenumber:8.12.47'
 
     // Deployment
     implementation 'com.rollbar:rollbar-spring-boot-webmvc:1.7.6'
